@@ -23,13 +23,12 @@ Node.js aur Git missing ho to launcher `winget` se khud install kar deta hai.
 
 ## Flow
 
-1. **Gateway chuno**: OmniRoute, Claude Code Router, OpenRouter, ya Custom. Jo select karo wo install + (optional) background start hota hai.
-2. **Claude Code install**: `npm i -g @anthropic-ai/claude-code`.
-3. **API setup**: Manual (URL + key) / local JSON file / gateway ka default URL.
-4. **Plugins**: claude-mem, headroom, claude-plugins-official, one-skill-to-rule-them-all, replica-skill. Har ek ke liye alag Y/N poochta hai.
-5. **Model tester**: gateway se models ki list laata hai, har model ko chhota message bhejta hai, jo reply de wo working. Phir aap main + small model chun kar set kar sakte ho.
+1. **Claude Code pehle**: default Claude hi rahega. Termux par `2.1.112` pin hota hai (naye version Termux par nahi chalte, neeche dekho).
+2. **Plugins / skills ek-ek karke**, Claude ke andar: claude-mem, headroom, claude-plugins-official, one-skill-to-rule-them-all, replica-skill. Har ek ke liye alag Y/N.
+3. **Gateway + API**: OmniRoute, Claude Code Router, OpenRouter ya Custom. API manual / local JSON file se.
+4. **Model**: working models test karo, ya seedha apna **custom model** ka naam daalo (test skip).
 
-Alag-alag step chalane ke liye: `./install.sh models`, `./install.sh api`, `./install.sh plugins`, `./install.sh gateway`, `./install.sh claude`, `./install.sh launch`.
+Alag-alag step chalane ke liye: `./install.sh claude`, `./install.sh plugins`, `./install.sh gateway`, `./install.sh api`, `./install.sh models`, `./install.sh launch`.
 
 ## Local JSON file format
 
@@ -58,11 +57,12 @@ Alag-alag step chalane ke liye: `./install.sh models`, `./install.sh api`, `./in
 
 ## Known limits (zaroor padho)
 
-- **Termux par Claude Code**: naye versions me native binary ki wajah se `npm install` fail ho sakta hai. Tool aapse purana version poochta hai (`@anthropic-ai/claude-code@<version>`) aur retry karta hai.
+- **Termux par Claude Code**: 2.1.113 se Claude Code glibc wali native binary use karta hai, Termux Android ke Bionic par chalta hai, isliye `claude.ai/install.sh` ya naya npm version `required file not found` deta hai. Tool `2.1.112` (aakhri JS build) pin karta hai aur `DISABLE_AUTOUPDATER=1` set karta hai taaki wo khud update hokar na tute.
+- Kisi plugin ka installer (jaise `npx claude-mem install`) Claude Code ko khud install karne ki koshish karta hai aur Termux par fail hota hai. Isliye is tool me plugins sirf `claude plugin ...` commands se lagte hain.
 - **OmniRoute Termux**: `npx -y omniroute` use hota hai (unke docs ke hisab se). Pehli baar start hone me kaafi time lag sakta hai.
 - **Endpoint**: Claude Code `<base>/v1/messages` (Anthropic format) bolta hai. Gateway ko ye support karna chahiye; model tester isi se verify karta hai.
 - **headroom** Python package hai (`pip`). Termux par `pkg install python` pehle karo; bhaari dependencies fail ho sakti hain.
-- **claude-mem**: `npx claude-mem install` try hota hai, fail ho to marketplace method. Node 20+ chahiye.
+- **claude-mem**: marketplace method se lagta hai. Isko Bun chahiye, jo Termux par chalna mushkil hai, isliye Termux par ye fail ho sakta hai (Windows par theek).
 - **one-skill-to-rule-them-all** aur **replica-skill**: repo clone hoti hai. Agar `.claude-plugin/marketplace.json` mile to plugin ki tarah, warna `SKILL.md` wale folders `~/.claude/skills/` me copy hote hain. Ye layout detection maine repos ke andar dekh kar verify nahi kiya, isliye fail ho to repo README follow karo.
 - Free providers ke rate limits / models roz badalte hain, isliye "working" list kabhi bhi change ho sakti hai: `./install.sh models` dobara chalao.
 

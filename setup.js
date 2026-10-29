@@ -85,6 +85,7 @@ function applyClaudeEnv({ base_url, api_key, model, small_model }) {
   const s = readJson(SETTINGS, {});
   if (fs.existsSync(SETTINGS) && !fs.existsSync(SETTINGS + '.bak')) fs.copyFileSync(SETTINGS, SETTINGS + '.bak');
   s.env = s.env || {};
+  if (IS_TERMUX) s.env.DISABLE_AUTOUPDATER = '1'; // naya version Termux par chalta nahi
   if (base_url) s.env.ANTHROPIC_BASE_URL = normBase(base_url);
   if (api_key) { s.env.ANTHROPIC_AUTH_TOKEN = api_key; delete s.env.ANTHROPIC_API_KEY; }
   if (model) {
@@ -102,7 +103,7 @@ function applyClaudeEnv({ base_url, api_key, model, small_model }) {
   console.log(C.g('✔ Claude settings update: ') + SETTINGS);
 }
 
-// ---------- Step 1: gateway ----------
+// ---------- Gateway ----------
 async function portUp(base) {
   try { await http(base, {}, 3000); return true; } catch { return false; }
 }
@@ -137,22 +138,28 @@ async function stepGateway() {
   return g;
 }
 
-// ---------- Step 2: Claude Code ----------
+// ---------- Step 1: Claude Code ----------
+// Termux par 2.1.113+ nahi chalta (glibc binary, Android me Bionic hota hai).
+// 2.1.112 aakhri JavaScript build hai - isliye Termux par wahi pin hota hai.
+const TERMUX_PIN = '2.1.112';
+const claudeWorks = () => has('claude') && cp.spawnSync('claude --version', { shell: true, stdio: 'ignore' }).status === 0;
 async function stepClaude() {
-  if (has('claude')) {
-    console.log(C.g('✔ Claude Code pehle se installed hai'));
+  if (claudeWorks()) {
+    console.log(C.g('✔ Claude Code pehle se chal raha hai'));
     sh('claude --version');
+    if (IS_TERMUX) applyClaudeEnv({});
     return true;
   }
-  if (!sh('npm install -g @anthropic-ai/claude-code')) {
-    console.log(C.r('✖ Install fail hua.'));
-    if (IS_TERMUX) console.log(C.y('Termux par naye version me native binary issue ho sakta hai. Purana version try kar sakte ho.'));
-    const v = await ask('Specific version daalo (jaise 1.0.128) ya Enter = skip: ');
-    if (v && sh(`npm install -g @anthropic-ai/claude-code@${v}`)) return true;
-    return false;
+  const ver = IS_TERMUX ? '@' + TERMUX_PIN : '';
+  if (IS_TERMUX) console.log(C.y(`ℹ Termux: Claude Code ${TERMUX_PIN} (last JS build) install hoga. Naya version yahan nahi chalta.`));
+  let ok = sh(`npm install -g @anthropic-ai/claude-code${ver}`) && claudeWorks();
+  if (!ok) {
+    console.log(C.r('✖ Claude Code install/run fail hua.'));
+    const v = await ask('Koi aur version try karna hai? (jaise 2.1.112) ya Enter = skip: ');
+    if (v) ok = sh(`npm install -g @anthropic-ai/claude-code@${v}`) && claudeWorks();
   }
-  console.log(C.g('✔ Claude Code installed'));
-  return true;
+  if (ok) { console.log(C.g('✔ Claude Code ready')); if (IS_TERMUX) applyClaudeEnv({}); }
+  return ok;
 }
 
 // ---------- Step 3: API setup ----------
@@ -221,7 +228,10 @@ function gitInstall(p) {
   return true;
 }
 async function stepPlugins() {
-  if (!has('claude')) console.log(C.y('⚠ claude command nahi mili - pehle Step 2 chalao. Phir bhi try karta hu.'));
+  if (!claudeWorks()) {
+    console.log(C.r('✖ Claude Code chal nahi raha. Plugins Claude ke andar hi install hote hain, pehle Step 1 (Claude Code) chalao.'));
+    return;
+  }
   const list = readJson(path.join(__dirname, 'plugins.json'), { plugins: [] }).plugins;
   for (const p of list) {
     console.log('\n' + C.b(p.name) + '\n  ' + p.desc);
@@ -271,6 +281,18 @@ async function stepModels() {
   let st = state();
   if (!st.base_url) { console.log(C.y('Pehle API set karte hain.')); await stepApi(); st = state(); if (!st.base_url) return; }
   const base = normBase(st.base_url), key = st.api_key || 'dummy';
+  if (await yn('Apna CUSTOM model seedha set karna hai (test skip)?', false)) {
+    const m = await ask('Model ka exact naam: ');
+    if (m) {
+      const sm = (await ask(`Small/fast model [Enter = ${m}]: `)) || m;
+      saveState({ model: m, small_model: sm });
+      applyClaudeEnv({ base_url: base, api_key: key, model: m, small_model: sm });
+      console.log(C.g('✔ Custom model set: ' + m));
+      const t = await testModel(base, key, m);
+      console.log(t.ok ? C.g(`✔ Test pass (${t.ms}ms)`) : C.y('⚠ Test fail: ' + t.err + ' (naam ya gateway check karo)'));
+    }
+    return;
+  }
   console.log(C.d('Models list la raha hu: ' + base));
   let models = await listModels(base, key);
   if (!models.length) console.log(C.y('Auto list nahi mili.'));
@@ -315,15 +337,20 @@ async function launch() {
   cp.spawnSync('claude', { shell: true, stdio: 'inherit' });
 }
 async function runAll() {
+  // 1) Claude Code pehle (default)
+  const okClaude = await stepClaude();
+  // 2) Plugins / skills ek-ek karke (Claude ke andar)
+  if (okClaude) await stepPlugins();
+  else console.log(C.y('Claude Code ready nahi, plugins skip.'));
+  // 3) Gateway (OmniRoute etc.) + API
   const g = await stepGateway();
-  await stepClaude();
   if (g && g.id !== 'ccr') await stepApi();
   else if (g) {
     saveState({ base_url: g.base_url, api_key: g.default_key });
     applyClaudeEnv({ base_url: g.base_url, api_key: g.default_key });
   }
-  await stepPlugins();
-  if (await yn('\nModels test karke working wala set karu?')) await stepModels();
+  // 4) Model: test karo ya custom daalo
+  if (await yn('\nModel set karna hai (working test ya custom naam)?')) await stepModels();
   if (await yn('Ab Claude Code chalau?', false)) await launch();
 }
 
@@ -340,11 +367,11 @@ const STEPS = {
   for (;;) {
     const m = await pick('Kya karna hai?', [
       ['all', 'Sab kuch (full setup)'],
-      ['gateway', '1. Gateway/Provider install + start'],
-      ['claude', '2. Claude Code install'],
-      ['api', '3. API / JSON config set karo'],
-      ['plugins', '4. Plugins (ek-ek poochhega)'],
-      ['models', '5. Models test karo + working set karo'],
+      ['claude', '1. Claude Code install'],
+      ['plugins', '2. Plugins / skills (ek-ek poochhega)'],
+      ['gateway', '3. Gateway (OmniRoute etc.) install + start'],
+      ['api', '4. API / JSON config set karo'],
+      ['models', '5. Model: test karo ya custom naam daalo'],
       ['launch', '6. Claude Code chalao'],
       ['exit', 'Exit'],
     ], (x) => x[1]);

@@ -3,10 +3,12 @@
     {
       "id": "claude-mem",
       "name": "claude-mem (thedotmack)",
-      "desc": "Sessions ke beech persistent memory/context",
+      "desc": "Sessions ke beech persistent memory. Termux par Bun ki wajah se chalna mushkil hai",
       "try": [
-        ["npx -y claude-mem install"],
-        ["claude plugin marketplace add thedotmack/claude-mem", "claude plugin install claude-mem@thedotmack"]
+        [
+          "claude plugin marketplace add thedotmack/claude-mem",
+          "claude plugin install claude-mem@thedotmack"
+        ]
       ]
     },
     {
@@ -14,8 +16,14 @@
       "name": "headroom (headroomlabs-ai)",
       "desc": "Tool output/logs compress karke tokens bachata hai (Python chahiye)",
       "try": [
-        ["python -m pip install \"headroom-ai[mcp]\"", "claude mcp add headroom -- headroom mcp serve"],
-        ["pip install \"headroom-ai[mcp]\"", "claude mcp add headroom -- headroom mcp serve"]
+        [
+          "python -m pip install \"headroom-ai[mcp]\"",
+          "claude mcp add headroom -- headroom mcp serve"
+        ],
+        [
+          "pip install \"headroom-ai[mcp]\"",
+          "claude mcp add headroom -- headroom mcp serve"
+        ]
       ]
     },
     {
@@ -23,7 +31,9 @@
       "name": "claude-plugins-official (Anthropic)",
       "desc": "Official plugin directory (marketplace add hoga)",
       "try": [
-        ["claude plugin marketplace add anthropics/claude-plugins-official"]
+        [
+          "claude plugin marketplace add anthropics/claude-plugins-official"
+        ]
       ],
       "note": "Phir plugin lene ke liye claude ke andar: /plugin install <naam>@claude-plugins-official"
     },
