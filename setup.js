@@ -29,8 +29,23 @@ const TERMUX_PIN = '2.1.112'; // last JS build of Claude Code (naye versions Ter
 fs.mkdirSync(STATE_DIR, { recursive: true });
 
 // ───────────────────────── basics ─────────────────────────
-const A = (n) => (s) => `\x1b[${n}m${s}\x1b[0m`;
-const C = { b: A(1), d: A(2), r: A(31), g: A(32), y: A(33), c: A(36) };
+const THEMES = {
+  cyber:  { name: 'Cyber',  a: 51,  a2: 45,  ok: 48,  warn: 221, err: 203, dim: 245, tag: 'neon cyan' },
+  sunset: { name: 'Sunset', a: 209, a2: 203, ok: 114, warn: 221, err: 196, dim: 245, tag: 'warm orange' },
+  ocean:  { name: 'Ocean',  a: 75,  a2: 39,  ok: 79,  warn: 222, err: 204, dim: 246, tag: 'cool blue' },
+  matrix: { name: 'Matrix', a: 46,  a2: 34,  ok: 82,  warn: 226, err: 196, dim: 244, tag: 'hacker green' },
+  violet: { name: 'Violet', a: 141, a2: 135, ok: 120, warn: 222, err: 211, dim: 245, tag: 'soft purple' },
+  mono:   { name: 'Mono',   a: 255, a2: 250, ok: 255, warn: 250, err: 250, dim: 244, tag: 'simple' },
+};
+const fg = (n) => (s) => `\x1b[38;5;${n}m${s}\x1b[39m`;
+const C = { b: (s) => `\x1b[1m${s}\x1b[22m` };
+let THEME_ID = 'cyber';
+function setTheme(id) {
+  const t = THEMES[id] || THEMES.cyber;
+  THEME_ID = THEMES[id] ? id : 'cyber';
+  C.c = fg(t.a); C.a2 = fg(t.a2); C.g = fg(t.ok); C.y = fg(t.warn); C.r = fg(t.err); C.d = fg(t.dim);
+}
+setTheme('cyber');
 const cols = () => Math.max(30, Math.min((process.stdout.columns || 44) - 1, 60));
 const clip = (s, n) => (s.length > n ? s.slice(0, Math.max(1, n - 1)) + '…' : s);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -39,6 +54,22 @@ const bad = (m) => console.log(`${C.r('✖')} ${m}`);
 const warn = (m) => console.log(`${C.y('!')} ${m}`);
 const info = (m) => console.log(`${C.c('i')} ${m}`);
 const clear = () => process.stdout.isTTY && process.stdout.write('\x1b[2J\x1b[H');
+
+const ERR_LOG = path.join(STATE_DIR, 'errors.log');
+let LOG_HINT = false;
+const rule = (label) => console.log('\n' + C.c('━━ ') + C.b(label) + ' ' + C.c('━'.repeat(Math.max(2, cols() - label.length - 5))));
+const bar = (i, n, w = 14) => { const f = Math.round((w * i) / Math.max(1, n)); return C.g('█'.repeat(f)) + C.d('░'.repeat(w - f)); };
+function reason(out) {
+  const ls = String(out).replace(/\x1b\[[0-9;]*m/g, '').split('\n').map((l) => l.trim()).filter(Boolean);
+  const hit = [...ls].reverse().find((l) => /(fail|error|denied|not found|invalid|unable|time ?out|refused)/i.test(l));
+  let msg = hit || ls[ls.length - 1] || 'unknown error';
+  const seg = msg.split(': ').pop();
+  if (seg.length > 8 && msg.length > cols() - 14) msg = seg; // sabse specific hissa dikhao
+  return clip(msg, cols() - 14);
+}
+function logErr(label, out) {
+  try { fs.appendFileSync(ERR_LOG, `\n=== ${new Date().toISOString()} ${label}\n${out}\n`); } catch { /* */ }
+}
 
 function readJson(p, def) { try { return JSON.parse(fs.readFileSync(p, 'utf8')); } catch { return def; } }
 function writeJson(p, obj) { fs.mkdirSync(path.dirname(p), { recursive: true }); fs.writeFileSync(p, JSON.stringify(obj, null, 2)); }
@@ -60,6 +91,7 @@ const mask = (k) => (!k ? '' : k.length <= 8 ? '****' : k.slice(0, 4) + '…' + 
 let ST = readJson(STATE_FILE, {});
 ST.profiles = ST.profiles || {};
 ST.installed = ST.installed || {};
+setTheme(ST.theme);
 if (ST.base_url && !Object.keys(ST.profiles).length) { // v1 se migrate
   const id = ST.gateway || 'default';
   ST.profiles[id] = { base_url: ST.base_url, api_key: ST.api_key, model: ST.model, small_model: ST.small_model };
@@ -247,8 +279,9 @@ async function step(label, cmd, opts = {}) {
   if (r.ok) ok(label);
   else {
     bad(label);
-    const tail = r.out.trim().split('\n').slice(-6).map((l) => '  ' + C.d(clip(l, cols() - 3))).join('\n');
-    if (tail.trim()) console.log(tail);
+    console.log('  ' + C.d('→ ' + reason(r.out)));
+    logErr(label, r.out);
+    if (!LOG_HINT) { console.log('  ' + C.d('(poora error: ' + ERR_LOG + ')')); LOG_HINT = true; }
   }
   return r.ok;
 }
@@ -445,44 +478,95 @@ async function gitSkills(p) {
   return true;
 }
 function readMarketplace(name) { return readJson(path.join(MKT_DIR, name, '.claude-plugin', 'marketplace.json'), null); }
-async function installMarketplace(p) {
+async function choosePlugins(p, list, rec) {
+  if (list.length <= 30) {
+    const sel = await multiselect(`${p.name}: kaun se plugins?`, list.map((x) => ({ ...x, checked: rec.includes(x.value) })));
+    return sel.map((x) => x.value);
+  }
+  for (;;) {
+    const s = await select(`${p.name}: ${list.length} plugins hain`, [
+      rec.length && { label: `Recommended (${rec.length}) ek-ek karke`, value: 'rec' },
+      { label: 'Search karke chuno', value: 'search' },
+      { label: `Sab ${list.length} (bahut slow)`, value: 'all', dim: true },
+      { label: 'Skip (sirf marketplace add rahe)', value: 'skip' },
+    ], { numbers: true });
+    if (!s || s.value === 'skip') return [];
+    if (s.value === 'rec') return rec;
+    if (s.value === 'all') {
+      if (await confirm(`${list.length} plugins ek-ek karke lagenge, bahut time + kaafi fail honge. Pakka?`, false)) return list.map((x) => x.value);
+      continue;
+    }
+    const q = (await text('Search (naam ka hissa)')).toLowerCase();
+    const m = list.filter((x) => x.label.toLowerCase().includes(q) || (x.hint || '').toLowerCase().includes(q)).slice(0, 40);
+    if (!m.length) { warn('Kuch nahi mila'); continue; }
+    return (await multiselect('Chuno', m)).map((x) => x.value);
+  }
+}
+async function installMarketplace(p, auto) {
   const add = await task(`${p.name}: marketplace add`, `claude plugin marketplace add ${p.slug}`);
   const already = /already/i.test(add.out);
   if (!add.ok && !already) {
     bad(`${p.name}: marketplace add fail`);
-    console.log(C.d(clip(add.out.trim().split('\n').slice(-3).join(' | '), cols() * 2)));
+    console.log('  ' + C.d('→ ' + reason(add.out)));
+    logErr(`marketplace add ${p.slug}`, add.out);
     return p.repo ? gitSkills(p) : false;
   }
   const name = (add.out.match(/added marketplace:\s*([^\s(]+)/i) || [])[1] || p.market || p.id;
-  ok(`${p.name}: marketplace "${name}" added`);
+  ok(`${p.name}: marketplace "${name}" ready`);
+  const prev = new Set((ST.installed[p.id] && ST.installed[p.id].plugins) || []);
   const mk = readMarketplace(name) || {};
   const list = (mk.plugins || []).map((x) => ({ label: x.name, value: x.name, hint: (x.description || '').replace(/\s+/g, ' '), checked: false }));
+  const names = list.map((x) => x.value);
+  const rec = (p.rec || []).filter((n) => names.includes(n));
   let chosen = [];
   if (p.plugins) chosen = p.plugins;
-  else if (p.all) chosen = list.map((x) => x.value);
-  else if (list.length === 1) chosen = [list[0].value];
-  else if (list.length > 1) chosen = (await multiselect(`${p.name}: kaun se plugins lagau?`, list)).map((x) => x.value);
-  const done = [];
-  for (const pl of chosen) if (await step(`plugin: ${pl}`, `claude plugin install ${pl}@${name}`)) done.push(pl);
-  if (chosen.length && !done.length) return false;
-  ST.installed[p.id] = { type: 'marketplace', market: name, plugins: done }; save();
+  else if (p.all) chosen = names;
+  else if (auto) chosen = rec;
+  else if (list.length === 1) chosen = names;
+  else if (list.length > 1) chosen = await choosePlugins(p, list, rec);
+  chosen = chosen.filter((n) => !prev.has(n));
+  if (auto && p.rec && !rec.length) info('Recommended plugins list me nahi mile, sirf marketplace add hui.');
+  const done = [...prev];
+  let streak = 0;
+  for (let i = 0; i < chosen.length; i++) {
+    const pl = chosen[i];
+    const r = await task(`[${i + 1}/${chosen.length}] ${pl}`, `claude plugin install ${pl}@${name}`, { timeout: 240000 });
+    if (r.ok || /already installed/i.test(r.out)) { done.push(pl); streak = 0; console.log(`${C.g('✔')} ${pl}`); }
+    else { streak++; console.log(`${C.r('✖')} ${pl} ${C.d('— ' + reason(r.out))}`); logErr(`plugin ${pl}@${name}`, r.out); }
+    if (streak >= 4) {
+      if (await confirm('Lagatar 4 fail hue. Baaki skip karun?', true)) break;
+      streak = 0;
+    }
+    await sleep(IS_TERMUX ? 900 : 400);
+  }
+  if (chosen.length) info(`${done.length - prev.size}/${chosen.length} naye plugins install hue`);
+  if (chosen.length && done.length === prev.size) return false;
+  ST.installed[p.id] = { type: 'marketplace', market: name, plugins: [...new Set(done)] };
+  save();
   return true;
 }
-async function installPipMcp(p) {
+async function installPipMcp(p, auto) {
+  const pre = plat(p.prereq);
+  if (pre && !auto) {
+    warn('Iske liye build tools (Rust/clang) chahiye, kaafi bade (~500MB+).');
+    if (!(await confirm('Build tools install karke try karun?', false))) return false;
+    if (!(await step('Build tools install', pre))) return false;
+  }
   const py = await ensurePython();
   if (!py) return false;
   if (!(await step(`${p.name}: pip install`, `${py} -m pip install "${p.pip}"`))) return false;
   if (!(await step(`${p.name}: Claude me MCP register`, `claude mcp add -s user ${p.mcp.name} -- ${p.mcp.cmd}`))) return false;
-  ST.installed[p.id] = { type: 'mcp', mcp: p.mcp.name }; save();
+  ST.installed[p.id] = { type: 'mcp', mcp: p.mcp.name };
+  save();
   return true;
 }
-async function installPlugin(p) {
-  console.log('\n' + C.b(p.name) + C.d(`  ${p.by || ''} · ${p.tag || ''}`));
+async function installPlugin(p, auto) {
+  console.log(C.b(p.name) + C.d(`  ${p.by || ''} · ${p.tag || ''}`));
   const w = plat(p.warn);
   if (w) warn(w);
   let good = false;
-  if (p.kind === 'marketplace') good = await installMarketplace(p);
-  else if (p.kind === 'pip-mcp') good = await installPipMcp(p);
+  if (p.kind === 'marketplace') good = await installMarketplace(p, auto);
+  else if (p.kind === 'pip-mcp') good = await installPipMcp(p, auto);
   else if (p.kind === 'skills-repo') good = await gitSkills(p);
   good ? ok(`${p.name} ready`) : bad(`${p.name} install nahi hua`);
   return good;
@@ -501,6 +585,35 @@ async function uninstallPlugin(id) {
   }
   delete ST.installed[id]; save();
 }
+function needsWork(p) {
+  const e = ST.installed[p.id];
+  if (!e) return true;
+  return !!p.rec;
+}
+async function runPluginQueue(list, auto) {
+  if (!list.length) return;
+  if (IS_TERMUX) cp.spawnSync('termux-wake-lock', { shell: true, stdio: 'ignore' });
+  let fails = 0;
+  for (let i = 0; i < list.length; i++) {
+    console.log('\n' + bar(i, list.length) + ' ' + C.b(`${i + 1}/${list.length}`));
+    const good = await installPlugin(list[i], auto);
+    if (!good) fails++;
+    await sleep(IS_TERMUX ? 1200 : 500);
+  }
+  if (IS_TERMUX) cp.spawnSync('termux-wake-unlock', { shell: true, stdio: 'ignore' });
+  console.log('\n' + bar(list.length, list.length) + ' ' + C.b('Plugins khatam'));
+  fails ? warn(`${fails} item fail hue. Error detail: ${ERR_LOG}`) : ok('Sab ho gaya');
+}
+async function autoPlugins() {
+  if (!(await needClaude())) return;
+  const queue = catalog().filter((p) => {
+    if (p.auto !== undefined && !plat(p.auto)) { info(`${p.name}: ${IS_TERMUX ? 'Termux par' : 'yahan'} auto skip (Plugins menu se manual lagao)`); return false; }
+    return needsWork(p);
+  });
+  if (!queue.length) { ok('Recommended sab plugins pehle se installed hain'); return; }
+  info(`${queue.length} items ek-ek karke install honge. Aaram se, band mat karna.`);
+  await runPluginQueue(queue, true);
+}
 async function needClaude() {
   if (cv()) return true;
   bad('Claude Code chal nahi raha. Plugins Claude ke andar hi lagte hain.');
@@ -508,12 +621,12 @@ async function needClaude() {
 }
 async function pluginChecklist() {
   if (!(await needClaude())) return;
-  const items = catalog().filter((p) => !ST.installed[p.id]).map((p) => ({
+  const items = catalog().filter((p) => !ST.installed[p.id] || p.rec).map((p) => ({
     label: `${p.name} [${p.tag || '?'}]`, value: p, hint: p.desc, checked: false,
   }));
   if (!items.length) { ok('Catalog ke sab plugins installed hain.'); return; }
   const chosen = await multiselect('Kaun se plugins/skills install karun?', items);
-  for (const it of chosen) await installPlugin(it.value);
+  await runPluginQueue(chosen.map((x) => x.value), false);
 }
 async function menuPlugins() {
   for (;;) {
@@ -521,12 +634,14 @@ async function menuPlugins() {
     const inst = Object.keys(ST.installed);
     console.log(C.d('Installed: ') + (inst.length ? inst.join(', ') : C.d('koi nahi')) + '\n');
     const s = await select('Kya karna hai?', [
-      { label: 'Install karo (checklist)', value: 'install' },
+      { label: 'Auto install (recommended, ek-ek karke)', value: 'auto' },
+      { label: 'Chuna hua install (checklist)', value: 'install' },
       { label: 'Hatao / uninstall', value: 'remove', hint: `${inst.length} installed` },
       { label: 'Apna GitHub plugin/skill add karo', value: 'custom', hint: 'owner/repo' },
       { label: '← Back', value: 'back' },
     ], { numbers: true });
     if (!s || s.value === 'back') return;
+    if (s.value === 'auto') { await autoPlugins(); await pause(); }
     if (s.value === 'install') { await pluginChecklist(); await pause(); }
     if (s.value === 'remove') {
       if (!inst.length) { warn('Kuch installed nahi'); await pause(); continue; }
@@ -539,7 +654,7 @@ async function menuPlugins() {
       if (!(await needClaude())) { await pause(); continue; }
       const slug = (await text('GitHub repo (owner/repo)')).replace(/^https?:\/\/github\.com\//, '').replace(/\.git$/, '');
       if (/^[\w.-]+\/[\w.-]+$/.test(slug)) {
-        await installPlugin({ id: slug.replace('/', '__'), name: slug, by: slug.split('/')[0], tag: 'custom', kind: 'marketplace', slug, repo: `https://github.com/${slug}` });
+        await installPlugin({ id: slug.replace('/', '__'), name: slug, by: slug.split('/')[0], tag: 'custom', kind: 'marketplace', slug, repo: `https://github.com/${slug}` }, false);
       } else bad('Format galat: owner/repo likho');
       await pause();
     }
@@ -700,7 +815,7 @@ async function modelTest() {
       bar();
     }
   };
-  await Promise.all(Array.from({ length: 4 }, worker));
+  await Promise.all(Array.from({ length: IS_TERMUX ? 2 : 4 }, worker));
   process.stdout.write('\r\x1b[K');
   const good = results.filter((r) => r.ok).sort((a, b) => a.ms - b.ms);
   const fails = results.filter((r) => !r.ok);
@@ -853,6 +968,7 @@ async function menuMaint() {
       { label: IS_TERMUX ? 'System update + upgrade (pkg)' : 'System check', value: 'prep' },
       { label: 'Tool update (git pull)', value: 'update' },
       { label: 'Shortcut `ccs` banao', value: 'short' },
+      { label: 'Theme badlo', value: 'theme', hint: THEMES[THEME_ID].name },
       { label: 'Default Claude pe wapas (gateway hatao)', value: 'reset' },
       { label: '← Back', value: 'back' },
     ], { numbers: true });
@@ -860,6 +976,7 @@ async function menuMaint() {
     if (s.value === 'prep') await stepPrep();
     if (s.value === 'update') await selfUpdate();
     if (s.value === 'short') await ensureShortcut();
+    if (s.value === 'theme') await menuTheme();
     if (s.value === 'reset') useDefault();
     await pause();
   }
@@ -868,18 +985,25 @@ async function menuMaint() {
 // ───────────────────────── full setup & menu ─────────────────────────
 async function fullSetup() {
   header('Full setup (ek baar)');
-  if (await confirm(IS_TERMUX ? 'Pehle system update + upgrade karun? (recommended)' : 'System check karun?', true)) await stepPrep();
+  console.log(C.d('Order: System → Claude Code → API/Model → Plugins → Shortcut'));
+  console.log(C.d('Sab ek-ek karke chalta hai, overload nahi hoga.'));
+  rule('System');
+  if (await confirm(IS_TERMUX ? 'System update + upgrade karun? (recommended)' : 'System check karun?', true)) await stepPrep();
   else fixGit();
-  console.log();
+  rule('1/4  Claude Code');
   const good = await stepClaude();
-  if (good) { console.log(); await pluginChecklist(); }
-  else if (!(await confirm('Claude Code ready nahi. Phir bhi aage badhein?', false))) return;
-  console.log();
+  if (!good && !(await confirm('Claude Code ready nahi. Phir bhi aage badhein?', false))) return;
+  rule('2/4  API / Gateway');
   if (await confirm('Gateway / API set karna hai? (No = default Claude hi rahega)', true)) {
     await installGateway();
     if (activeProfile() && (await confirm('Ab model set karun?', true))) await modelChoice();
   }
-  console.log();
+  rule('3/4  Plugins & Skills');
+  if (good) {
+    if (await confirm('Recommended plugins auto install karun? (ek-ek karke)', true)) await autoPlugins();
+    else if (await confirm('Apni marzi se chunna hai?', false)) await pluginChecklist();
+  } else info('Claude Code ready nahi, plugins skip.');
+  rule('4/4  Shortcut');
   await ensureShortcut();
   console.log('\n' + C.g('✔ Setup complete.') + C.d(' Aage ke badlav ke liye bas `ccs` chalao.'));
   if (await confirm('Claude abhi chalau?', false)) await launch();
@@ -888,10 +1012,17 @@ function header(sub) {
   const w = Math.min(cols(), 44);
   const line = (t, f) => console.log(C.c('│') + f(t.padEnd(w - 2)) + C.c('│'));
   console.log(C.c('╭' + '─'.repeat(w - 2) + '╮'));
-  line('  ◆ CC-SETUP', C.b);
-  line('  Claude Code + Free API Gateway', C.d);
+  line('  ╔═╗╔═╗╔═╗  CC-SETUP', (s) => C.b(C.c(s)));
+  line('  ║  ║  ╚═╗  Claude Code manager', C.a2);
+  line('  ╚═╝╚═╝╚═╝  Free API · Plugins', C.d);
   console.log(C.c('╰' + '─'.repeat(w - 2) + '╯'));
-  if (sub) console.log(C.b(sub) + '\n');
+  if (sub) console.log(C.c('▌ ') + C.b(sub) + '\n');
+}
+async function menuTheme() {
+  const s = await select('Theme chuno', Object.entries(THEMES).map(([id, t]) => ({ label: t.name, value: id, hint: t.tag })), { current: THEME_ID });
+  if (!s) return;
+  setTheme(s.value); ST.theme = s.value; save();
+  console.log(`${C.c('██')}${C.a2('██')}${C.g('██')}${C.y('██')}${C.r('██')} ${C.b(THEMES[s.value].name)} theme set`);
 }
 async function mainMenu() {
   for (;;) {
@@ -942,12 +1073,13 @@ ${C.b('cc-setup')}  (ccs)
   ccs doctor      health check
   ccs update      tool update (git pull)
   ccs prep        system update + upgrade
+  ccs theme       colour theme badlo
   ccs reset       default Claude pe wapas
 `;
 const CMDS = {
   menu: mainMenu, setup: fullSetup, run: () => launch(process.argv.slice(3)), launch: () => launch(process.argv.slice(3)),
   claude: async () => { header('Claude Code'); await stepClaude(); }, plugins: menuPlugins, gateway: menuGateway,
-  api: menuApi, models: modelTest, doctor, update: selfUpdate, prep: stepPrep, reset: async () => useDefault(), shortcut: ensureShortcut,
+  api: menuApi, models: modelTest, doctor, update: selfUpdate, prep: stepPrep, reset: async () => useDefault(), shortcut: ensureShortcut, theme: menuTheme,
 };
 
 (async () => {

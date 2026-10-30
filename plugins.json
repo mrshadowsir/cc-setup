@@ -9,8 +9,12 @@
       "kind": "marketplace",
       "slug": "thedotmack/claude-mem",
       "market": "thedotmack",
-      "plugins": ["claude-mem"],
-      "warn": { "termux": "Isko Bun chahiye, Termux par chal na bhi sakta hai" }
+      "plugins": [
+        "claude-mem"
+      ],
+      "warn": {
+        "termux": "Isko Bun chahiye, Termux par chal na bhi sakta hai"
+      }
     },
     {
       "id": "headroom",
@@ -20,18 +24,43 @@
       "desc": "Tool output/logs compress karke tokens bachata hai",
       "kind": "pip-mcp",
       "pip": "headroom-ai[mcp]",
-      "mcp": { "name": "headroom", "cmd": "headroom mcp serve" },
-      "warn": { "termux": "Python packages build hone me time lag sakta hai ya fail ho sakta hai" }
+      "mcp": {
+        "name": "headroom",
+        "cmd": "headroom mcp serve"
+      },
+      "warn": {
+        "termux": "Termux par build fail hota hai (Rust/clang chahiye). Auto me skip, manual me try kar sakte ho."
+      },
+      "auto": {
+        "default": true,
+        "termux": false
+      },
+      "prereq": {
+        "termux": "pkg install -y python rust clang make binutils libffi openssl"
+      }
     },
     {
       "id": "claude-plugins-official",
       "name": "claude-plugins-official",
       "by": "Anthropic",
       "tag": "official",
-      "desc": "Official plugin directory (list se plugin chunoge)",
+      "desc": "Official directory: recommended plugins auto lagte hain, baaki search karke",
       "kind": "marketplace",
       "slug": "anthropics/claude-plugins-official",
-      "market": "claude-plugins-official"
+      "market": "claude-plugins-official",
+      "rec": [
+        "frontend-design",
+        "code-review",
+        "feature-dev",
+        "commit-commands",
+        "pr-review-toolkit",
+        "security-guidance",
+        "plugin-dev",
+        "hookify",
+        "agent-sdk-dev",
+        "claude-md-management",
+        "code-simplifier"
+      ]
     },
     {
       "id": "one-skill-to-rule-them-all",
