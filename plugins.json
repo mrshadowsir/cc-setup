@@ -2,51 +2,58 @@
   "plugins": [
     {
       "id": "claude-mem",
-      "name": "claude-mem (thedotmack)",
-      "desc": "Sessions ke beech persistent memory. Termux par Bun ki wajah se chalna mushkil hai",
-      "try": [
-        [
-          "claude plugin marketplace add thedotmack/claude-mem",
-          "claude plugin install claude-mem@thedotmack"
-        ]
-      ]
+      "name": "claude-mem",
+      "by": "thedotmack",
+      "tag": "community",
+      "desc": "Sessions ke beech persistent memory",
+      "kind": "marketplace",
+      "slug": "thedotmack/claude-mem",
+      "market": "thedotmack",
+      "plugins": ["claude-mem"],
+      "warn": { "termux": "Isko Bun chahiye, Termux par chal na bhi sakta hai" }
     },
     {
       "id": "headroom",
-      "name": "headroom (headroomlabs-ai)",
-      "desc": "Tool output/logs compress karke tokens bachata hai (Python chahiye)",
-      "try": [
-        [
-          "python -m pip install \"headroom-ai[mcp]\"",
-          "claude mcp add headroom -- headroom mcp serve"
-        ],
-        [
-          "pip install \"headroom-ai[mcp]\"",
-          "claude mcp add headroom -- headroom mcp serve"
-        ]
-      ]
+      "name": "headroom",
+      "by": "headroomlabs-ai",
+      "tag": "community",
+      "desc": "Tool output/logs compress karke tokens bachata hai",
+      "kind": "pip-mcp",
+      "pip": "headroom-ai[mcp]",
+      "mcp": { "name": "headroom", "cmd": "headroom mcp serve" },
+      "warn": { "termux": "Python packages build hone me time lag sakta hai ya fail ho sakta hai" }
     },
     {
       "id": "claude-plugins-official",
-      "name": "claude-plugins-official (Anthropic)",
-      "desc": "Official plugin directory (marketplace add hoga)",
-      "try": [
-        [
-          "claude plugin marketplace add anthropics/claude-plugins-official"
-        ]
-      ],
-      "note": "Phir plugin lene ke liye claude ke andar: /plugin install <naam>@claude-plugins-official"
+      "name": "claude-plugins-official",
+      "by": "Anthropic",
+      "tag": "official",
+      "desc": "Official plugin directory (list se plugin chunoge)",
+      "kind": "marketplace",
+      "slug": "anthropics/claude-plugins-official",
+      "market": "claude-plugins-official"
     },
     {
       "id": "one-skill-to-rule-them-all",
-      "name": "one-skill-to-rule-them-all (rebelytics)",
-      "desc": "Meta-skill jo aapki skills improve karti hai",
+      "name": "one-skill-to-rule-them-all",
+      "by": "rebelytics",
+      "tag": "community",
+      "desc": "Meta-skill: skills banata/improve karta hai",
+      "kind": "marketplace",
+      "slug": "rebelytics/one-skill-to-rule-them-all",
+      "market": "one-skill-to-rule-them-all",
+      "all": true,
       "repo": "https://github.com/rebelytics/one-skill-to-rule-them-all"
     },
     {
       "id": "replica-skill",
-      "name": "replica-skill (Jakeschincariol)",
-      "desc": "11 free skills - kisi bhi app ko clone/rebuild/test karne ke liye",
+      "name": "replica-skill",
+      "by": "Jakeschincariol",
+      "tag": "community",
+      "desc": "11 skills: app clone / rebuild / test",
+      "kind": "marketplace",
+      "slug": "Jakeschincariol/replica-skill",
+      "all": true,
       "repo": "https://github.com/Jakeschincariol/replica-skill"
     }
   ]

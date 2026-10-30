@@ -3,31 +3,35 @@
     {
       "id": "omniroute",
       "name": "OmniRoute - local gateway (160+ providers, 50+ free)",
+      "hint": "recommended",
       "install": { "default": "npm install -g omniroute", "termux": "" },
       "start": { "default": "omniroute", "termux": "npx -y omniroute" },
+      "proc": "omniroute",
       "base_url": "http://localhost:20128",
       "default_key": "omniroute",
-      "after": "Dashboard kholo: http://localhost:20128 -> wahan free provider connect karo, aur chaaho to API key banao."
+      "dashboard": "http://localhost:20128",
+      "after": "Dashboard kholo (http://localhost:20128), wahan free provider connect karo, phir model chuno."
     },
     {
       "id": "ccr",
-      "name": "Claude Code Router (ccr) - local router, apne providers config karo",
+      "name": "Claude Code Router - apne providers config karo",
       "install": "npm install -g @musistudio/claude-code-router",
       "start": "ccr start",
+      "proc": "ccr",
       "base_url": "http://127.0.0.1:3456",
       "default_key": "ccr",
-      "after": "Config file: ~/.claude-code-router/config.json (providers yahin add hote hain). Docs: github.com/musistudio/claude-code-router"
+      "after": "Providers yahan add hote hain: ~/.claude-code-router/config.json"
     },
     {
       "id": "openrouter",
-      "name": "OpenRouter - cloud (free models ':free' naam ke saath)",
+      "name": "OpenRouter - cloud (':free' models)",
       "base_url": "https://openrouter.ai/api",
       "needs_key": true,
       "after": "Free API key: https://openrouter.ai/keys"
     },
     {
       "id": "custom",
-      "name": "Custom - apna URL / apni API (Anthropic-compatible endpoint)",
+      "name": "Custom - apna URL / apni API",
       "needs_key": true
     }
   ]
