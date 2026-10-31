@@ -87,6 +87,71 @@ const normBase = (u) => (u || '').trim().replace(/\/+$/, '').replace(/\/v1$/, ''
 const isLocal = (u) => /localhost|127\.0\.0\.1/.test(u || '');
 const mask = (k) => (!k ? '' : k.length <= 8 ? '****' : k.slice(0, 4) + '…' + k.slice(-3));
 
+// ───────── PATH / internet safety (kabhi kuch install nahi, kabhi path galat) ─────────
+const PSEP = IS_WIN ? ';' : ':';
+let NPM_BIN;
+function npmGlobalBin(force) {
+  if (NPM_BIN !== undefined && !force) return NPM_BIN;
+  const r = cp.spawnSync('npm prefix -g', { shell: true, encoding: 'utf8', timeout: 25000 });
+  const prefix = r.status === 0 ? (r.stdout || '').trim().split('\n').pop().trim() : '';
+  NPM_BIN = prefix ? (IS_WIN ? prefix : path.join(prefix, 'bin')) : '';
+  return NPM_BIN;
+}
+function pathHas(dir) {
+  const norm = (p) => path.resolve(p).toLowerCase();
+  return (process.env.PATH || '').split(PSEP).some((p) => p && norm(p) === norm(dir));
+}
+function persistUserPath(dir) {
+  if (!IS_WIN) return;
+  const d = dir.replace(/'/g, "''");
+  const ps = `$d='${d}'; $p=[Environment]::GetEnvironmentVariable('Path','User'); if(-not $p){$p=''}; if(($p -split ';') -notcontains $d){[Environment]::SetEnvironmentVariable('Path',(($p.TrimEnd(';')+';'+$d).TrimStart(';')),'User')}`;
+  cp.spawnSync('powershell', ['-NoProfile', '-Command', ps], { stdio: 'ignore', timeout: 20000 });
+}
+function addToRc(dir) {
+  const rc = path.join(HOME, /zsh/.test(process.env.SHELL || '') ? '.zshrc' : '.bashrc');
+  try {
+    const cur = fs.existsSync(rc) ? fs.readFileSync(rc, 'utf8') : '';
+    if (!cur.includes(dir)) fs.appendFileSync(rc, `\nexport PATH="${dir}:$PATH" # cc-setup\n`);
+    return rc;
+  } catch { return null; }
+}
+function refreshWinPath() {
+  if (!IS_WIN) return;
+  const r = cp.spawnSync('powershell', ['-NoProfile', '-Command', "[Environment]::GetEnvironmentVariable('Path','Machine')+';'+[Environment]::GetEnvironmentVariable('Path','User')"], { encoding: 'utf8', timeout: 20000 });
+  const add = (r.stdout || '').trim();
+  if (add) process.env.PATH = add + ';' + (process.env.PATH || '');
+}
+function ensureNpmPath(force) {
+  const dir = npmGlobalBin(force);
+  if (!dir || pathHas(dir)) return;
+  process.env.PATH = dir + PSEP + (process.env.PATH || '');
+  if (IS_WIN) { persistUserPath(dir); info('npm PATH set kiya. Naya terminal / VS Code dobara kholo.'); }
+  else if (!IS_TERMUX) { const rc = addToRc(dir); info(`npm PATH ${rc ? rc + ' me' : ''} add kiya. Naya terminal kholo.`); }
+}
+async function online() {
+  for (const u of ['https://registry.npmjs.org/', 'https://github.com/']) {
+    try { await http(u, { method: 'HEAD' }, 8000); return true; } catch { /* next */ }
+  }
+  return false;
+}
+function fallbackShortcut() {
+  const dir = path.join(STATE_DIR, 'bin');
+  fs.mkdirSync(dir, { recursive: true });
+  const target = path.join(ROOT, 'setup.js');
+  if (IS_WIN) fs.writeFileSync(path.join(dir, 'ccs.cmd'), `@echo off\r\nnode "${target}" %*\r\n`);
+  else {
+    const f = path.join(dir, 'ccs');
+    fs.rmSync(f, { force: true });
+    fs.writeFileSync(f, `#!/bin/sh\nexec node "${target}" "$@"\n`);
+    fs.chmodSync(f, 0o755);
+  }
+  if (!pathHas(dir)) {
+    process.env.PATH = dir + PSEP + (process.env.PATH || '');
+    IS_WIN ? persistUserPath(dir) : addToRc(dir);
+  }
+  return has('ccs');
+}
+
 // ───────────────────────── state ─────────────────────────
 let ST = readJson(STATE_FILE, {});
 ST.profiles = ST.profiles || {};
@@ -364,6 +429,7 @@ function fixGit() {
 async function stepPrep() {
   header('System taiyari');
   let restart = false;
+  if (!(await online())) { bad('Internet nahi mila. WiFi / data check karo, phir dobara.'); return false; }
   if (IS_TERMUX) {
     info('Termux: update + upgrade (kuch minute lag sakte hain)');
     const before = process.version;
@@ -371,6 +437,8 @@ async function stepPrep() {
     const b = sh('pkg upgrade -y -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef');
     const c = sh('pkg install -y nodejs-lts git curl');
     if (!(a && b && c)) warn('Kuch step fail hua. Mirror issue ho to: termux-change-repo');
+    const missing = ['node', 'npm', 'git'].filter((x) => !has(x));
+    if (missing.length) { bad(`Ye install nahi hue: ${missing.join(', ')}. Pehle: termux-change-repo (mirror badlo), phir ccs sys`); return false; }
     const nv = cp.spawnSync('node -v', { shell: true, encoding: 'utf8' }).stdout.trim();
     if (nv && nv !== before) { warn(`Node upgrade hua (${before} → ${nv}).`); restart = true; }
     if (!ST.tipRedmi) {
@@ -385,12 +453,16 @@ async function stepPrep() {
     });
     if (!has('winget')) warn('winget nahi mila (Windows App Installer). Node / Git manually update karo.');
     else {
-      if (!has('git')) await step('Git install (winget)', 'winget install -e --id Git.Git --accept-source-agreements --accept-package-agreements');
-      else ok('git ready');
+      if (!has('git')) {
+        await step('Git install (winget)', 'winget install -e --id Git.Git --accept-source-agreements --accept-package-agreements');
+        refreshWinPath();
+        has('git') ? ok('git ready') : warn('Git install hua par PATH me nahi: terminal / VS Code band karke dobara kholo.');
+      } else ok('git ready');
       if (await confirm('Node.js + Git latest par upgrade karun? (winget)', true)) {
         await wg('OpenJS.NodeJS.LTS', 'Node.js upgrade');
         if (has('git')) await wg('Git.Git', 'Git upgrade');
-        info('Upgrade ke baad terminal band karke dobara kholo, phir ccs chalao.');
+        refreshWinPath();
+        info('Upgrade ke baad terminal / VS Code band karke dobara kholo, phir ccs chalao.');
       }
     }
   } else {
@@ -415,8 +487,11 @@ async function ensureShortcut() {
   }
   if (has('ccs')) { ok('Shortcut `ccs` pehle se hai'); return; }
   const r = await step('Shortcut `ccs` bana raha hu (npm link)', 'npm link', { cwd: ROOT });
-  if (r && has('ccs')) ok('Ab kahin se bhi sirf `ccs` likho');
-  else if (r) info('Terminal band karke dobara kholo, phir `ccs` chalega');
+  if (r) ensureNpmPath(true);
+  if (has('ccs')) { ok('Ab kahin se bhi sirf `ccs` likho'); return; }
+  info('npm link se nahi bana, direct wrapper bana raha hu...');
+  try { fallbackShortcut() ? ok('Short command ready: `ccs`') : warn('Wrapper ban gaya. Terminal / VS Code band karke dobara kholo, phir `ccs`.'); }
+  catch (e) { bad('Shortcut nahi ban paya: ' + e.message + '  (direct: node "' + path.join(ROOT, 'setup.js') + '")'); }
 }
 
 // ───────────────────────── Claude Code ─────────────────────────
@@ -427,6 +502,8 @@ function claudeVersion() {
 }
 const cv = (refresh) => { if (refresh || CV === undefined) CV = claudeVersion(); return CV; };
 async function stepClaude() {
+  if (!(await online())) { bad('Internet nahi mila. WiFi / data check karo, phir dobara.'); return false; }
+  ensureNpmPath();
   const cur = cv(true);
   const curNum = ((cur || '').match(/\d+\.\d+\.\d+/) || [])[0];
   const lr = await task('Latest version check (npm)', 'npm view @anthropic-ai/claude-code version --fetch-retries=1 --fetch-timeout=10000', { timeout: 30000 });
@@ -441,11 +518,13 @@ async function stepClaude() {
     if (!(await confirm(`${curNum} → ${target} update karun?`, !IS_TERMUX))) { ok(`Claude ${curNum} hi rakha`); return true; }
   }
   const ver = target ? '@' + target : '';
-  let good = (await step(`Claude Code install ${ver}`, `npm install -g @anthropic-ai/claude-code${ver}`)) && !!cv(true);
+  let good = await step(`Claude Code install ${ver}`, `npm install -g @anthropic-ai/claude-code${ver}`);
+  ensureNpmPath(true);
+  good = good && !!cv(true);
   if (!good) {
     bad('Claude Code chal nahi raha.');
     const v2 = await text('Koi aur version try karna hai? (Enter = skip)');
-    if (v2) good = (await step(`Claude Code @${v2}`, `npm install -g @anthropic-ai/claude-code@${v2}`)) && !!cv(true);
+    if (v2) { good = await step(`Claude Code @${v2}`, `npm install -g @anthropic-ai/claude-code@${v2}`); ensureNpmPath(true); good = good && !!cv(true); }
   }
   if (good) { ok(`Claude Code ready: ${cv()}`); if (IS_TERMUX) patchSettings((e) => { e.DISABLE_AUTOUPDATER = '1'; }); }
   return good;
@@ -933,7 +1012,12 @@ async function doctor() {
   header('Health check');
   const nodeMajor = parseInt(process.versions.node, 10);
   nodeMajor >= 18 ? ok(`Node ${process.version}`) : bad(`Node ${process.version} (18+ chahiye)`);
-  has('git') ? ok('git') : bad('git nahi mila');
+  has('git') ? ok('git') : bad('git nahi mila → ccs sys');
+  has('npm') ? ok('npm') : bad('npm nahi mila → ccs sys');
+  (await online()) ? ok('Internet') : bad('Internet nahi (npm / git kaam nahi karenge)');
+  const nb = npmGlobalBin(true);
+  if (nb) pathHas(nb) ? ok('npm PATH theek') : warn(`npm global bin PATH me nahi (${nb}) → ccs fix`);
+  has('ccs') ? ok('ccs command') : warn('ccs command nahi → ccs fix');
   const v = cv(true);
   v ? ok(`Claude Code ${v}`) : bad(`Claude Code chal nahi raha → "Full setup" ya Claude install chalao${IS_TERMUX ? ` (Termux: ${TERMUX_PIN} chahiye)` : ''}`);
   const env = (readJson(SETTINGS, {}).env) || {};
@@ -1014,10 +1098,12 @@ async function stepOmni() {
     ST.omniMode = 'global'; save();
     if (!(await confirm('Latest par update karun?', false))) return true;
   }
-  const good = await step('OmniRoute install (npm -g)', 'npm install -g omniroute');
-  if (good) ST.omniMode = 'global';
-  else if (IS_TERMUX) { warn('Global install nahi hua. Termux par `npx -y omniroute` se chalega (pehli start me download hoga).'); ST.omniMode = 'npx'; }
-  else { save(); return false; }
+  if (!(await online())) { bad('Internet nahi mila. WiFi / data check karo, phir dobara.'); return false; }
+  ensureNpmPath();
+  const inst = await step('OmniRoute install (npm -g)', 'npm install -g omniroute');
+  ensureNpmPath(true);
+  if (inst && has('omniroute')) ST.omniMode = 'global';
+  else { warn('Global install / PATH nahi bana. `npx -y omniroute` se chalega (pehli start me download hoga).'); ST.omniMode = 'npx'; }
   ST.gateway = 'omniroute';
   if (!ST.profiles.omniroute) ST.profiles.omniroute = { base_url: g.base_url, api_key: g.default_key };
   save();
@@ -1079,6 +1165,7 @@ function printCommands() {
 async function fullSetup() {
   header('Setup (3 step)');
   console.log(C.d('Har step alag hai. Aap haan/nahi bolte ho.'));
+  ensureNpmPath();
   rule('Step 1/3  System update');
   if (await confirm(IS_TERMUX ? 'pkg update + pkg upgrade karun?' : 'System check / upgrade karun?', true)) {
     if ((await stepPrep()) === 'restart') {
@@ -1182,10 +1269,35 @@ ${C.b('cc-setup')}  (ccs)
   ccs setup       upar ke step 1-3 ek-ek karke
   ccs plugins     plugins (optional)
   ccs doctor      health check
+  ccs fix         sab auto-fix (PATH, git, shortcut, settings)
+  ccs vscode      VS Code extension install
   ccs update      tool update (git pull)
   ccs theme       colour theme
   ccs reset       default Claude pe wapas
 `;
+async function cmdFix() {
+  header('Auto fix');
+  ensureNpmPath(true); ok('npm PATH theek kiya');
+  refreshWinPath();
+  fixGit(); ok('git HTTPS fix');
+  await ensureShortcut();
+  if (IS_TERMUX) { patchSettings((e) => { e.DISABLE_AUTOUPDATER = '1'; }); ok('Termux auto-update band'); }
+  const p = activeProfile();
+  if (p) { applyProfile(p); ok('Claude settings profile se sync'); }
+  cv(true) ? ok(`Claude ${cv()}`) : warn('Claude chal nahi raha → ccs claude');
+  info('Ab: ccs doctor');
+}
+async function cmdVscode() {
+  header('VS Code');
+  if (!has('code')) {
+    warn('`code` command nahi mili.');
+    info('VS Code: Ctrl+Shift+P → "Shell Command: Install \'code\' command in PATH", phir terminal dobara kholo.');
+    return;
+  }
+  await step('Claude Code extension install', 'code --install-extension anthropic.claude-code');
+  info('Extension ID na mile to VS Code Extensions me "Claude Code" search karo.');
+  info('Settings wahi hain (~/.claude/settings.json), isliye OmniRoute wahan bhi chalega.');
+}
 const CMDS = {
   menu: mainMenu, setup: fullSetup,
   sys: async () => { header('System update'); await stepPrep(); },
@@ -1197,12 +1309,13 @@ const CMDS = {
   models: async () => { header('Model'); await modelChoice(); },
   run: () => launch(process.argv.slice(3)), launch: () => launch(process.argv.slice(3)),
   plugins: menuPlugins, gateway: menuGateway, profiles: menuApi, doctor, update: selfUpdate,
-  theme: menuTheme, reset: async () => useDefault(), shortcut: ensureShortcut, help: async () => console.log(HELP),
+  theme: menuTheme, reset: async () => useDefault(), shortcut: ensureShortcut, fix: cmdFix, vscode: cmdVscode, help: async () => console.log(HELP),
 };
 
 (async () => {
   if (parseInt(process.versions.node, 10) < 18) { console.log(C.r('Node 18+ chahiye.')); process.exit(1); }
   const arg = process.argv[2];
+  if (arg !== 'help' && arg !== '--help' && arg !== '-h') { try { ensureNpmPath(); } catch { /* */ } }
   if (arg === 'help' || arg === '--help' || arg === '-h') { console.log(HELP); return; }
   await (CMDS[arg] || mainMenu)();
   process.exit(0);
