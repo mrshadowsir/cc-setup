@@ -361,6 +361,10 @@ const hdrs = (key) => ({ 'x-api-key': key, authorization: 'Bearer ' + key, 'anth
 async function portUp(base) { try { await http(base, {}, 2500); return true; } catch { return false; } }
 
 // ───────────────────────── Claude settings / profiles ─────────────────────────
+function termuxEnv(env) {
+  env.DISABLE_AUTOUPDATER = '1';
+  if (has('rg')) env.USE_BUILTIN_RIPGREP = '0'; // Android par system ripgrep (Claude ki Grep/Glob search ke liye)
+}
 const MODEL_KEYS = ['ANTHROPIC_MODEL', 'ANTHROPIC_DEFAULT_SONNET_MODEL', 'ANTHROPIC_DEFAULT_OPUS_MODEL', 'ANTHROPIC_DEFAULT_HAIKU_MODEL', 'ANTHROPIC_SMALL_FAST_MODEL'];
 function patchSettings(fn) {
   const s = readJson(SETTINGS, {});
@@ -383,7 +387,7 @@ function applyProfile(p) {
       env.ANTHROPIC_DEFAULT_HAIKU_MODEL = small;
       env.ANTHROPIC_SMALL_FAST_MODEL = small;
     }
-    if (IS_TERMUX) env.DISABLE_AUTOUPDATER = '1';
+    if (IS_TERMUX) termuxEnv(env);
   });
   const cj = readJson(CLAUDE_JSON, {});
   if (!cj.hasCompletedOnboarding) { cj.hasCompletedOnboarding = true; writeJson(CLAUDE_JSON, cj); }
@@ -400,7 +404,7 @@ function setProfile(id, patch, activate = true) {
 function useDefault() {
   patchSettings((env) => {
     ['ANTHROPIC_BASE_URL', 'ANTHROPIC_AUTH_TOKEN', 'ANTHROPIC_API_KEY', ...MODEL_KEYS].forEach((k) => delete env[k]);
-    if (IS_TERMUX) env.DISABLE_AUTOUPDATER = '1';
+    if (IS_TERMUX) termuxEnv(env);
   });
   ST.active = null; save();
   ok('Default Claude mode: gateway settings hata di (profiles saved hain).');
@@ -501,6 +505,23 @@ function claudeVersion() {
   return r.status === 0 ? (r.stdout || '').trim().split('\n')[0] || null : null;
 }
 const cv = (refresh) => { if (refresh || CV === undefined) CV = claudeVersion(); return CV; };
+async function fixTermuxExtras() {
+  if (!IS_TERMUX) return;
+  if (!has('rg')) await step('ripgrep install (Claude ki search ke liye)', 'pkg install -y ripgrep');
+  try { // Claude jis vendored path me rg dhundta hai wahan system rg ka link (best-effort)
+    const root = (cp.spawnSync('npm root -g', { shell: true, encoding: 'utf8', timeout: 20000 }).stdout || '').trim();
+    const rg = (cp.spawnSync('command -v rg', { shell: true, encoding: 'utf8' }).stdout || '').trim();
+    const pkgDir = path.join(root, '@anthropic-ai', 'claude-code');
+    if (root && rg && fs.existsSync(pkgDir)) {
+      const dir = path.join(pkgDir, 'vendor', 'ripgrep', 'arm64-android');
+      fs.mkdirSync(dir, { recursive: true });
+      const link = path.join(dir, 'rg');
+      fs.rmSync(link, { force: true });
+      fs.symlinkSync(rg, link);
+    }
+  } catch { /* best-effort */ }
+  patchSettings(termuxEnv);
+}
 async function stepClaude() {
   if (!(await online())) { bad('Internet nahi mila. WiFi / data check karo, phir dobara.'); return false; }
   ensureNpmPath();
@@ -513,7 +534,7 @@ async function stepClaude() {
   const target = IS_TERMUX ? TERMUX_PIN : latest;
   if (IS_TERMUX) info(`Termux par naya version nahi chalta, isliye ${TERMUX_PIN} use hota hai.`);
 
-  if (curNum && (curNum === target || !target)) { ok('Claude Code up to date'); if (IS_TERMUX) patchSettings((e) => { e.DISABLE_AUTOUPDATER = '1'; }); return true; }
+  if (curNum && (curNum === target || !target)) { ok('Claude Code up to date'); if (IS_TERMUX) await fixTermuxExtras(); return true; }
   if (curNum) {
     if (!(await confirm(`${curNum} → ${target} update karun?`, !IS_TERMUX))) { ok(`Claude ${curNum} hi rakha`); return true; }
   }
@@ -526,7 +547,7 @@ async function stepClaude() {
     const v2 = await text('Koi aur version try karna hai? (Enter = skip)');
     if (v2) { good = await step(`Claude Code @${v2}`, `npm install -g @anthropic-ai/claude-code@${v2}`); ensureNpmPath(true); good = good && !!cv(true); }
   }
-  if (good) { ok(`Claude Code ready: ${cv()}`); if (IS_TERMUX) patchSettings((e) => { e.DISABLE_AUTOUPDATER = '1'; }); }
+  if (good) { ok(`Claude Code ready: ${cv()}`); if (IS_TERMUX) await fixTermuxExtras(); }
   return good;
 }
 
@@ -689,6 +710,8 @@ function needsWork(p) {
 }
 async function runPluginQueue(list, auto) {
   if (!list.length) return;
+  // kai plugins (jaise security-guidance) ke hooks ko Python 3 chahiye
+  if (!pyCmd()) { info('Plugins ke hooks ke liye Python chahiye, install kar raha hu...'); await ensurePython(); }
   if (IS_TERMUX) cp.spawnSync('termux-wake-lock', { shell: true, stdio: 'ignore' });
   let fails = 0;
   for (let i = 0; i < list.length; i++) {
@@ -1020,6 +1043,10 @@ async function doctor() {
   has('ccs') ? ok('ccs command') : warn('ccs command nahi → ccs fix');
   const v = cv(true);
   v ? ok(`Claude Code ${v}`) : bad(`Claude Code chal nahi raha → "Full setup" ya Claude install chalao${IS_TERMUX ? ` (Termux: ${TERMUX_PIN} chahiye)` : ''}`);
+  if (IS_TERMUX) {
+    has('rg') ? ok('ripgrep (Claude search)') : warn('ripgrep nahi → ccs fix');
+    pyCmd() ? ok('python (plugins ke hooks)') : warn('python nahi → pkg install -y python');
+  }
   const env = (readJson(SETTINGS, {}).env) || {};
   if (IS_TERMUX) env.DISABLE_AUTOUPDATER === '1' ? ok('Auto-update band (Termux safe)') : warn('DISABLE_AUTOUPDATER set nahi → Claude Code update hokar tut sakta hai');
   const p = activeProfile();
@@ -1055,6 +1082,11 @@ async function launch(args = []) {
     warn('Local gateway band hai.');
     if (await confirm('OmniRoute start karun?', true)) await startGateway(g);
   }
+  if (p && !p.model) {
+    warn('Model set nahi hai: Claude "sonnet" naam bhejega aur OmniRoute galat provider par bhej sakta hai (401 error).');
+    if (await confirm('Abhi model chun lun?', true)) await modelChoice();
+  }
+  if (IS_TERMUX) cp.spawnSync('termux-wake-lock', { shell: true, stdio: 'ignore' });
   clear();
   cp.spawnSync(['claude', ...args].join(' '), { shell: true, stdio: 'inherit' });
 }
@@ -1145,6 +1177,10 @@ async function connectApi() {
 async function cmdStart() {
   const g = currentGateway() || omniGw();
   if (await startGateway(g) && g.dashboard) info(`Dashboard (provider connect karo): ${g.dashboard}`);
+}
+async function cmdLog() {
+  try { fs.readFileSync(GW_LOG, 'utf8').trim().split('\n').slice(-30).forEach((l) => console.log(C.d(clip(l, cols())))); }
+  catch { warn('Log nahi hai (ccs start ke baad banta hai)'); }
 }
 async function cmdStop() { const g = currentGateway() || omniGw(); await stopGateway(g); }
 function printCommands() {
@@ -1261,6 +1297,7 @@ ${C.b('cc-setup')}  (ccs)
   ccs claude      Claude check / install / update
   ccs omni        OmniRoute install
   ccs start       OmniRoute start
+  ccs log          OmniRoute log (last 30 lines)
   ccs stop        OmniRoute band
   ccs json        OmniRoute local JSON banao + Claude connect
   ccs api         API chuno + key daalo + connect
@@ -1281,7 +1318,7 @@ async function cmdFix() {
   refreshWinPath();
   fixGit(); ok('git HTTPS fix');
   await ensureShortcut();
-  if (IS_TERMUX) { patchSettings((e) => { e.DISABLE_AUTOUPDATER = '1'; }); ok('Termux auto-update band'); }
+  if (IS_TERMUX) { await fixTermuxExtras(); ok('Termux: auto-update band + ripgrep'); }
   const p = activeProfile();
   if (p) { applyProfile(p); ok('Claude settings profile se sync'); }
   cv(true) ? ok(`Claude ${cv()}`) : warn('Claude chal nahi raha → ccs claude');
@@ -1304,7 +1341,7 @@ const CMDS = {
   prep: async () => { header('System update'); await stepPrep(); },
   claude: async () => { header('Claude Code'); await stepClaude(); },
   omni: async () => { header('OmniRoute'); await stepOmni(); },
-  start: cmdStart, stop: cmdStop, json: cmdJson, api: connectApi,
+  start: cmdStart, log: cmdLog, stop: cmdStop, json: cmdJson, api: connectApi,
   model: async () => { header('Model'); await modelChoice(); },
   models: async () => { header('Model'); await modelChoice(); },
   run: () => launch(process.argv.slice(3)), launch: () => launch(process.argv.slice(3)),

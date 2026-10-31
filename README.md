@@ -22,9 +22,9 @@ pkg update -y -o Dpkg::Options::=--force-confold
 pkg upgrade -y -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef
 ```
 
-**3. Zaruri packages**
+**3. Zaruri packages** (python = plugins ke hooks ke liye, ripgrep = Claude ki search ke liye)
 ```
-pkg install -y git nodejs-lts curl unzip
+pkg install -y git nodejs-lts curl unzip python ripgrep
 ```
 
 **4. Check karo (teeno ka version aana chahiye)**
@@ -68,10 +68,11 @@ ccs api
 ```
 `ccs json` me path blank chhodo to default JSON ban jati hai.
 
-**10. Model chuno**
+**10. Model chuno (ZARURI, ye step mat chhodna)**
 ```
 ccs model
 ```
+Model set na ho to Claude "sonnet" naam bhejta hai aur OmniRoute galat provider par bhej deta hai (401 error). `ccs run` bhi model na ho to puchta hai.
 
 **11. Claude chalao**
 ```
@@ -83,6 +84,12 @@ ccs run
 - Same jagah **Autostart ON**
 - Recent apps me Termux card ko **Lock** karo
 
+**13. Plugins (optional)**
+```
+ccs plugins
+```
+"Auto install" recommended plugins ek-ek karke lagata hai. Python pehle khud install karta hai. `claude-mem` Termux par skip hota hai (use Bun chahiye, jo Android par nahi chalta).
+
 **Kuch bhi gadbad ho to ek command:**
 ```
 ccs fix
@@ -90,6 +97,14 @@ ccs fix
 ```
 ccs doctor
 ```
+
+---
+
+### Optional, advanced (Termux par latest Claude / claude-mem)
+Ye **community** projects hain, official nahi. Apni zimmedari par, pehle repo padho:
+- Latest Claude Code Termux par: github.com/ferrumclaudepilgrim/claude-code-android (glibc-runner se binary patch karta hai)
+- Bun Termux par (claude-mem ke liye): github.com/tribixbite/bun-on-termux
+Tool inhe automatic install nahi karta, kyunki ye binaries patch karte hain.
 
 ---
 
@@ -187,7 +202,8 @@ ccs json       OmniRoute ki local JSON banao + Claude connect
 ccs api        API chuno + key daalo + connection test
 ccs model      model test karke chuno ya custom naam
 ccs run        Claude chalao (OmniRoute auto-start)
-ccs doctor     health check (net, PATH, node, git, claude, gateway)
+ccs doctor     health check (net, PATH, node, git, claude, python, ripgrep, gateway)
+ccs log        OmniRoute ka log (last 30 lines)
 ccs fix        auto-fix (PATH, git, ccs command, settings)
 ccs vscode     VS Code extension
 ccs plugins    plugins (optional, manual)

@@ -13,7 +13,11 @@
         "claude-mem"
       ],
       "warn": {
-        "termux": "Isko Bun chahiye, Termux par chal na bhi sakta hai"
+        "termux": "Bun chahiye, Termux (Android) par chalta nahi: hook warnings aayenge. PC par theek chalta hai."
+      },
+      "auto": {
+        "default": true,
+        "termux": false
       }
     },
     {
