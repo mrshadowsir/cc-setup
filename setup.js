@@ -363,6 +363,7 @@ function fixGit() {
 }
 async function stepPrep() {
   header('System taiyari');
+  let restart = false;
   if (IS_TERMUX) {
     info('Termux: update + upgrade (kuch minute lag sakte hain)');
     const before = process.version;
@@ -371,7 +372,7 @@ async function stepPrep() {
     const c = sh('pkg install -y nodejs-lts git curl');
     if (!(a && b && c)) warn('Kuch step fail hua. Mirror issue ho to: termux-change-repo');
     const nv = cp.spawnSync('node -v', { shell: true, encoding: 'utf8' }).stdout.trim();
-    if (nv && nv !== before) warn(`Node upgrade hua (${before} → ${nv}). Tool band karke dobara chalao: ccs`);
+    if (nv && nv !== before) { warn(`Node upgrade hua (${before} → ${nv}).`); restart = true; }
     if (!ST.tipRedmi) {
       console.log('\n' + C.y('Redmi/MIUI tip:') + ' Settings → Apps → Termux → Battery saver = "No restrictions", Autostart ON,');
       console.log('recent apps me Termux ko lock karo. Warna gateway background me band ho jata hai.\n');
@@ -398,9 +399,20 @@ async function stepPrep() {
   }
   fixGit();
   ok('GitHub HTTPS fix (SSH host-key error nahi aayega)');
+  return restart ? 'restart' : true;
 }
 
 async function ensureShortcut() {
+  if (IS_TERMUX && process.env.PREFIX) {
+    const bin = path.join(process.env.PREFIX, 'bin', 'ccs');
+    try {
+      fs.rmSync(bin, { force: true }); // purana npm-link symlink ho to pehle hatao (warna setup.js overwrite ho jata)
+      fs.writeFileSync(bin, `#!${path.join(process.env.PREFIX, 'bin', 'sh')}\nexec node "${path.join(ROOT, 'setup.js')}" "$@"\n`);
+      fs.chmodSync(bin, 0o755);
+      ok('Short command ready: ab kahin se sirf `ccs` likho');
+      return;
+    } catch (e) { warn('ccs wrapper nahi ban paya: ' + e.message); }
+  }
   if (has('ccs')) { ok('Shortcut `ccs` pehle se hai'); return; }
   const r = await step('Shortcut `ccs` bana raha hu (npm link)', 'npm link', { cwd: ROOT });
   if (r && has('ccs')) ok('Ab kahin se bhi sirf `ccs` likho');
@@ -415,14 +427,20 @@ function claudeVersion() {
 }
 const cv = (refresh) => { if (refresh || CV === undefined) CV = claudeVersion(); return CV; };
 async function stepClaude() {
-  const v = cv(true);
-  if (v) {
-    ok(`Claude Code ready: ${v}`);
-    if (IS_TERMUX) patchSettings((e) => { e.DISABLE_AUTOUPDATER = '1'; });
-    return true;
+  const cur = cv(true);
+  const curNum = ((cur || '').match(/\d+\.\d+\.\d+/) || [])[0];
+  const lr = await task('Latest version check (npm)', 'npm view @anthropic-ai/claude-code version --fetch-retries=1 --fetch-timeout=10000', { timeout: 30000 });
+  const latest = lr.ok ? (lr.out.trim().split('\n').pop() || '').trim() : null;
+  console.log(`${C.d('Installed ')}${curNum ? C.g(curNum) : C.r('nahi hai')}`);
+  console.log(`${C.d('Latest    ')}${latest || C.y('check nahi hua (net?)')}`);
+  const target = IS_TERMUX ? TERMUX_PIN : latest;
+  if (IS_TERMUX) info(`Termux par naya version nahi chalta, isliye ${TERMUX_PIN} use hota hai.`);
+
+  if (curNum && (curNum === target || !target)) { ok('Claude Code up to date'); if (IS_TERMUX) patchSettings((e) => { e.DISABLE_AUTOUPDATER = '1'; }); return true; }
+  if (curNum) {
+    if (!(await confirm(`${curNum} → ${target} update karun?`, !IS_TERMUX))) { ok(`Claude ${curNum} hi rakha`); return true; }
   }
-  const ver = IS_TERMUX ? '@' + TERMUX_PIN : '';
-  if (IS_TERMUX) info(`Termux: ${TERMUX_PIN} install hoga (naye versions yahan nahi chalte, auto-update band rahega)`);
+  const ver = target ? '@' + target : '';
   let good = (await step(`Claude Code install ${ver}`, `npm install -g @anthropic-ai/claude-code${ver}`)) && !!cv(true);
   if (!good) {
     bad('Claude Code chal nahi raha.');
@@ -663,7 +681,7 @@ async function menuPlugins() {
 
 // ───────────────────────── Gateway ─────────────────────────
 async function startGateway(g) {
-  const cmd = plat(g.start);
+  const cmd = gwStartCmd(g);
   if (!cmd) return true;
   if (await portUp(g.base_url)) { ok('Gateway pehle se chal raha hai'); return true; }
   if (IS_TERMUX) cp.spawnSync('termux-wake-lock', { shell: true, stdio: 'ignore' });
@@ -950,8 +968,8 @@ async function launch(args = []) {
   }
   const p = activeProfile(), g = currentGateway();
   if (p && g && plat(g.start) && isLocal(p.base_url) && !(await portUp(p.base_url))) {
-    info('Gateway band tha, start kar raha hu...');
-    await startGateway(g);
+    warn('Local gateway band hai.');
+    if (await confirm('OmniRoute start karun?', true)) await startGateway(g);
   }
   clear();
   cp.spawnSync(['claude', ...args].join(' '), { shell: true, stdio: 'inherit' });
@@ -983,31 +1001,103 @@ async function menuMaint() {
 }
 
 // ───────────────────────── full setup & menu ─────────────────────────
-async function fullSetup() {
-  header('Full setup (ek baar)');
-  console.log(C.d('Order: System → Claude Code → API/Model → Plugins → Shortcut'));
-  console.log(C.d('Sab ek-ek karke chalta hai, overload nahi hoga.'));
-  rule('System');
-  if (await confirm(IS_TERMUX ? 'System update + upgrade karun? (recommended)' : 'System check karun?', true)) await stepPrep();
-  else fixGit();
-  rule('1/4  Claude Code');
-  const good = await stepClaude();
-  if (!good && !(await confirm('Claude Code ready nahi. Phir bhi aage badhein?', false))) return;
-  rule('2/4  API / Gateway');
-  if (await confirm('Gateway / API set karna hai? (No = default Claude hi rahega)', true)) {
-    await installGateway();
-    if (activeProfile() && (await confirm('Ab model set karun?', true))) await modelChoice();
-  }
-  rule('3/4  Plugins & Skills');
-  if (good) {
-    if (await confirm('Recommended plugins auto install karun? (ek-ek karke)', true)) await autoPlugins();
-    else if (await confirm('Apni marzi se chunna hai?', false)) await pluginChecklist();
-  } else info('Claude Code ready nahi, plugins skip.');
-  rule('4/4  Shortcut');
-  await ensureShortcut();
-  console.log('\n' + C.g('✔ Setup complete.') + C.d(' Aage ke badlav ke liye bas `ccs` chalao.'));
-  if (await confirm('Claude abhi chalau?', false)) await launch();
+// ───────────────────────── Simple manual commands ─────────────────────────
+const omniGw = () => gateways().find((x) => x.id === 'omniroute');
+function gwStartCmd(g) {
+  if (g.id === 'omniroute' && IS_TERMUX) return ST.omniMode === 'global' ? 'omniroute' : 'npx -y omniroute';
+  return plat(g.start);
 }
+async function stepOmni() {
+  const g = omniGw();
+  if (has('omniroute')) {
+    ok('OmniRoute pehle se installed');
+    ST.omniMode = 'global'; save();
+    if (!(await confirm('Latest par update karun?', false))) return true;
+  }
+  const good = await step('OmniRoute install (npm -g)', 'npm install -g omniroute');
+  if (good) ST.omniMode = 'global';
+  else if (IS_TERMUX) { warn('Global install nahi hua. Termux par `npx -y omniroute` se chalega (pehli start me download hoga).'); ST.omniMode = 'npx'; }
+  else { save(); return false; }
+  ST.gateway = 'omniroute';
+  if (!ST.profiles.omniroute) ST.profiles.omniroute = { base_url: g.base_url, api_key: g.default_key };
+  save();
+  ok('OmniRoute ready (abhi start/connect nahi kiya)');
+  return true;
+}
+async function cmdJson() {
+  header('OmniRoute local JSON');
+  const f = (await text('JSON path (Enter = default)', DEFAULT_JSON)).replace(/^~/, HOME);
+  if (fs.existsSync(f) && !readJson(f, null)) { bad('Ye file valid JSON nahi hai: ' + f); return; }
+  const cur = readJson(f, {}) || {};
+  const prof = ST.profiles.omniroute || {};
+  const base = normBase(await text('OmniRoute URL', cur.base_url || prof.base_url || 'http://localhost:20128'));
+  const key = await text('API key (dashboard wali ya default)', cur.api_key || prof.api_key || 'omniroute');
+  const model = await text('Model naam (khali = baad me ccs model)', cur.model || prof.model || '');
+  writeJson(f, { base_url: base, api_key: key, model });
+  ST.gateway = 'omniroute'; save();
+  setProfile('omniroute', { base_url: base, api_key: key, model: model || undefined, json: f });
+  ok(`JSON ban gayi: ${f}`);
+  ok('Claude ab OmniRoute se connect hai (settings update)');
+  info('Agla: ccs start  →  ccs model  →  ccs run');
+}
+async function connectApi() {
+  header('API chuno + key');
+  const g = (await select('Kaun si API?', gateways().map((x) => ({ label: x.name, value: x, hint: x.hint })), { numbers: true }))?.value;
+  if (!g) return;
+  if (g.after) info(g.after);
+  const base = normBase(await text('Base URL', g.base_url || ''));
+  if (!base) { bad('Base URL chahiye'); return; }
+  const key = await text('API key', g.default_key || '');
+  const id = g.id === 'custom' ? await text('Profile ka naam', 'custom') : g.id;
+  ST.gateway = g.id; save();
+  setProfile(id, { base_url: base, api_key: key || 'dummy' });
+  ok(`Connected: profile "${id}" active (Claude settings update)`);
+  if (isLocal(base) && !(await portUp(base))) { info('Gateway abhi band hai: ccs start. Phir ccs model.'); return; }
+  const n = (await listModels(base, key || 'dummy')).length;
+  n ? ok(`Connection test: ${n} models mile. Ab: ccs model`) : warn('Models list nahi mili (key/URL check karo). Phir bhi manual model naam ccs model me de sakte ho.');
+}
+async function cmdStart() {
+  const g = currentGateway() || omniGw();
+  if (await startGateway(g) && g.dashboard) info(`Dashboard (provider connect karo): ${g.dashboard}`);
+}
+async function cmdStop() { const g = currentGateway() || omniGw(); await stopGateway(g); }
+function printCommands() {
+  console.log('\n' + C.b('Short commands'));
+  [
+    ['ccs sys', 'pkg update + upgrade'],
+    ['ccs claude', 'Claude install/update'],
+    ['ccs omni', 'OmniRoute install'],
+    ['ccs start', 'OmniRoute start'],
+    ['ccs stop', 'OmniRoute band'],
+    ['ccs json', 'local JSON + connect'],
+    ['ccs api', 'API + key connect'],
+    ['ccs model', 'model chuno / custom'],
+    ['ccs run', 'Claude chalao'],
+    ['ccs', 'menu'],
+  ].forEach(([a, b]) => console.log('  ' + C.c(a.padEnd(12)) + C.d(b)));
+}
+async function fullSetup() {
+  header('Setup (3 step)');
+  console.log(C.d('Har step alag hai. Aap haan/nahi bolte ho.'));
+  rule('Step 1/3  System update');
+  if (await confirm(IS_TERMUX ? 'pkg update + pkg upgrade karun?' : 'System check / upgrade karun?', true)) {
+    if ((await stepPrep()) === 'restart') {
+      await ensureShortcut();
+      console.log('\n' + C.y('Tool band karke dobara chalao:') + ' ccs setup  ' + C.d('(Step 1 me "n" bolna)'));
+      return;
+    }
+  }
+  rule('Step 2/3  Claude Code');
+  const good = await stepClaude();
+  if (!good && !(await confirm('Claude ready nahi hua. OmniRoute phir bhi install karun?', false))) { printCommands(); return; }
+  rule('Step 3/3  OmniRoute');
+  if (await confirm('OmniRoute install karun?', true)) await stepOmni();
+  rule('Short command');
+  await ensureShortcut();
+  console.log('\n' + C.g('✔ Setup khatam. Ab sab band.') + C.d(' Aage ke kaam neeche ki commands se.'));
+  printCommands();
+}
+
 function header(sub) {
   const w = Math.min(cols(), 44);
   const line = (t, f) => console.log(C.c('│') + f(t.padEnd(w - 2)) + C.c('│'));
@@ -1024,6 +1114,23 @@ async function menuTheme() {
   setTheme(s.value); ST.theme = s.value; save();
   console.log(`${C.c('██')}${C.a2('██')}${C.g('██')}${C.y('██')}${C.r('██')} ${C.b(THEMES[s.value].name)} theme set`);
 }
+async function menuExtras() {
+  for (;;) {
+    clear(); header('Extras');
+    const s = await select('Kya karna hai?', [
+      { label: 'Plugins & Skills (optional)', value: 'plugins' },
+      { label: 'API profiles (badlo / hatao)', value: 'profiles' },
+      { label: 'Health check', value: 'doctor' },
+      { label: 'Maintenance / Theme / Update', value: 'maint' },
+      { label: '← Back', value: 'back' },
+    ], { numbers: true });
+    if (!s || s.value === 'back') return;
+    if (s.value === 'plugins') await menuPlugins();
+    if (s.value === 'profiles') await menuApi();
+    if (s.value === 'doctor') { clear(); await doctor(); await pause(); }
+    if (s.value === 'maint') await menuMaint();
+  }
+}
 async function mainMenu() {
   for (;;) {
     clear(); header();
@@ -1035,51 +1142,62 @@ async function mainMenu() {
     row('Claude', v ? C.g('✔ ' + v) : C.r('✖ chal nahi raha'));
     row('API', p ? `${p.id}${up}` : C.d('Default Claude'));
     if (p) row('Model', p.model || C.d('auto'));
-    const inst = Object.keys(ST.installed);
-    row('Plugins', inst.length ? clip(inst.join(', '), cols() - 10) : C.d('koi nahi'));
     console.log();
     const s = await select('Kya karna hai?', [
-      { label: 'Full setup (ek baar me sab)', value: 'setup' },
-      { label: 'Claude chalao', value: 'run', hint: 'gateway auto-start' },
-      { label: 'Plugins & Skills', value: 'plugins' },
-      { label: 'Gateway (OmniRoute etc.)', value: 'gateway' },
-      { label: 'API / Profile / Model', value: 'api' },
-      { label: 'Health check', value: 'doctor' },
-      { label: 'Maintenance / Update', value: 'maint' },
+      { label: 'Setup (sys → Claude → OmniRoute)', value: 'setup' },
+      { label: 'Claude chalao', value: 'run' },
+      { label: 'Model chuno', value: 'model' },
+      { label: 'OmniRoute local JSON', value: 'json' },
+      { label: 'API chuno + key', value: 'api' },
+      { label: 'OmniRoute start / stop / log', value: 'gw' },
+      { label: 'Extras (plugins, doctor, theme)', value: 'extras' },
+      { label: 'Commands list', value: 'cmds' },
       { label: 'Exit', value: 'exit' },
     ], { numbers: true, hint: '↑↓ ya number · Enter' });
     if (!s || s.value === 'exit') break;
     if (s.value === 'setup') { clear(); await fullSetup(); await pause(); }
     if (s.value === 'run') await launch();
-    if (s.value === 'plugins') await menuPlugins();
-    if (s.value === 'gateway') await menuGateway();
-    if (s.value === 'api') await menuApi();
-    if (s.value === 'doctor') { clear(); await doctor(); await pause(); }
-    if (s.value === 'maint') await menuMaint();
+    if (s.value === 'model') { clear(); header('Model'); await modelChoice(); await pause(); }
+    if (s.value === 'json') { clear(); await cmdJson(); await pause(); }
+    if (s.value === 'api') { clear(); await connectApi(); await pause(); }
+    if (s.value === 'gw') await menuGateway();
+    if (s.value === 'extras') await menuExtras();
+    if (s.value === 'cmds') { clear(); header('Commands'); printCommands(); await pause(); }
   }
-  console.log(C.d('Bye! Dobara kholne ke liye: ccs  (ya bash install.sh)'));
+  console.log(C.d('Bye! Dobara kholne ke liye: ccs'));
 }
 
 const HELP = `
 ${C.b('cc-setup')}  (ccs)
-  ccs             smart menu
-  ccs setup       ek baar ka full setup
-  ccs run         Claude chalao (gateway auto-start)
-  ccs claude      Claude Code install/check
-  ccs plugins     plugins & skills manager
-  ccs gateway     gateway manager
-  ccs api         profile / model manager
-  ccs models      models test karke chuno
+  ccs             menu
+  ccs sys         pkg update + upgrade
+  ccs claude      Claude check / install / update
+  ccs omni        OmniRoute install
+  ccs start       OmniRoute start
+  ccs stop        OmniRoute band
+  ccs json        OmniRoute local JSON banao + Claude connect
+  ccs api         API chuno + key daalo + connect
+  ccs model       model test karke chuno / custom naam
+  ccs run         Claude chalao
+  ccs setup       upar ke step 1-3 ek-ek karke
+  ccs plugins     plugins (optional)
   ccs doctor      health check
   ccs update      tool update (git pull)
-  ccs prep        system update + upgrade
-  ccs theme       colour theme badlo
+  ccs theme       colour theme
   ccs reset       default Claude pe wapas
 `;
 const CMDS = {
-  menu: mainMenu, setup: fullSetup, run: () => launch(process.argv.slice(3)), launch: () => launch(process.argv.slice(3)),
-  claude: async () => { header('Claude Code'); await stepClaude(); }, plugins: menuPlugins, gateway: menuGateway,
-  api: menuApi, models: modelTest, doctor, update: selfUpdate, prep: stepPrep, reset: async () => useDefault(), shortcut: ensureShortcut, theme: menuTheme,
+  menu: mainMenu, setup: fullSetup,
+  sys: async () => { header('System update'); await stepPrep(); },
+  prep: async () => { header('System update'); await stepPrep(); },
+  claude: async () => { header('Claude Code'); await stepClaude(); },
+  omni: async () => { header('OmniRoute'); await stepOmni(); },
+  start: cmdStart, stop: cmdStop, json: cmdJson, api: connectApi,
+  model: async () => { header('Model'); await modelChoice(); },
+  models: async () => { header('Model'); await modelChoice(); },
+  run: () => launch(process.argv.slice(3)), launch: () => launch(process.argv.slice(3)),
+  plugins: menuPlugins, gateway: menuGateway, profiles: menuApi, doctor, update: selfUpdate,
+  theme: menuTheme, reset: async () => useDefault(), shortcut: ensureShortcut, help: async () => console.log(HELP),
 };
 
 (async () => {
