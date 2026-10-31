@@ -363,6 +363,7 @@ async function portUp(base) { try { await http(base, {}, 2500); return true; } c
 // ───────────────────────── Claude settings / profiles ─────────────────────────
 function termuxEnv(env) {
   env.DISABLE_AUTOUPDATER = '1';
+  env.DISABLE_INSTALLATION_CHECKS = '1'; // "switched to native installer" warning band (Termux par `claude install` mat chalao)
   if (has('rg')) env.USE_BUILTIN_RIPGREP = '0'; // Android par system ripgrep (Claude ki Grep/Glob search ke liye)
 }
 const MODEL_KEYS = ['ANTHROPIC_MODEL', 'ANTHROPIC_DEFAULT_SONNET_MODEL', 'ANTHROPIC_DEFAULT_OPUS_MODEL', 'ANTHROPIC_DEFAULT_HAIKU_MODEL', 'ANTHROPIC_SMALL_FAST_MODEL'];
@@ -1319,6 +1320,11 @@ async function cmdFix() {
   fixGit(); ok('git HTTPS fix');
   await ensureShortcut();
   if (IS_TERMUX) { await fixTermuxExtras(); ok('Termux: auto-update band + ripgrep'); }
+  if (IS_TERMUX && cv()) { // claude-mem Termux par nahi chalta (Bun), uske hook warnings hatao
+    const r = await task('claude-mem hatao (Termux par chalta nahi)', 'claude plugin uninstall claude-mem@thedotmack');
+    if (r.ok) { ok('claude-mem hata diya (hook warnings band)'); await task('marketplace hatao', 'claude plugin marketplace remove thedotmack'); }
+    delete ST.installed['claude-mem']; save();
+  }
   const p = activeProfile();
   if (p) { applyProfile(p); ok('Claude settings profile se sync'); }
   cv(true) ? ok(`Claude ${cv()}`) : warn('Claude chal nahi raha → ccs claude');
