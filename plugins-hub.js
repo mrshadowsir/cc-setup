@@ -193,6 +193,169 @@ function skills() {
   });
 }
 
+/* ---------- Recommended: health, setup, problem fix ---------- */
+const WIN = process.platform === 'win32';
+const TERMUX = (process.env.PREFIX || '').includes('com.termux');
+const MKT_REPO = { 'claude-plugins-official': 'anthropics/claude-plugins-official', 'thedotmack': 'thedotmack/claude-mem' };
+const PLJ = () => rj(path.join(__dirname, 'plugins.json'), []);
+
+function onPath(bin) {
+  const dirs = (process.env.PATH || '').split(path.delimiter).filter(Boolean);
+  const exts = WIN ? ['', '.exe', '.cmd', '.bat'] : [''];
+  return dirs.some(d => exts.some(e => { try { fs.accessSync(path.join(d, bin + e)); return true; } catch { return false; } }));
+}
+
+// Kaunse tools (binaries) is item ko chahiye
+function needs(pl) {
+  const cmd = pl.cmd || '';
+  const out = [];
+  if (/^claude\b|\bclaude plugin\b|\bclaude mcp\b/.test(cmd)) out.push('claude');
+  if (/\bnpx\b/.test(cmd)) out.push('npx');
+  if (/\buvx\b/.test(cmd)) out.push('uvx');
+  if (/^python\b/.test(cmd)) out.push('python');
+  if (pl.id === 'claude-mem') out.push('bun');
+  if (pl.id === 'apk-builder') out.push('gh');
+  if (pl.id === 'pc-playwright') out.push('npx');
+  return [...new Set(out)];
+}
+
+// Tool na mile to install ka command (Termux / Windows / Linux ke hisaab se)
+function toolCmd(bin, ctx) {
+  if (bin === 'uvx' || bin === 'uv') return 'python -m pip install -U uv';
+  if (bin === 'bun') return 'npm install -g bun';
+  if (bin === 'claude') return 'npm install -g ' + (ctx.claudePkg || '@anthropic-ai/claude-code');
+  if (bin === 'gh') return TERMUX ? 'pkg install -y gh' : WIN ? 'winget install GitHub.cli' : null;
+  if (bin === 'npx') return TERMUX ? 'pkg install -y nodejs-lts' : null;
+  if (bin === 'python') return TERMUX ? 'pkg install -y python' : null;
+  return null;
+}
+
+async function healthOf(pl, ctx) {
+  const id = pl.id, name = pl.name || id, desc = pl.desc || '';
+  if (!pl.cmd) return { id, name, desc, status: 'manual', installed: false, checks: [{ name: 'Setup', ok: false, msg: 'Auto install nahi. Custom tab se manual chalao' }] };
+  const checks = [];
+  const add = (n, ok, okMsg, badMsg) => checks.push({ name: n, ok: !!ok, msg: ok ? okMsg : badMsg });
+  for (const b of needs(pl)) add('Tool: ' + b, onPath(b), 'mil gaya', 'nahi mila (Fix se install hoga)');
+  const mcp = fromCmd(pl.cmd, /mcp add --scope user (\S+)/);
+  const pid = fromCmd(pl.cmd, /plugin install (\S+)/);
+  const mkt = fromCmd(pl.cmd, /marketplace add (\S+)/);
+  let installed = false;
+  if (mcp) {
+    installed = mcpServers().some(x => x.name === mcp);
+    add('MCP config', installed, 'config me hai', 'config me nahi');
+  } else if (pid) {
+    const mName = pid.split('@')[1];
+    const known = mName in rj(KNOWN, {});
+    add('Marketplace ' + mName, known, 'jud gaya', 'nahi juda');
+    const inst = installedRaw().find(x => x.id === pid);
+    installed = !!inst;
+    add('Plugin installed', installed, 'installed hai', 'installed nahi');
+    if (inst) {
+      const enabled = (settings().enabledPlugins || {})[pid] !== false;
+      add('Enabled', enabled, 'ON hai', 'OFF hai (Fix se ON hoga)');
+      const files = !!inst.path && fs.existsSync(inst.path) && countFiles(inst.path, 1) > 0;
+      add('Files', files, 'files maujood', 'files gayab (Fix se reinstall hoga)');
+    }
+  } else if (mkt) {
+    installed = mkt.split('/').pop() in rj(KNOWN, {});
+    add('Marketplace', installed, 'jud gaya', 'nahi juda');
+  } else if (id === 'headroom') {
+    const r = await run('python -m pip show headroom-ai', 20000);
+    installed = r.ok && /Name:/.test(r.out);
+    add('Python package', installed, 'installed hai', 'installed nahi');
+  } else {
+    installed = !!ctx.cfgInstalled(id);
+    add('Install', installed, 'installed hai', 'installed nahi');
+  }
+  if (id === 'pc-playwright') {
+    const d = path.join(os.homedir(), WIN ? 'AppData/Local/ms-playwright' : '.cache/ms-playwright');
+    add('Browser (chromium)', fs.existsSync(d), 'browser mila', 'browser nahi (Fix se install hoga)');
+  }
+  const ok = checks.every(c => c.ok);
+  return { id, name, desc, status: ok ? 'ok' : 'bad', installed, checks };
+}
+
+// Kaun se steps chahiye: sel(name) se filter, aur sirf wahi jo asal me fail hain
+function planSteps(pl, h, ctx, sel) {
+  const steps = [];
+  const fail = n => h.checks.some(c => c.name === n && !c.ok);
+  const want = n => sel(n) && fail(n);
+  for (const b of needs(pl)) {
+    if (want('Tool: ' + b)) { const t = toolCmd(b, ctx); if (t) steps.push(t); }
+  }
+  const mcp = fromCmd(pl.cmd, /mcp add --scope user (\S+)/);
+  const pid = fromCmd(pl.cmd, /plugin install (\S+)/);
+  const mkt = fromCmd(pl.cmd, /marketplace add (\S+)/);
+  if (mcp) {
+    if (want('MCP config')) steps.push(pl.cmd);
+  } else if (pid) {
+    const mName = pid.split('@')[1];
+    if (want('Marketplace ' + mName) && MKT_REPO[mName]) steps.push(`claude plugin marketplace add ${MKT_REPO[mName]}`);
+    if (want('Plugin installed')) steps.push(`claude plugin install ${pid}`);
+    if (want('Enabled')) steps.push(`claude plugin enable ${pid}`);
+    if (want('Files')) steps.push(`claude plugin uninstall ${pid}`, `claude plugin install ${pid}`);
+  } else if (mkt) {
+    if (want('Marketplace')) steps.push(pl.cmd);
+  } else if (pl.cmd) {
+    const own = h.checks.find(c => !c.ok && ['Python package', 'Install'].includes(c.name));
+    if (own && sel(own.name)) steps.push(pl.cmd.replace(/\{DIR\}/g, __dirname));
+  }
+  if (pl.id === 'pc-playwright' && want('Browser (chromium)')) steps.push('npx -y playwright install chromium');
+  return steps;
+}
+
+// Fix option ka selector
+function selFor(key) {
+  if (!key || key === 'all' || key === 'reinstall') return () => true;
+  if (key === 'tools') return n => n.startsWith('Tool: ');
+  if (key.startsWith('check:')) { const nm = key.slice(6); return n => n === nm; }
+  return () => false;
+}
+
+// Reinstall se pehle purana saaf karo (MCP config / plugin files + settings)
+async function cleanupForReinstall(pl) {
+  const mcp = fromCmd(pl.cmd, /mcp add --scope user (\S+)/);
+  const pid = fromCmd(pl.cmd, /plugin install (\S+)/);
+  if (mcp) await removeMcp(vname(mcp));
+  if (pid) { vid(pid); await run(`claude plugin uninstall ${pid}`, 120000); purge(pid); }
+}
+
+async function runSteps(pl, key, ctx) {
+  if (ctx.running().includes(sid(pl.id))) throw new Error('Ye pehle se chal raha hai. Logs dekho');
+  let steps;
+  if (key === 'reinstall') {
+    await cleanupForReinstall(pl);
+    const h = await healthOf(pl, ctx);
+    steps = planSteps(pl, h, ctx, selFor('reinstall'));
+  } else {
+    const h = await healthOf(pl, ctx);
+    steps = planSteps(pl, h, ctx, selFor(key));
+  }
+  if (!steps.length) return { ok: true, msg: 'Is option me kuch karne ko nahi (sab theek hai)' };
+  ctx.start('job-mp-' + sid(pl.id), steps.join(' && '), {
+    cwd: os.homedir(), onExit: code => { if (code === 0) ctx.mark(pl.id); },
+  });
+  return { ok: true, msg: `${key === 'all' ? 'Fix' : 'Fix option'} shuru (${steps.length} step). Logs me job-mp dekho`, steps: steps.length };
+}
+
+// Ek item ke saare fix options (sirf wahi jo problem ke hisaab se relevant hain)
+async function optionsFor(pl, ctx) {
+  const h = await healthOf(pl, ctx);
+  if (h.status === 'manual') return { status: h.status, checks: h.checks, options: [] };
+  const opts = [];
+  const prev = key => planSteps(pl, h, ctx, selFor(key)).join(' && ');
+  const bad = h.checks.filter(c => !c.ok);
+  if (bad.length) {
+    opts.push({ key: 'all', label: '🔧 Sab problem ek saath fix karo', preview: prev('all') });
+    if (bad.some(c => c.name.startsWith('Tool: '))) opts.push({ key: 'tools', label: '🧰 Sirf tools install karo', preview: prev('tools') });
+    for (const c of bad) opts.push({ key: 'check:' + c.name, label: '🎯 Sirf: ' + c.name, preview: prev('check:' + c.name) });
+  }
+  opts.push({ key: 'reinstall', label: '♻️ Poora reinstall (purana hata kar fresh)', preview: 'Purana hatega, phir naya setup' });
+  opts.push({ key: 'copy', label: '📋 Manual command copy karo', cmd: planSteps(pl, h, ctx, selFor('reinstall')).join(' && ') || pl.cmd });
+  opts.push({ key: 'logs', label: '📜 Logs dekho' });
+  return { status: h.status, checks: h.checks, options: opts };
+}
+
 /* ---------- routes (p = path after 'mp/') ---------- */
 async function route(p, b, ctx) {
   b = b || {};
@@ -311,6 +474,23 @@ async function route(p, b, ctx) {
         msg = 'Ye item automatic delete nahi hota. Status reset kar diya';
       }
       return { ok: true, msg, clearCfg: b.id };
+    }
+
+    case 'rec/health': {
+      const rows = [];
+      for (const pl of PLJ()) rows.push(await healthOf(pl, ctx));
+      return { rows, running: ctx.running() };
+    }
+    case 'rec/options': {
+      const pl = PLJ().find(x => x.id === b.id);
+      if (!pl) throw new Error('Ye item plugins.json me nahi hai');
+      return optionsFor(pl, ctx);
+    }
+    case 'rec/setup':
+    case 'rec/fix': {
+      const pl = PLJ().find(x => x.id === b.id);
+      if (!pl) throw new Error('Ye item plugins.json me nahi hai');
+      return runSteps(pl, b.key || 'all', ctx);
     }
 
     default: return undefined; // cc.js ko pata chale ki route nahi mila

@@ -621,7 +621,7 @@ async function route(u, b) {
     case 'quit': setTimeout(() => shutdown(), 200); return { ok: true };
     default: {
       if (p.startsWith('mp/')) {
-        const mctx = { start, running: () => Object.keys(svc).filter(k => k.startsWith('job-mp-') && svc[k].child).map(k => k.slice(7)), log: (n, t) => { try { fs.appendFileSync(logf(n), t + '\n'); } catch { /* ignore */ } } };
+        const mctx = { mark: id => { const k = loadCfg(); k.installed[id] = true; saveCfg(k); }, cfgInstalled: id => !!loadCfg().installed[id], claudePkg: CLAUDE_PKG, start, running: () => Object.keys(svc).filter(k => k.startsWith('job-mp-') && svc[k].child).map(k => k.slice(7)), log: (n, t) => { try { fs.appendFileSync(logf(n), t + '\n'); } catch { /* ignore */ } } };
         const r = await pluginsHub.route(p.slice(3), b, mctx);
         if (r !== undefined) { if (r.clearCfg) { const k = loadCfg(); delete k.installed[r.clearCfg]; saveCfg(k); } return r; }
       }

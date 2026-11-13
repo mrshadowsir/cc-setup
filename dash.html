@@ -8,7 +8,7 @@
 <link rel="icon" href="/icon.svg">
 <title>ccs dashboard</title>
 <style>
-:root{--bg:#0b1020;--s:#141b33;--s2:#1b2442;--line:#2a3560;--tx:#eef2ff;--mu:#9aa7d0;--ac:#7c5cff;--ac2:#18c7ff;--ok:#38e08c;--wa:#ffc94d;--bad:#ff6b81;--pk:#ff7ad9;color-scheme:dark}
+:root{--bg:#111318;--s:#1b1f27;--s2:#252a35;--line:#323a48;--tx:#eceef4;--mu:#9aa3b5;--ac:#7c5cff;--ac2:#18c7ff;--ok:#38e08c;--wa:#ffc94d;--bad:#ff6b81;--pk:#ff7ad9;color-scheme:dark}
 *{box-sizing:border-box;margin:0}
 html{-webkit-text-size-adjust:100%}
 body{background:var(--bg);color:var(--tx);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;padding:0 14px calc(86px + env(safe-area-inset-bottom));max-width:700px;margin:auto}
@@ -155,15 +155,91 @@ html,body{min-height:100%}
 .mtile b{font-size:16px}
 .mtile small{color:var(--mu);font-size:12.5px;font-weight:400;line-height:1.3}
 @media (min-width:700px){.mgrid{grid-template-columns:repeat(3,minmax(0,1fr))}}
-@media (min-width:1024px){.mgrid{grid-template-columns:repeat(4,minmax(0,1fr))}.menu{padding-left:268px}.menubtn{display:none}}
+@media (min-width:1024px){.mgrid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+
+/* ---- Professional shell: top-left menu, drawer navigation ---- */
+.hero{align-items:center;gap:12px;min-height:76px}
+.menubtn{flex:none;width:46px;height:46px;min-height:46px;padding:0;margin:0;border-radius:14px;background:#ffffff2e;border:1px solid #ffffff40;color:#fff;font-size:22px;line-height:1;display:inline-grid;place-items:center;cursor:pointer}
+.menubtn:active{transform:scale(.94)}
+.hero .pill{margin-left:auto}
+.menu{position:fixed;inset:0;z-index:40;display:flex;padding:0;background:transparent;overflow:hidden}
+.menu[hidden]{display:none}
+.mscrim{position:absolute;inset:0;background:#05080fb3;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+.mpanel{position:relative;width:min(340px,86vw);height:100%;background:var(--s);border-right:1px solid var(--line);box-shadow:12px 0 40px #000a;overflow-y:auto;padding:calc(16px + env(safe-area-inset-top)) 12px calc(24px + env(safe-area-inset-bottom));animation:drawerIn .22s ease-out}
+@keyframes drawerIn{from{transform:translateX(-100%)}to{transform:none}}
+@media (prefers-reduced-motion:reduce){.mpanel{animation:none}}
+.dhead{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:4px 6px 14px;border-bottom:1px solid var(--line);margin-bottom:6px}
+.dbrand{display:flex;align-items:center;gap:12px}
+.dbrand .logo{width:42px;height:42px;font-size:18px}
+.dbrand b{display:block;font-size:16px}.dbrand small{color:var(--mu);font-size:12.5px}
+.dclose{min-height:40px;width:40px;padding:0;border-radius:12px;font-size:16px;flex:none}
+.mgroup{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mu);font-weight:700;margin:18px 8px 6px}
+.ditem{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:transparent;border:1px solid transparent;border-radius:14px;padding:8px 10px;min-height:60px;color:var(--tx);font-weight:400}
+.ditem:hover{background:var(--s2)}
+.ditem.cur{background:linear-gradient(90deg,#7c5cff26,#18c7ff14);border-color:#7c5cff66}
+.dico{width:42px;height:42px;border-radius:13px;background:var(--s2);display:grid;place-items:center;font-size:20px;flex:none}
+.ditem.cur .dico{background:linear-gradient(135deg,var(--ac),var(--ac2))}
+.dtxt{flex:1;min-width:0;display:flex;flex-direction:column}
+.dtxt b{font-size:15px;font-weight:700}
+.dtxt small{color:var(--mu);font-size:12.5px;line-height:1.3}
+.dchev{color:var(--mu);font-size:22px;flex:none}
+.ditem.cur .dchev{color:var(--ac2)}
+@media (min-width:700px){.mpanel{width:min(360px,80vw)}}
+@media (min-width:1024px){
+ .menubtn{display:inline-grid}
+ .hero{padding-left:calc(268px + 32px)}
+}
+.fixopts{background:var(--s2);border:1px solid var(--line);border-radius:14px;padding:12px;margin:10px 0}
+.fixopt{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line)}
+.fixopt:last-of-type{border-bottom:0}
+.fixopt>div{flex:1;min-width:0;overflow-wrap:anywhere}
+.fixopt button{flex:none}
+.dsec{margin:2px 0}
+.dsec>summary{list-style:none;cursor:pointer}
+.dsec>summary::-webkit-details-marker{display:none}
+.dsec[open]>summary .dchev{transform:rotate(90deg);color:var(--ac2)}
+.dsec>summary .dchev{transition:transform .2s}
+.dsubs{padding:2px 0 8px 54px;display:flex;flex-direction:column;gap:2px}
+.dsubi{display:block;width:100%;text-align:left;background:none;border:0;color:var(--mu);padding:9px 10px;border-radius:10px;min-height:40px;font-size:14px;font-weight:400}
+.dsubi:hover{color:var(--tx);background:var(--s2)}
+.dsubi.cur{color:#fff;background:linear-gradient(90deg,#7c5cff26,#18c7ff14)}
+.msearch{width:100%;margin:4px 0 6px;padding:11px 14px;border-radius:12px;font-size:14px}
+[hidden]{display:none!important}
+.mgroup:first-of-type{margin-top:8px}
+
+/* ---- Gray base, colorful accents, advanced layout ---- */
+body{background:radial-gradient(900px 500px at -10% -10%,#7c5cff1f,transparent 60%),radial-gradient(800px 480px at 110% 0%,#18c7ff17,transparent 55%),var(--bg)}
+.card{background:linear-gradient(180deg,#ffffff0a,#ffffff00 45%),var(--s);box-shadow:0 10px 30px #00000040}
+nav{background:#15181fe6;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:14px 0 4px}
+.stat{display:flex;gap:12px;align-items:center;padding:14px;border-radius:18px;color:#fff;box-shadow:0 10px 24px #00000055;min-width:0}
+.st-v{background:linear-gradient(135deg,#7c5cff,#4f7bff)}
+.st-p{background:linear-gradient(135deg,#18c7ff,#0ea5e9)}
+.st-r{background:linear-gradient(135deg,#ff7ad9,#ec4899)}
+.st-m{background:linear-gradient(135deg,#38e08c,#10b981)}
+.sico{width:44px;height:44px;border-radius:14px;background:#ffffff2e;display:grid;place-items:center;font-size:22px;flex:none}
+.stxt{min-width:0;flex:1}
+.stxt small{display:block;opacity:.85;font-size:12px}
+.stxt b{display:block;font-size:17px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stxt em{display:block;font-style:normal;font-size:12px;opacity:.85;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media (min-width:700px){.stats{gap:12px}}
+@media (min-width:1024px){
+ .stats{grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+ #t-home.on{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px;align-items:start}
+ #t-home.on>.stats{grid-column:1/-1;margin:0}
+ #t-home.on>.card{grid-column:span 6;margin:0}
+ .stat{padding:18px}
+}
+.dfoot{text-align:center;color:var(--mu);font-size:13px;margin:26px 0 6px;padding:12px;border-top:1px dashed var(--line)}
+.dfoot b{color:var(--tx)}
 </style>
 </head>
 <body>
 <div id="toast" role="status"></div>
 
-<div class="hero"><div class="logo">cc</div>
+<div class="hero"><button class="menubtn" data-a="menuOpen" aria-label="Menu">☰</button><div class="logo">cc</div>
  <div><b>ccs dashboard</b><small id="sub">chalu ho raha hai…</small></div>
- <div class="pill" id="pill">…</div><button class="menubtn" data-a="menuOpen" aria-label="Menu">☰</button></div>
+ <div class="pill" id="pill">…</div></div>
 
 <div id="inc" role="alert">
  <b>⚠️ Model band ho gaya: <span id="inc-m"></span></b>
@@ -177,6 +253,7 @@ html,body{min-height:100%}
 
 <!-- ============ HOME ============ -->
 <div class="tab on" id="t-home">
+ <div class="stats" id="stats"></div>
 <div class="card c1"><h2>🚀 3 step me shuru karo</h2>
   <div class="step" id="st1"><div class="num">1</div><div class="nm"><b>Claude Code install</b><div class="mu" id="s-claude"></div></div><button class="p sm" id="b-claude" data-a="claude">Install</button></div>
   <div class="step" id="st2"><div class="num">2</div><div class="nm"><b>Gateway aur API key</b><div class="mu" id="s-key"></div></div><button class="p sm" data-a="goto" data-g="gw">Daalo</button></div>
@@ -461,11 +538,94 @@ html,body{min-height:100%}
 <div class="tab" id="t-logs"><div class="card c3"><h2>📜 Logs</h2>
  <label for="lsel">Kiska log</label><select id="lsel"></select><div style="height:10px"></div><pre id="log">Kuch nahi chal raha.</pre></div></div>
 
-<div id="menu" class="menu" hidden>
- <div class="mhead"><b>📋 Sab sections</b><button class="g" data-a="menuClose">✕ Band</button></div>
- <div class="mgrid"><button class="mtile c1" data-a="menuGo" data-t="home"><span class="mi">🏠</span><b>Home</b><small>Setup 3 step</small></button><button class="mtile c1" data-a="menuGo" data-t="task"><span class="mi">📝</span><b>Task</b><small>Claude se kaam</small></button><button class="mtile c1" data-a="menuGo" data-t="preview"><span class="mi">👁️</span><b>Preview</b><small>Live app dekho</small></button><button class="mtile c1" data-a="menuGo" data-t="models"><span class="mi">⚡</span><b>Hub</b><small>Models aur free API</small></button><button class="mtile c1" data-a="menuGo" data-t="apk"><span class="mi">📦</span><b>APK</b><small>App banao</small></button><button class="mtile c1" data-a="menuGo" data-t="plugins"><span class="mi">🧩</span><b>Plugins</b><small>Install / Delete</small></button><button class="mtile c1" data-a="menuGo" data-t="logs"><span class="mi">📜</span><b>Logs</b><small>Errors dekho</small></button><button class="mtile c4" data-a="menuGo" data-t="battery"><span class="mi">🔋</span><b>Battery</b><small>Wake-lock aur restriction</small></button><button class="mtile c2" data-a="menuGo" data-t="gateway"><span class="mi">🌐</span><b>Gateway</b><small>Provider aur API key</small></button><button class="mtile c5" data-a="menuGo" data-t="commands"><span class="mi">⌨️</span><b>Commands</b><small>Copy karo</small></button><button class="mtile c3" data-a="menuGo" data-t="health"><span class="mi">🩺</span><b>Health</b><small>Sab check karo</small></button><button class="mtile c1" data-a="menuGo" data-t="update"><span class="mi">⬆️</span><b>Update</b><small>Naya version</small></button><button class="mtile c2" data-a="menuGo" data-t="memory"><span class="mi">🧠</span><b>Memory</b><small>RAM aur stop</small></button></div>
+<div id="menu" class="menu" hidden role="dialog" aria-label="Menu">
+ <div class="mscrim" data-a="menuClose"></div>
+ <aside class="mpanel">
+  <div class="dhead"><div class="dbrand"><div class="logo">cc</div><div><b>ccs dashboard</b><small>Navigation</small></div></div><button class="dclose" data-a="menuClose" aria-label="Band">✕</button></div>
+  <input id="msearch" class="msearch" type="search" autocomplete="off" placeholder="Menu me dhundo…">
+<div class="mgroup">Main</div>
+<button class="ditem dtop" data-a="menuGo" data-t="home" data-q="Home Setup ke 3 step"><span class="dico">🏠</span><span class="dtxt"><b>Home</b><small>Setup ke 3 step</small></span><span class="dchev">›</span></button>
+<button class="ditem dtop" data-a="menuGo" data-t="task" data-q="Task Claude se kaam karwao"><span class="dico">📝</span><span class="dtxt"><b>Task</b><small>Claude se kaam karwao</small></span><span class="dchev">›</span></button>
+<button class="ditem dtop" data-a="menuGo" data-t="preview" data-q="Preview Live app dekho"><span class="dico">👁️</span><span class="dtxt"><b>Preview</b><small>Live app dekho</small></span><span class="dchev">›</span></button>
+<div class="mgroup">Setup</div>
+<details class="dsec" data-k="gateway" data-q="Gateway Provider aur API key">
+<summary class="ditem dtop"><span class="dico">🌐</span><span class="dtxt"><b>Gateway</b><small>Provider aur API key</small></span><span class="dchev">›</span></summary>
+<div class="dsubs">
+<button class="dsubi" data-a="menuGo" data-t="gateway">› Provider aur API key</button>
+<button class="dsubi" data-a="menuAct" data-act="tofree">› Free API keys dekho</button>
+<button class="dsubi" data-a="menuAct" data-act="gw">› Local gateway start / stop</button>
+</div>
+</details>
+<details class="dsec" data-k="hub" data-q="Hub Models, free API, OmniRoute">
+<summary class="ditem dtop"><span class="dico">⚡</span><span class="dtxt"><b>Hub</b><small>Models, free API, OmniRoute</small></span><span class="dchev">›</span></summary>
+<div class="dsubs">
+<button class="dsubi" data-a="menuGo" data-t="models">› Models dhundo aur lagao</button>
+<button class="dsubi" data-a="menuGo" data-t="models">› Free API providers</button>
+<button class="dsubi" data-a="menuGo" data-t="models">› OmniRoute gateway</button>
+</div>
+</details>
+<details class="dsec" data-k="battery" data-q="Battery Wake-lock aur restriction">
+<summary class="ditem dtop"><span class="dico">🔋</span><span class="dtxt"><b>Battery</b><small>Wake-lock aur restriction</small></span><span class="dchev">›</span></summary>
+<div class="dsubs">
+<button class="dsubi" data-a="menuGo" data-t="battery">› Wake-lock aur status</button>
+<button class="dsubi" data-a="menuAct" data-act="bat" data-w="optim">› Battery setting kholo</button>
+<button class="dsubi" data-a="menuAct" data-act="bat" data-w="autostart">› Autostart (Redmi/Xiaomi)</button>
+<button class="dsubi" data-a="menuAct" data-act="bat" data-w="app">› Termux app info</button>
+</div>
+</details>
+<div class="mgroup">Tools</div>
+<button class="ditem dtop" data-a="menuGo" data-t="apk" data-q="APK App banao, cloud build"><span class="dico">📦</span><span class="dtxt"><b>APK</b><small>App banao, cloud build</small></span><span class="dchev">›</span></button>
+<details class="dsec" data-k="plugins" data-q="Plugins Install, fix, delete, backup">
+<summary class="ditem dtop"><span class="dico">🧩</span><span class="dtxt"><b>Plugins</b><small>Install, fix, delete, backup</small></span><span class="dchev">›</span></summary>
+<div class="dsubs">
+<button class="dsubi" data-a="menuPsec" data-s="mkt">› 🛒 Marketplace</button>
+<button class="dsubi" data-a="menuPsec" data-s="inst">› ✅ Installed</button>
+<button class="dsubi" data-a="menuPsec" data-s="cust">› 🔧 Custom aur marketplaces</button>
+<button class="dsubi" data-a="menuPsec" data-s="rec">› 📦 Recommended aur Fix</button>
+<button class="dsubi" data-a="menuPsec" data-s="adv">› 🧪 Backup aur restore</button>
+</div>
+</details>
+<button class="ditem dtop" data-a="menuGo" data-t="commands" data-q="Commands Copy karne wale commands"><span class="dico">⌨️</span><span class="dtxt"><b>Commands</b><small>Copy karne wale commands</small></span><span class="dchev">›</span></button>
+<div class="mgroup">System</div>
+<details class="dsec" data-k="health" data-q="Health Sab check karo, plugin health">
+<summary class="ditem dtop"><span class="dico">🩺</span><span class="dtxt"><b>Health</b><small>Sab check karo, plugin health</small></span><span class="dchev">›</span></summary>
+<div class="dsubs">
+<button class="dsubi" data-a="menuAct" data-act="doctor">› Sab check karo</button>
+<button class="dsubi" data-a="menuPsec" data-s="inst">› Plugin health (Installed)</button>
+<button class="dsubi" data-a="menuAct" data-act="fixall">› Sab broken plugins fix karo</button>
+</div>
+</details>
+<details class="dsec" data-k="update" data-q="Update Naya version lo">
+<summary class="ditem dtop"><span class="dico">⬆️</span><span class="dtxt"><b>Update</b><small>Naya version lo</small></span><span class="dchev">›</span></summary>
+<div class="dsubs">
+<button class="dsubi" data-a="menuGo" data-t="update">› Update page kholo</button>
+<button class="dsubi" data-a="menuAct" data-act="update">› Abhi update karo</button>
+</div>
+</details>
+<details class="dsec" data-k="memory" data-q="Memory RAM aur process">
+<summary class="ditem dtop"><span class="dico">🧠</span><span class="dtxt"><b>Memory</b><small>RAM aur process</small></span><span class="dchev">›</span></summary>
+<div class="dsubs">
+<button class="dsubi" data-a="menuGo" data-t="memory">› RAM dekho</button>
+<button class="dsubi" data-a="menuAct" data-act="stopall">› Sab process roko</button>
+<button class="dsubi" data-a="menuAct" data-act="quit">› Dashboard band karo</button>
+</div>
+</details>
+<button class="ditem dtop" data-a="menuGo" data-t="logs" data-q="Logs Errors aur job logs"><span class="dico">📜</span><span class="dtxt"><b>Logs</b><small>Errors aur job logs</small></span><span class="dchev">›</span></button>
+<div class="mgroup">Advanced</div>
+<details class="dsec" data-k="adv" data-q="Advanced Power features">
+<summary class="ditem dtop"><span class="dico">🧪</span><span class="dtxt"><b>Advanced</b><small>Power features</small></span><span class="dchev">›</span></summary>
+<div class="dsubs">
+<button class="dsubi" data-a="menuAct" data-act="fixall">› Sab plugins ek saath fix</button>
+<button class="dsubi" data-a="menuPsec" data-s="adv">› Plugin backup file lo</button>
+<button class="dsubi" data-a="menuAct" data-act="mpPick">› Plugin backup se restore</button>
+<button class="dsubi" data-a="menuAct" data-act="reload">› Dashboard reload karo</button>
+<button class="dsubi" data-a="menuGo" data-t="plugins">› Plugin Center kholo</button>
+</div>
+</details>
+ </aside>
 </div>
 
+<footer class="dfoot"><b>ccs dashboard</b> · <span id="dfv">v</span> · <span id="dfp"></span></footer>
 <nav>
  <button class="on" data-a="tab" data-t="home"><span>🏠</span>Home</button>
  <button data-a="tab" data-t="task"><span>📝</span>Task</button>
@@ -500,7 +660,7 @@ function paint(){
   htm($('#prov'),Object.entries(GN).map(([g,t])=>{const it=Object.entries(S.providers).filter(([,y])=>y.group===g);return it.length?`<optgroup label="${t}">`+it.map(([x,y])=>`<option value="${esc(x)}">${esc(y.name)}</option>`).join('')+'</optgroup>':''}).join(''));
   $('#prov').value=c.provider;$('#url').value=c.base_url||S.providers[c.provider].base_url;$('#cm').value=c.model;$('#preset').value=c.preset;$('#ck-auto2').checked=c.auto;$('#key').value='';
   $('#dir').value=c.lastDir;if(c.apkDir)$('#apk-dir').value=c.apkDir;$('#ck-wake').checked=c.wake}
- txt($('#sub'),S.platform+' · '+dur(S.uptime)+' · v'+S.version);
+ txt($('#sub'),S.platform+' · '+dur(S.uptime));
  const ready=v&&c.key&&c.model;
  const pl=$('#pill');txt(pl,ready?'✅ Ready':'⚙️ Setup');
  txt($('#hint'),S.providers[c.provider].hint||'');txt($('#keyhint'),c.key?'(saved: '+c.key+')':'');
@@ -518,10 +678,7 @@ function paint(){
  dot('d-gw',!g.hasCmd?'':g.up?'ok':'wa');txt($('#b-gw'),g.running?'Stop':'Start');$('#b-gw').disabled=g.up&&!g.running;
  const used=S.sys.total-S.sys.free;$('#ram').style.width=Math.round(used/S.sys.total*100)+'%';
  const b=S.sys.battery;txt($('#s-ram'),`RAM ${Math.round(used/1048576)} / ${Math.round(S.sys.total/1048576)} MB`+(b?` · Battery ${b.percentage}%`:'')+(S.platform==='Windows'?'':` · Load ${S.sys.load.toFixed(1)}`));
- txt($('#ver'),'v'+S.version);txt($('#repo'),S.repo);
- htm($('#plist'),S.plugins.map(p=>{const st=p.installed?'<span class=ok>✔ Installed</span>':p.job==='running'?'<span class=wa>Ho raha hai…</span>':p.job==='failed'?'<span class=bad>Fail. Logs dekho</span>':'<span class=mu>Install nahi hai</span>';
-  const btn=p.installed?`<button class="sm bad-btn" data-a="recdel" data-id="${esc(p.id)}">🗑 Delete</button>`:`<button class="p sm" data-a="plug" data-id="${esc(p.id)}" ${p.job==='running'||!p.hasCmd?'disabled':''}>${p.hasCmd?'Install':'Manual'}</button>`;
-  return `<div class="row"><div class="nm"><b>${esc(p.name)}</b>${p.rec?' <span class=ok>★ Recommended</span>':''}<div class="mu">${esc(p.desc)} ${st}</div>${p.note?`<div class="mu">${esc(p.note)}</div>`:''}</div>${btn}</div>`}).join(''));
+ txt($('#ver'),'v'+S.version);txt($('#repo'),S.repo); txt($('#dfv'),'v'+S.version);txt($('#dfp'),S.platform); statsPaint();
  const sel=$('#lsel'),cur=sel.value,names=S.logs.length?S.logs:['gateway'];
  if(sel._n!==names.join()){sel._n=names.join();sel.innerHTML=names.map(n=>`<option>${esc(n)}</option>`).join('');sel.value=names.includes(cur)?cur:names[0]}
  const run=S.runningTask;if(run&&!curTask)curTask=run;
@@ -540,7 +697,7 @@ async function useModel(m){const r=await api('config',{model:m});if(!r.error){to
 const A={
  tab(e){tab=e.dataset.t;document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x.id==='t-'+tab));document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x.dataset.t===tab));scrollTo(0,0);document.body.classList.toggle('pvwide',tab==='preview');if(tab==='preview')setTimeout(pvOpen,30);if(tab==='plugins')mpLoad();if(tab==='models'){paintHub();if(seg==='m'&&!H.loaded&&!H.loading)loadHub()}tick(true)},
  goto(e){const cd=$('#c-'+e.dataset.g);const tb=cd&&cd.closest('.tab');if(tb)A.tab({dataset:{t:tb.id.slice(2)}});if(cd)cd.scrollIntoView({behavior:'smooth',block:'start'})},
- menuOpen(){$('#menu').hidden=false;scrollTo(0,0)},
+ menuOpen(){document.querySelectorAll('.ditem,.dsubi').forEach(x=>x.classList.toggle('cur',x.dataset.t===tab));$('#menu').hidden=false},
  menuClose(){$('#menu').hidden=true},
  menuGo(e){$('#menu').hidden=true;A.tab({dataset:{t:e.dataset.t}})},
  async save(){const r=await api('config',{provider:$('#prov').value,base_url:$('#url').value,api_key:$('#key').value,preset:$('#preset').value});if(!r.error){$('#key').value='';toast(r.applied?'Save aur Claude me lag gaya ✅':'Save ho gaya. Ab model chuno');refresh()}},
@@ -778,7 +935,7 @@ document.addEventListener('toggle',e=>{const d=e.target;if(d&&d.classList&&d.cla
 let MP=null,psec='mkt',mpQ='',mpT=null;
 const sidc=x=>String(x).replace(/\W/g,'_');
 const stTag=x=>x==='active'?'<span class="tag fr">● Active</span>':x==='off'?'<span class="tag">⏸ OFF</span>':'<span class="tag bd">⚠ Files gayab</span>';
-async function mpLoad(){const r=await api('mp/state');if(r.error||!r.counts)return;MP=r;mpPaint();clearTimeout(mpT);if(MP.running.length&&tab==='plugins')mpT=setTimeout(mpLoad,3000)}
+async function mpLoad(){const r=await api('mp/state');if(r.error||!r.counts)return;MP=r;mpPaint();recLoad();clearTimeout(mpT);if(MP.running.length&&tab==='plugins')mpT=setTimeout(mpLoad,3000)}
 function mpPaint(){
  if(!MP)return;
  const c=MP.counts;
@@ -815,6 +972,104 @@ Object.assign(A,{
  mpExport(){api('mp/export').then(r=>{if(r.error)return;const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(r,null,2)],{type:'application/json'}));a.download='cc-plugins-backup.json';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000)})},
  mpPick(){$('#mp-file').click()}
 });
+
+/* ---- Recommended: health + Install/Fix ---- */
+let REC=null;
+async function recLoad(){const r=await api('mp/rec/health');if(r.error||!r.rows)return;REC=r;recPaint()}
+function recPaint(){
+ if(!REC)return;
+ const ok=REC.rows.filter(x=>x.status==='ok').length, bad=REC.rows.filter(x=>x.status==='bad').length;
+ const sum=`<div style="margin-bottom:8px"><span class="tag fr">✅ ${ok} pura setup</span> <span class="tag bd">⚠ ${bad} problem</span></div>`;
+ htm($('#plist'), sum+REC.rows.map(x=>{
+   const busy=REC.running.includes(sidc(x.id));
+   const st=x.status==='ok'?'<span class="tag fr">● Pura setup</span>':x.status==='manual'?'<span class="tag">✋ Manual</span>':'<span class="tag bd">⚠ Problem</span>';
+   const checks=x.checks.map(c=>`<div class="mu" style="font-size:13px">${c.ok?'<span class="ok">✔</span>':'<span class="bad">✖</span>'} ${esc(c.name)}: ${esc(c.msg)}</div>`).join('');
+   let btns='';
+   if(x.status!=='manual'){
+     if(busy) btns='<span class="wa">Ho raha hai… Logs dekho</span>';
+     else{
+       btns+= x.status==='bad' ? `<button class="p sm" data-a="recopts" data-id="${esc(x.id)}">🛠 Fix options</button>` : `<button class="sm" data-a="recrecheck">🔍 Re-check</button>`;
+       btns+= x.installed ? ` <button class="sm bad-btn" data-a="recdel" data-id="${esc(x.id)}">🗑 Delete</button>` : ` <button class="p sm" data-a="recsetup" data-id="${esc(x.id)}">⬇ Install + Setup</button>`;
+     }
+   }
+   return `<div class="row" style="flex-direction:column;align-items:stretch"><div><b>${esc(x.name)}</b> ${st}<div class="mu">${esc(x.desc)}</div></div><div style="margin-top:6px">${checks}</div>${OPEN===x.id&&OPT[x.id]?optHtml(x.id):''}<div class="macts" style="margin-top:8px;flex-wrap:wrap">${btns}</div></div>`;
+ }).join(''));
+}
+Object.assign(A,{
+ recsetup(e){api('mp/rec/setup',{id:e.dataset.id}).then(r=>{if(!r.error){toast(r.msg);setTimeout(recLoad,3000);mpLoad()}})},
+ recfix(e){api('mp/rec/fix',{id:e.dataset.id}).then(r=>{if(!r.error){toast(r.msg);setTimeout(recLoad,3000);mpLoad()}})},
+ recrecheck(){recLoad();toast('Health dobara check ho rahi hai')}
+});
+
+/* ---- Fix options (multiple choices per problem) ---- */
+let OPEN=null,OPT={};
+function optHtml(id){const o=OPT[id];
+ return `<div class="fixopts"><div class="mu" style="margin-bottom:6px"><b>Fix ke options</b>: jo pasand ho wo chuno</div>`+
+ o.options.map(x=>{
+   const act = x.key==='copy' ? `<button class="sm" data-a="copy" data-c="${esc(x.cmd)}">📋 Copy</button>`
+     : x.key==='logs' ? `<button class="sm" data-a="recLogs">📜 Logs</button>`
+     : `<button class="p sm" data-a="recdo" data-id="${esc(id)}" data-k="${esc(x.key)}">Chalao</button>`;
+   return `<div class="fixopt"><div><b>${esc(x.label)}</b>${x.preview?`<div class="mono mu" style="font-size:12px;overflow-wrap:anywhere">${esc(x.preview)}</div>`:''}</div>${act}</div>`;
+ }).join('')+`<div style="margin-top:8px"><button class="sm" data-a="recclose">Band karo</button></div></div>`;
+}
+Object.assign(A,{
+ recopts(e){const id=e.dataset.id;OPEN=id;api('mp/rec/options',{id}).then(r=>{if(!r.error){OPT[id]=r;recPaint()}})},
+ recclose(){OPEN=null;recPaint()},
+ recdo(e){const id=e.dataset.id,key=e.dataset.k;
+   if(key==='reinstall'&&!confirm('Purana setup hat kar fresh install hoga. Pakka?'))return;
+   api('mp/rec/fix',{id,key}).then(r=>{if(!r.error){toast(r.msg);OPEN=null;setTimeout(recLoad,3000);mpLoad()}})},
+ recLogs(){A.tab({dataset:{t:'logs'}})}
+});
+
+/* ---- Advanced: sub-menu actions + fix all ---- */
+async function recFixAll(){
+ if(!REC)await recLoad();
+ const bad=(REC&&REC.rows||[]).filter(x=>x.status==='bad');
+ if(!bad.length){toast('Sab theek hai, fix karne ko kuch nahi');return}
+ if(!confirm(bad.length+' item(s) ka fix shuru karein? Har item ka Logs job-mp me dikhega.'))return;
+ let n=0;for(const x of bad){const r=await api('mp/rec/fix',{id:x.id,key:'all'});if(!r.error)n++}
+ toast(n+' fix job shuru. Logs tab me dekho');setTimeout(recLoad,4000);mpLoad();
+}
+function menuFilter(q){
+ q=q.trim().toLowerCase();
+ document.querySelectorAll('.dsec').forEach(sec=>{
+   let any=false;
+   sec.querySelectorAll('.dsubi').forEach(b=>{const m=!q||b.textContent.toLowerCase().includes(q)||(sec.dataset.q||'').toLowerCase().includes(q);b.hidden=!m;if(m)any=true});
+   const own=!q||(sec.dataset.q||'').toLowerCase().includes(q);
+   sec.hidden=!(any||own);
+   if(q&&!sec.hidden)sec.open=true;
+ });
+ document.querySelectorAll('.dtop[data-a="menuGo"]').forEach(b=>{b.hidden=!!q&&!(b.dataset.q||'').toLowerCase().includes(q)});
+ document.querySelectorAll('.mgroup').forEach(g=>{let n=g.nextElementSibling,vis=false;while(n&&!n.classList.contains('mgroup')){if(!n.hidden)vis=true;n=n.nextElementSibling}g.hidden=!vis});
+}
+document.addEventListener('input',e=>{if(e.target.id==='msearch')menuFilter(e.target.value)});
+Object.assign(A,{
+ menuAct(e){
+   const ds={...e.dataset},act=ds.act;
+   if(act==='quit'&&!confirm('Dashboard band ho jayega. Pakka?'))return;
+   if(act==='stopall'&&!confirm('Sab running process ruk jayenge. Pakka?'))return;
+   A.menuClose();
+   if(A[act])A[act]({dataset:ds});
+ },
+ menuPsec(e){const s=e.dataset.s;A.menuClose();A.tab({dataset:{t:'plugins'}});A.psec({dataset:{s}})},
+ fixall(){recFixAll()},
+ reload(){location.reload()}
+});
+
+/* ---- Colorful stat cards ---- */
+function statsPaint(){
+ if(!S||!S.sys)return;
+ const used=S.sys.total-S.sys.free, pct=Math.round(used/S.sys.total*100);
+ const inst=S.plugins.filter(p=>p.installed).length, tot=S.plugins.length;
+ const ready=!!(S.claude.version&&S.cfg.key&&S.cfg.model);
+ const tiles=[
+  ['st-v','🚀','Version','v'+S.version,S.platform],
+  ['st-p','🧩','Setup items',inst+' / '+tot,'installed'],
+  ['st-r','🧠','RAM',pct+'%',Math.round(used/1048576)+' MB use ho raha'],
+  ['st-m','⚡','Model',S.cfg.model||'—',ready?'Ready ✅':'Setup baaki'],
+ ];
+ htm($('#stats'),tiles.map(([c,ic,l,v,sub])=>`<div class="stat ${c}"><span class="sico">${ic}</span><div class="stxt"><small>${esc(l)}</small><b>${esc(v)}</b><em>${esc(sub)}</em></div></div>`).join(''));
+}
 document.addEventListener('click',e=>{const el=e.target.closest('[data-a]');if(el&&A[el.dataset.a])A[el.dataset.a](el)});
 $('#prov').addEventListener('change',async()=>{const r=await api('config',{provider:$('#prov').value});if(!r.error){init=false;await refresh();toast('Provider badal gaya'+(r.applied?' aur Claude me lag gaya':'. URL, key aur model daalo'))}});
 $('#ck-auto2').addEventListener('change',()=>api('config',{auto:$('#ck-auto2').checked}));
