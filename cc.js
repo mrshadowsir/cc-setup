@@ -432,7 +432,8 @@ const pluginsHub = require('./plugins-hub.js');
 const hubCtx = () => ({
   mark: id => { const k = loadCfg(); k.installed[id] = true; saveCfg(k); },
   cfgInstalled: id => !!loadCfg().installed[id],
-  wanted: () => { const inst = loadCfg().installed || {}; return Object.keys(inst).filter(k => inst[k]); },
+  want: id => { const k = loadCfg(); k.wanted = k.wanted || {}; k.wanted[id] = true; saveCfg(k); },
+  wanted: () => { const k = loadCfg(); const ids = new Set([...Object.keys(k.installed || {}).filter(x => k.installed[x]), ...Object.keys(k.wanted || {})]); return [...ids]; },
   claudePkg: CLAUDE_PKG,
   start,
   running: () => Object.keys(svc).filter(k => k.startsWith('job-mp-') && svc[k].child).map(k => k.slice(7)),
@@ -633,7 +634,7 @@ async function route(u, b) {
       if (p.startsWith('mp/')) {
         const mctx = hubCtx();
         const r = await pluginsHub.route(p.slice(3), b, mctx);
-        if (r !== undefined) { if (r.clearCfg) { const k = loadCfg(); delete k.installed[r.clearCfg]; saveCfg(k); } return r; }
+        if (r !== undefined) { if (r.clearCfg) { const k = loadCfg(); delete k.installed[r.clearCfg]; if (k.wanted) delete k.wanted[r.clearCfg]; saveCfg(k); } return r; }
       }
       throw new Error('unknown: ' + p);
     }

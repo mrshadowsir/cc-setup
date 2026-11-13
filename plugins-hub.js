@@ -141,6 +141,8 @@ function state(ctx) {
     counts: {
       available: mk.reduce((a, m) => a + m.plugins.length, 0),
       installed: inst.length,
+      plugins: inst.filter(p => p.kind !== 'mcp').length,
+      mcp: inst.filter(p => p.kind === 'mcp').length,
       active: inst.filter(p => p.state === 'active').length,
       off: inst.filter(p => p.state === 'off').length,
       missing: inst.filter(p => p.state === 'missing').length,
@@ -291,7 +293,7 @@ function planSteps(pl, h, ctx, sel) {
   } else if (pid) {
     const mName = pid.split('@')[1];
     if (want('Marketplace ' + mName) && MKT_REPO[mName]) steps.push(`claude plugin marketplace add ${MKT_REPO[mName]}`);
-    if (want('Plugin installed')) steps.push(`claude plugin install ${pid}`);
+    if (want('Plugin installed')) { if (mName in rj(KNOWN, {})) steps.push('claude plugin marketplace update'); steps.push(`claude plugin install ${pid}`); }
     if (want('Enabled')) steps.push(`claude plugin enable ${pid}`);
     if (want('Files')) steps.push(`claude plugin uninstall ${pid}`, `claude plugin install ${pid}`);
   } else if (mkt) {
@@ -322,6 +324,7 @@ async function cleanupForReinstall(pl) {
 
 async function runSteps(pl, key, ctx) {
   if (ctx.running().includes(sid(pl.id))) throw new Error('Ye pehle se chal raha hai. Logs dekho');
+  ctx.want(pl.id);
   let steps;
   if (key === 'reinstall') {
     await cleanupForReinstall(pl);
@@ -413,6 +416,30 @@ async function diag(ctx) {
     cliMcpList: cli.out.trim().slice(0, 1500),
     cliPluginList: cliP.out.trim().slice(0, 1500),
   };
+}
+
+
+// Sab wanted items ko ek hi job me theek karo (plugins + MCP), HEAL retry counter reset
+async function syncAll(ctx) {
+  if (ctx.running().length) throw new Error('Pehle se job chal raha hai. Thodi der baad try karo');
+  HEAL.clear();
+  const wanted = new Set(ctx.wanted());
+  const steps = [], items = [];
+  for (const pl of PLJ()) {
+    if (!pl.cmd || !wanted.has(pl.id)) continue;
+    if (fromCmd(pl.cmd, /mcp add --scope user (\S+)/)) ensureMcpFile(pl);
+    const h = await healthOf(pl, ctx);
+    if (h.status === 'ok') continue;
+    steps.push(...planSteps(pl, h, ctx, selFor('all')));
+    items.push(pl.id);
+  }
+  const uniq = [...new Set(steps)];
+  if (!uniq.length) return { ok: true, msg: 'Sab wanted items theek hain, sync ki zarurat nahi' };
+  ctx.start('job-mp-sync', uniq.join(' && '), {
+    cwd: os.homedir(),
+    onExit: code => { for (const id of items) { const pl = PLJ().find(x => x.id === id); if (pl && code === 0) { ensureMcpFile(pl); ctx.mark(id); } } },
+  });
+  return { ok: true, msg: `Sync shuru: ${items.length} item, ${uniq.length} step. Logs me job-mp-sync dekho` };
 }
 
 /* ---------- routes (p = path after 'mp/') ---------- */
@@ -555,6 +582,7 @@ async function route(p, b, ctx) {
 
     case 'diag': return diag(ctx);
     case 'heal': return autoHeal(ctx);
+    case 'sync': return syncAll(ctx);
     default: return undefined; // cc.js ko pata chale ki route nahi mila
   }
 }

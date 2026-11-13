@@ -484,7 +484,7 @@ nav{background:#15181fe6;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur
  <div class="psub" id="ps-inst">
   <div class="card c3"><h2>✅ Installed plugins</h2>
    <p class="mu"><span class="tag fr">● Active</span> installed + ON + files maujood. <span class="tag">⏸ OFF</span> band hai. <span class="tag bd">⚠ Files gayab</span> reinstall ya delete karo.</p>
-   <div class="btns"><button data-a="mpBulk" data-on="1">Sab ON</button><button data-a="mpBulk" data-on="0">Sab OFF</button><button data-a="mpHealth">🩺 Health check</button><button data-a="mpDiag">🧪 Diagnostic</button><button data-a="mpHeal">🔧 Auto-heal abhi</button></div>
+   <div class="btns"><button data-a="mpBulk" data-on="1">Sab ON</button><button data-a="mpBulk" data-on="0">Sab OFF</button><button data-a="mpHealth">🩺 Health check</button><button data-a="mpDiag">🧪 Diagnostic</button><button class="p" data-a="mpSync">🛠 Claude ko sync karo</button><button data-a="mpHeal">🔧 Auto-heal abhi</button></div>
    <div id="mp-inst"></div>
    <div id="mp-health"></div>
   </div>
@@ -940,7 +940,7 @@ async function mpLoad(){const r=await api('mp/state');if(r.error||!r.counts)retu
 function mpPaint(){
  if(!MP)return;
  const c=MP.counts;
- htm($('#mp-sum'),`<span class="tag">🛒 ${c.available} available</span> <span class="tag fr">✅ ${c.active} active</span> <span class="tag">⏸ ${c.off} off</span> <span class="tag bd">⚠ ${c.missing} missing</span> <span class="tag ac">🔧 ${c.custom} custom</span>`);
+ htm($('#mp-sum'),`<span class="tag">🛒 ${c.available} available</span> <span class="tag fr">✅ ${c.active} active · 🧩 ${c.plugins} plugin · 🔌 ${c.mcp} MCP</span> <span class="tag">⏸ ${c.off} off</span> <span class="tag bd">⚠ ${c.missing} missing</span> <span class="tag ac">🔧 ${c.custom} custom</span>`);
  const q=mpQ.trim().toLowerCase();
  const cat=MP.catalog.filter(p=>!q||(p.name+' '+p.desc+' '+p.category+' '+p.mkt).toLowerCase().includes(q));
  const row=p=>{const busy=MP.running.includes(sidc(p.id));return `<div class="row"><div class="nm"><b>${esc(p.name)}</b> <span class="tag">${esc(p.mkt)}</span>${p.installed?' <span class="ok">✔ Installed</span>':''}${busy?' <span class="wa">Ho raha hai…</span>':''}<div class="mu">${esc(p.desc)}</div></div>${p.installed?`<button class="sm bad-btn" data-a="mpUninstall" data-id="${esc(p.id)}">🗑 Delete</button>`:`<button class="p sm" data-a="mpInstall" data-id="${esc(p.id)}" ${busy?'disabled':''}>Install</button>`}</div>`};
@@ -1077,6 +1077,10 @@ function statsPaint(){
 Object.assign(A,{
  mpDiag(){api('mp/diag').then(r=>{if(r.error)return;htm($('#mp-health'),'<div class="gh">🧪 Diagnostic (asli state)</div><pre class="mono" style="white-space:pre-wrap;word-break:break-word;font-size:12px;background:var(--s2);padding:10px;border-radius:12px">'+esc(JSON.stringify(r,null,2))+'</pre>')})},
  mpHeal(){api('mp/heal',{}).then(r=>{if(!r.error){toast(r.msg);setTimeout(recLoad,3000);mpLoad()}})}
+});
+
+Object.assign(A,{
+ mpSync(){api('mp/sync',{}).then(r=>{if(!r.error){toast(r.msg);setTimeout(recLoad,5000);setTimeout(mpLoad,5000);mpLoad()}})}
 });
 document.addEventListener('click',e=>{const el=e.target.closest('[data-a]');if(el&&A[el.dataset.a])A[el.dataset.a](el)});
 $('#prov').addEventListener('change',async()=>{const r=await api('config',{provider:$('#prov').value});if(!r.error){init=false;await refresh();toast('Provider badal gaya'+(r.applied?' aur Claude me lag gaya':'. URL, key aur model daalo'))}});
