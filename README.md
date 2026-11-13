@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://img.shields.io/badge/cc--setup-v4.9.1-7c5cff?style=for-the-badge&labelColor=0b1020" alt="cc-setup v4.9.1">
+  <img src="https://img.shields.io/badge/cc--setup-v4.11-7c5cff?style=for-the-badge&labelColor=0b1020" alt="cc-setup v4.11">
   <img src="https://img.shields.io/badge/Termux-Android-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Termux">
   <img src="https://img.shields.io/badge/Windows-VS%20Code-0078D4?style=for-the-badge&logo=windows&logoColor=white" alt="Windows">
   <img src="https://img.shields.io/badge/Node.js-18%2B-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" alt="Node 18+">

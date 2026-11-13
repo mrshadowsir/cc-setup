@@ -433,6 +433,8 @@ const hubCtx = () => ({
   mark: id => { const k = loadCfg(); k.installed[id] = true; saveCfg(k); },
   cfgInstalled: id => !!loadCfg().installed[id],
   want: id => { const k = loadCfg(); k.wanted = k.wanted || {}; k.wanted[id] = true; saveCfg(k); },
+  clear: id => { const k = loadCfg(); if (k.installed) delete k.installed[id]; if (k.wanted) delete k.wanted[id]; saveCfg(k); },
+  paths: () => ({ dir: DIR, cfg: CFG, logs: LOGS, project: __dirname }),
   wanted: () => { const k = loadCfg(); const ids = new Set([...Object.keys(k.installed || {}).filter(x => k.installed[x]), ...Object.keys(k.wanted || {})]); return [...ids]; },
   claudePkg: CLAUDE_PKG,
   start,

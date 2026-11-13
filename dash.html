@@ -260,6 +260,7 @@ nav{background:#15181fe6;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur
   <div class="step" id="st3"><div class="num">3</div><div class="nm"><b>Model chuno</b><div class="mu" id="s-model"></div></div><button class="p sm" data-a="tab" data-t="models">Chuno</button></div>
   <p class="mu" style="margin-top:10px">Teeno ho jayein to terminal me likho <b class="mono">ccs claude</b></p>
  </div>
+<div class="card c4"><h2>🩺 Health</h2><p class="mu">Sab checks ek click me. Result Health tab me dikhega.</p><div class="btns"><button class="p" data-a="homeHealth">🩺 Health check</button></div></div>
 <div class="card c4"><h2>☰ Sab sections</h2><p class="mu">Battery, Gateway, Health, Update, Memory aur Commands ab alag-alag pages par hain. Upar <b>☰ Menu</b> dabao.</p><div class="btns"><button class="p" data-a="menuOpen">☰ Menu kholo</button></div></div>
 </div>
 
@@ -324,6 +325,8 @@ nav{background:#15181fe6;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur
   <div class="btns"><button class="d" data-a="stopall">Sab process roko</button><button class="d" data-a="quit">Dashboard band</button></div>
  </div>
 </div>
+
+<div class="tab" id="t-files"><div class="card c1"><h2>📁 Files &amp; Storage</h2><p class="mu">Sabhi files kahan hain, kitni badi hain, aur kya install hua hai.</p><div class="btns"><button data-a="filesRefresh">🔄 Refresh</button></div></div><div id="files-body"></div></div>
 
 <!-- ============ TASK ============ -->
 <div class="tab" id="t-task">
@@ -463,7 +466,7 @@ nav{background:#15181fe6;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur
   <p class="mu">Marketplace se plugin laao. Ek click me install, ek click me permanent delete. Yahan dekho kaun sa plugin active hai aur kaam kar raha hai.</p>
   <div class="pseg" id="pseg">
    <button class="on" data-a="psec" data-s="mkt">🛒 Marketplace</button>
-   <button data-a="psec" data-s="inst">✅ Installed</button>
+   <button data-a="psec" data-s="inst">✅ Installed</button><button data-a="psec" data-s="mcp">🔌 MCP</button><button data-a="psec" data-s="pl">🧩 Plugins</button><button data-a="psec" data-s="tcomp">✅ Termux</button>
    <button data-a="psec" data-s="cust">🔧 Custom</button>
    <button data-a="psec" data-s="adv">🧪 Advanced</button>
    <button data-a="psec" data-s="rec">📦 Recommended</button>
@@ -490,7 +493,10 @@ nav{background:#15181fe6;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur
   </div>
  </div>
 
- <div class="psub" id="ps-cust">
+ <div class="psub" id="ps-mcp"><div class="card c1"><h2>🔌 MCP servers</h2><p class="mu">Har MCP ka connection status (Claude se) aur har problem ka alag Fix button. Force delete sab hata deta hai.</p><div class="btns"><button data-a="secRefresh">🔄 Refresh</button></div><div id="sec-mcp"><p class="mu">Load ho raha hai…</p></div></div></div>
+<div class="psub" id="ps-pl"><div class="card c1"><h2>🧩 Plugins & skills</h2><p class="mu">Installed plugins ka status, har problem ka Fix, aur Force delete.</p><div class="btns"><button data-a="secRefresh">🔄 Refresh</button></div><div id="sec-pl"><p class="mu">Load ho raha hai…</p></div></div></div>
+<div class="psub" id="ps-tcomp"><div class="card c1"><h2>✅ Termux compatible</h2><p class="mu">Kaun sa item Termux par chal raha hai, kaun nahi. Filter se dekho.</p><div class="pseg" id="tcf"><button class="on" data-a="tcFilter" data-f="all">Sab</button><button data-a="tcFilter" data-f="works">✅ Chalta hai</button><button data-a="tcFilter" data-f="problem">⚠ Problem</button><button data-a="tcFilter" data-f="no">❌ Nahi chalega</button><button data-a="tcFilter" data-f="untested">⏳ Untested</button></div><div id="tc-list"><p class="mu">Load ho raha hai…</p></div></div></div>
+<div class="psub" id="ps-cust">
   <div class="card c2"><h2>🔧 Custom plugins</h2>
    <p class="mu">Official marketplace ke bahar ke plugins (3rd party ya tumhare apne).</p>
    <div id="mp-cust"></div>
@@ -503,12 +509,12 @@ nav{background:#15181fe6;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur
   <div class="card c2"><h2>⚙️ Plugin ID se install</h2>
    <p class="mu">Plugin ka naam@marketplace likho, jaise <span class="mono">code-review@claude-plugins-official</span>.</p>
    <input id="mp-id" autocapitalize="off" autocomplete="off" placeholder="plugin-naam@marketplace">
-   <div class="btns"><button class="p" data-a="mpInstallId">Install</button></div>
+   <div class="btns"><button data-a="tcheck" data-src="mp-id" data-out="tc-out-mp">🔎 Termux check</button><button class="p" data-a="mpInstallId">Install</button></div><div id="tc-out-mp"></div>
   </div>
   <div class="card c2"><h2>➕ Apna plugin command</h2>
    <p class="mu">Koi bhi plugin ka command yahan daalo (claude / npx / npm / pip / pkg se shuru).</p>
    <input id="pcmd" autocapitalize="off" autocomplete="off" placeholder="claude plugin marketplace add owner/repo">
-   <div class="btns"><button class="p" data-a="pcustom">Chalao</button></div>
+   <div class="btns"><button data-a="tcheck" data-src="pcmd" data-out="tc-out-pcmd">🔎 Termux check</button><button class="p" data-a="pcustom">Chalao</button></div><div id="tc-out-pcmd"></div>
    <p class="mu">Result Logs tab me dikhega (job-custom).</p>
   </div>
  </div>
@@ -587,6 +593,7 @@ nav{background:#15181fe6;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur
 </div>
 </details>
 <button class="ditem dtop" data-a="menuGo" data-t="commands" data-q="Commands Copy karne wale commands"><span class="dico">⌨️</span><span class="dtxt"><b>Commands</b><small>Copy karne wale commands</small></span><span class="dchev">›</span></button>
+<button class="ditem dtop" data-a="menuPsec" data-s="tcomp" data-q="termux compatible check works chalta"><span class="dico">✅</span><span class="dtxt"><b>Termux compatible</b><small>Kaun sa item Termux par chalta hai</small></span><span class="dchev">›</span></button>
 <div class="mgroup">System</div>
 <details class="dsec" data-k="health" data-q="Health Sab check karo, plugin health">
 <summary class="ditem dtop"><span class="dico">🩺</span><span class="dtxt"><b>Health</b><small>Sab check karo, plugin health</small></span><span class="dchev">›</span></summary>
@@ -612,6 +619,7 @@ nav{background:#15181fe6;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur
 </div>
 </details>
 <button class="ditem dtop" data-a="menuGo" data-t="logs" data-q="Logs Errors aur job logs"><span class="dico">📜</span><span class="dtxt"><b>Logs</b><small>Errors aur job logs</small></span><span class="dchev">›</span></button>
+<button class="ditem dtop" data-a="menuGo" data-t="files" data-q="files storage kahan kya install"><span class="dico">📁</span><span class="dtxt"><b>Files &amp; Storage</b><small>Kahan kya hai, kitni jagah, kya install hua</small></span><span class="dchev">›</span></button>
 <div class="mgroup">Advanced</div>
 <details class="dsec" data-k="adv" data-q="Advanced Power features">
 <summary class="ditem dtop"><span class="dico">🧪</span><span class="dtxt"><b>Advanced</b><small>Power features</small></span><span class="dchev">›</span></summary>
@@ -696,7 +704,7 @@ function paint(){
 }
 async function useModel(m){const r=await api('config',{model:m});if(!r.error){toast(r.applied?'Model lag gaya: '+m:'Model save hua. Gateway URL aur key bhi daalo');refresh()}}
 const A={
- tab(e){tab=e.dataset.t;document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x.id==='t-'+tab));document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x.dataset.t===tab));scrollTo(0,0);document.body.classList.toggle('pvwide',tab==='preview');if(tab==='preview')setTimeout(pvOpen,30);if(tab==='plugins')mpLoad();if(tab==='models'){paintHub();if(seg==='m'&&!H.loaded&&!H.loading)loadHub()}tick(true)},
+ tab(e){tab=e.dataset.t;document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x.id==='t-'+tab));document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x.dataset.t===tab));scrollTo(0,0);document.body.classList.toggle('pvwide',tab==='preview');if(tab==='preview')setTimeout(pvOpen,30);if(tab==='plugins')mpLoad();if(tab==='files')filesLoad();if(tab==='models'){paintHub();if(seg==='m'&&!H.loaded&&!H.loading)loadHub()}tick(true)},
  goto(e){const cd=$('#c-'+e.dataset.g);const tb=cd&&cd.closest('.tab');if(tb)A.tab({dataset:{t:tb.id.slice(2)}});if(cd)cd.scrollIntoView({behavior:'smooth',block:'start'})},
  menuOpen(){document.querySelectorAll('.ditem,.dsubi').forEach(x=>x.classList.toggle('cur',x.dataset.t===tab));$('#menu').hidden=false},
  menuClose(){$('#menu').hidden=true},
@@ -959,13 +967,13 @@ document.addEventListener('change',async e=>{if(e.target.id!=='mp-file')return;c
  catch{toast('Ye backup file sahi nahi hai',1)}});
 Object.assign(A,{
  recdel(e){const id=e.dataset.id;if(!confirm('Ye item permanently delete ho jayega (MCP ya plugin files). Pakka?'))return;api('mp/rec/uninstall',{id}).then(r=>{if(!r.error){toast(r.msg,!r.ok);mpLoad();refresh()}})},
- psec(e){psec=e.dataset.s;document.querySelectorAll('.psub').forEach(x=>x.classList.toggle('on',x.id==='ps-'+psec));document.querySelectorAll('#pseg button').forEach(x=>x.classList.toggle('on',x.dataset.s===psec));if(psec==='adv')mpSkills()},
+ psec(e){psec=e.dataset.s;document.querySelectorAll('.psub').forEach(x=>x.classList.toggle('on',x.id==='ps-'+psec));document.querySelectorAll('#pseg button').forEach(x=>x.classList.toggle('on',x.dataset.s===psec));if(psec==='adv')mpSkills();if(psec==='mcp'||psec==='pl')secLoad();if(psec==='tcomp')compatLoad()},
  mpRefresh(){api('mp/mkt/update',{}).then(r=>{if(!r.error){toast('Marketplace update shuru. Kuch second baad list refresh hogi');setTimeout(mpLoad,8000)}})},
  mpOfficial(){api('mp/mkt/add',{repo:'anthropics/claude-plugins-official'}).then(r=>{if(!r.error){toast('Official marketplace jud raha hai. Logs dekho');setTimeout(mpLoad,8000)}})},
  mpAddMkt(){api('mp/mkt/add',{repo:$('#mp-repo').value.trim()}).then(r=>{if(!r.error){toast('Marketplace jud raha hai. Logs dekho');setTimeout(mpLoad,8000)}})},
  mpRmMkt(e){const name=e.dataset.name;if(!confirm(`Marketplace "${name}" hatana hai? Iske plugins bhi hat sakte hain.`))return;api('mp/mkt/remove',{name}).then(r=>{if(!r.error){toast(r.msg,!r.ok);mpLoad()}})},
  mpInstall(e){api('mp/install',{id:e.dataset.id}).then(r=>{if(!r.error){toast('Install shuru. Ho jaane par list update hogi');mpLoad()}})},
- mpInstallId(){api('mp/install',{id:$('#mp-id').value.trim()}).then(r=>{if(!r.error){toast('Install shuru. Logs dekho');mpLoad()}})},
+ mpInstallId(){const _v=$('#mp-id').value.trim();if(LASTCHECK&&LASTCHECK.v===_v&&LASTCHECK.level==='no'&&!confirm('Termux check me ye Termux par nahi chalega. Phir bhi install karein?'))return;api('mp/install',{id:_v}).then(r=>{if(!r.error){toast('Install shuru. Logs dekho');mpLoad()}})},
  mpUninstall(e){const id=e.dataset.id;if(!confirm(`"${id}" PERMANENT delete ho jayega (files, cache, settings sab). Pakka?`))return;api('mp/uninstall',{id}).then(r=>{if(!r.error){toast(r.msg,!r.ok);mpLoad()}})},
  mpToggle(e){const on=e.dataset.on==='1';api('mp/toggle',{id:e.dataset.id,on}).then(r=>{if(!r.error){toast(on?'ON ho gaya':'OFF ho gaya. Naye Claude session me lagega');mpLoad()}})},
  mpBulk(e){const on=e.dataset.on==='1';if(!confirm(on?'Sab plugins ON karein?':'Sab plugins OFF karein?'))return;api('mp/bulk',{on}).then(r=>{if(!r.error){toast(r.msg);mpLoad()}})},
@@ -1081,6 +1089,70 @@ Object.assign(A,{
 
 Object.assign(A,{
  mpSync(){api('mp/sync',{}).then(r=>{if(!r.error){toast(r.msg);setTimeout(recLoad,5000);setTimeout(mpLoad,5000);mpLoad()}})}
+});
+
+/* ---- MCP + Plugins sections ---- */
+let SEC=null;
+async function secLoad(){const r=await api('sec/list');if(r.error)return;SEC=r;secPaint()}
+function secRow(kind,x){
+ const probs=x.checks.filter(c=>!c.ok);
+ const st=x.status==='ok'?'<span class="tag fr">● OK</span>':`<span class="tag bd">⚠ ${probs.length} problem</span>`;
+ const checks=x.checks.map(c=>`<div class="fixrow"><div class="mu" style="font-size:13px">${c.ok?'<span class="ok">✔</span>':'<span class="bad">✖</span>'} ${esc(c.name)}: ${esc(c.msg)}</div>${c.ok?'':`<button class="sm p" data-a="secfix" data-kind="${kind}" data-id="${esc(x.id)}" data-k="check:${esc(c.name)}">🔧 Fix</button>`}</div>`).join('');
+ return `<div class="row" style="flex-direction:column;align-items:stretch"><div><b>${esc(x.name)}</b> ${st}${x.command?`<div class="mono mu" style="font-size:12px;overflow-wrap:anywhere">${esc(x.command)}</div>`:''}</div><div style="margin-top:6px">${checks}</div><div class="macts" style="margin-top:8px;flex-wrap:wrap">${probs.length?`<button class="p sm" data-a="secfix" data-kind="${kind}" data-id="${esc(x.id)}" data-k="all">🔧 Sab problem fix</button>`:''}<button class="sm" data-a="secfix" data-kind="${kind}" data-id="${esc(x.id)}" data-k="reinstall">♻️ Reinstall</button><button class="sm" data-a="secLogs">📜 Logs</button><button class="sm bad-btn" data-a="secforce" data-kind="${kind}" data-id="${esc(x.id)}">🗑 Force delete</button></div></div>`;
+}
+function secPaint(){
+ if(!SEC)return;
+ htm($('#sec-mcp'),SEC.mcp.length?SEC.mcp.map(x=>secRow('mcp',x)).join(''):'<p class="mu">Koi MCP server nahi. Recommended tab se install karo.</p>');
+ htm($('#sec-pl'),SEC.plugins.length?SEC.plugins.map(x=>secRow('plugin',x)).join(''):'<p class="mu">Koi plugin installed nahi. Recommended ya Marketplace se install karo.</p>');
+}
+Object.assign(A,{
+ secfix(e){const {kind,id}=e.dataset;api('sec/fix',{kind,id,key:e.dataset.k}).then(r=>{if(!r.error){toast(r.msg);setTimeout(secLoad,5000)}})},
+ secforce(e){const {kind,id}=e.dataset;if(!confirm(`"${id}" PERMANENT delete hoga (config, files, cache, settings sab). Pakka?`))return;api('sec/force',{kind,id}).then(r=>{if(!r.error){toast(r.msg);secLoad()}})},
+ secRefresh(){secLoad()},
+ secLogs(){A.tab({dataset:{t:'logs'}})}
+});
+
+/* ---- Termux compatibility + Files & Storage ---- */
+let COMPAT=null,TCF='all',LASTCHECK=null;
+const TC_LABEL={works:'<span class="tag fr">✅ Termux me chal raha hai</span>',problem:'<span class="tag bd">⚠ Problem</span>',no:'<span class="tag bd">❌ Termux me nahi chalega</span>',untested:'<span class="tag">⏳ Abhi test nahi hua</span>',manual:'<span class="tag">✋ Manual</span>'};
+const TC_LEVEL={ok:'<span class="tag fr">✅ Termux par chalega</span>',warn:'<span class="tag" style="color:var(--wa)">⚠ Chalega, par dhyan do</span>',no:'<span class="tag bd">❌ Termux par nahi chalega</span>'};
+const tcNotes=notes=>notes.map(n=>`<div class="mu" style="font-size:13px">${n.ok===true?'<span class="ok">✔</span>':n.ok===false?'<span class="bad">✖</span>':'<span class="wa">!</span>'} ${esc(n.msg)}</div>`).join('');
+async function compatLoad(){const r=await api('compat/list');if(r.error)return;COMPAT=r;compatPaint()}
+function compatPaint(){
+ if(!COMPAT)return;
+ const cnt=k=>COMPAT.rows.filter(x=>x.status===k).length;
+ const rows=COMPAT.rows.filter(x=>TCF==='all'||x.status===TCF);
+ htm($('#tc-list'),`<div class="mu" style="margin-bottom:8px">✅ ${cnt('works')} chalte hain · ⚠ ${cnt('problem')} problem · ❌ ${cnt('no')} nahi chalte · ⏳ ${cnt('untested')} untested</div>`+
+  (rows.length?rows.map(x=>`<div class="row" style="flex-direction:column;align-items:stretch"><div><b>${esc(x.name)}</b> ${TC_LABEL[x.status]||''}<div class="mu">${esc(x.desc||'')}</div></div>${tcNotes(x.notes||[])}</div>`).join(''):'<p class="mu">Is filter me koi item nahi.</p>'));
+}
+async function filesLoad(){
+ const r=await api('files/info');if(r.error)return;
+ const fmt=b=>b>1048576?(b/1048576).toFixed(1)+' MB':b>1024?(b/1024).toFixed(1)+' KB':b+' B';
+ const row=x=>`<div class="row"><div class="nm"><b>${esc(x.label)}</b><div class="mono mu" style="font-size:12px;overflow-wrap:anywhere">${esc(x.path)}</div></div><div style="text-align:right;white-space:nowrap">${x.exists?`<span class="tag fr">${fmt(x.size)}</span><div class="mu" style="font-size:12px">${x.items} files</div>`:'<span class="tag">nahi hai</span>'}</div></div>`;
+ const inst=r.installed;
+ htm($('#files-body'),
+  `<div class="card c1"><h2>💾 Total: ${fmt(r.totalSize)}</h2></div>`+
+  `<div class="card c3"><h2>📂 Kahan kya rakha hai</h2>${r.paths.map(row).join('')}</div>`+
+  `<div class="card c2"><h2>📦 Project files (${r.projectFiles.length})</h2>${r.projectFiles.map(f=>`<div class="row"><div class="nm"><b>${esc(f.name)}</b></div><span class="tag">${fmt(f.size)}</span></div>`).join('')}</div>`+
+  `<div class="card c2"><h2>✅ Kya install hua</h2>`+
+  `<h3 class="gh">🧩 Plugins (${inst.plugins.length})</h3>${inst.plugins.map(p=>`<div class="row"><div class="nm"><b>${esc(p.id)}</b> ${stTag(p.state)}</div></div>`).join('')||'<p class="mu">Koi plugin nahi</p>'}`+
+  `<h3 class="gh">🔌 MCP servers (${inst.mcp.length})</h3>${inst.mcp.map(m=>`<div class="row"><div class="nm"><b>${esc(m.name)}</b><div class="mono mu" style="font-size:12px;overflow-wrap:anywhere">${esc(m.command)}</div></div></div>`).join('')||'<p class="mu">Koi MCP nahi</p>'}`+
+  `<h3 class="gh">🗂 Marketplaces (${inst.marketplaces.length})</h3><p class="mu">${esc(inst.marketplaces.join(', ')||'koi nahi')}</p>`+
+  `<h3 class="gh">🛠 Tools</h3><div>${inst.tools.map(t=>`<span class="tag ${t.ok?'fr':'bd'}">${t.ok?'✔':'✖'} ${esc(t.name)}</span>`).join(' ')}</div>`+
+  `</div>`);
+}
+Object.assign(A,{
+ tcFilter(e){TCF=e.dataset.f;document.querySelectorAll('#tcf button').forEach(b=>b.classList.toggle('on',b.dataset.f===TCF));compatPaint()},
+ async tcheck(e){
+   const src=e.dataset.src,out=$('#'+e.dataset.out),v=$('#'+src).value.trim();
+   if(!v){toast('Pehle plugin ID ya command likho');return}
+   const cmd=src==='mp-id'?'claude plugin install '+v:v;
+   const r=await api('compat/check',{cmd});if(r.error)return;
+   LASTCHECK={level:r.level,v};
+   htm(out,`<div class="fixopts" style="margin-top:10px">${TC_LEVEL[r.level]||''}<div style="margin-top:6px">${tcNotes(r.notes)}</div></div>`);
+ },
+ homeHealth(){A.tab({dataset:{t:'health'}});A.doctor()},
+ filesRefresh(){filesLoad()}
 });
 document.addEventListener('click',e=>{const el=e.target.closest('[data-a]');if(el&&A[el.dataset.a])A[el.dataset.a](el)});
 $('#prov').addEventListener('change',async()=>{const r=await api('config',{provider:$('#prov').value});if(!r.error){init=false;await refresh();toast('Provider badal gaya'+(r.applied?' aur Claude me lag gaya':'. URL, key aur model daalo'))}});

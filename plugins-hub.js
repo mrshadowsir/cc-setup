@@ -442,6 +442,155 @@ async function syncAll(ctx) {
   return { ok: true, msg: `Sync shuru: ${items.length} item, ${uniq.length} step. Logs me job-mp-sync dekho` };
 }
 
+
+/* ---------- MCP + Plugins sections (alag-alag, har problem ka fix) ---------- */
+const CLI_CACHE = { t: 0, out: '' };
+async function mcpCli() {
+  if (CLI_CACHE.out && Date.now() - CLI_CACHE.t < 60000) return CLI_CACHE.out;
+  const r = await run('claude mcp list', 90000);
+  CLI_CACHE.out = r.out; CLI_CACHE.t = Date.now();
+  return r.out;
+}
+function mcpCliStatus(out, name) {
+  const line = String(out).split('\n').map(l => l.trim()).find(l => l.startsWith(name + ':'));
+  if (!line) return 'unknown';
+  if (/Connected/i.test(line)) return 'connected';
+  if (/Fail|Error|Disconnect|not connected/i.test(line)) return 'failed';
+  return 'unknown';
+}
+
+// Har item ke liye "pl" object (plugins.json ka ya config se bana)
+function itemFor(kind, id) {
+  if (kind === 'mcp') {
+    const name = String(id);
+    const known = PLJ().find(x => fromCmd(x.cmd, /mcp add --scope user (\S+)/) === name);
+    if (known) return known;
+    const cfg = (rj(CJ, {}).mcpServers || {})[name];
+    if (!cfg) return null;
+    const cmd = [cfg.command, ...(cfg.args || [])].filter(Boolean).join(' ');
+    return { id: 'mcp:' + name, name, desc: 'Custom MCP server (config se)', cmd: `claude mcp add --scope user ${name} -- ${cmd}` };
+  }
+  const pid = String(id);
+  const known = PLJ().find(x => fromCmd(x.cmd, /plugin install (\S+)/) === pid);
+  return known || { id: pid, name: pid.split('@')[0], desc: 'Plugin', cmd: `claude plugin install ${pid}` };
+}
+
+async function sectionsList(ctx) {
+  const cli = await mcpCli();
+  const mcp = [];
+  for (const srv of mcpServers()) {
+    const pl = itemFor('mcp', srv.name);
+    const h = await healthOf(pl, ctx);
+    const cs = mcpCliStatus(cli, srv.name);
+    h.checks.push({ name: 'Connection', ok: cs === 'connected', msg: cs === 'connected' ? 'Claude se connected' : cs === 'failed' ? 'Connect fail (Fix: Reinstall ya Tool fix)' : 'Claude list me status nahi mila' });
+    mcp.push({ id: srv.name, name: srv.name, command: srv.command, status: h.checks.every(c => c.ok) ? 'ok' : 'bad', checks: h.checks });
+  }
+  const plugins = [];
+  for (const p of installedStatus().filter(x => x.kind !== 'mcp')) {
+    const pl = itemFor('plugin', p.id);
+    const h = await healthOf(pl, ctx);
+    plugins.push({ id: p.id, name: p.name, command: p.mkt, status: h.checks.every(c => c.ok) ? 'ok' : 'bad', checks: h.checks });
+  }
+  return { mcp, plugins, cli: String(cli).trim().slice(0, 1200) };
+}
+
+async function secFix(kind, id, key, ctx) {
+  const pl = itemFor(kind, id);
+  if (!pl) throw new Error('Ye item nahi mila (shayad already delete ho gaya)');
+  // Connection fail = config/process ka problem: reinstall se hi theek hota hai
+  const k = key === 'check:Connection' ? 'reinstall' : key;
+  return runSteps(pl, k || 'all', ctx);
+}
+
+// FORCE DELETE: config, files, cache, settings, aur wanted record sab hatao (CLI fail ho to bhi)
+async function forceRemove(kind, id, ctx) {
+  const removed = [];
+  if (kind === 'mcp') {
+    const name = vname(id);
+    const pl = itemFor('mcp', name);            // pehle pakdo, config hatne ke baad nahi milega
+    const r = await removeMcp(name);
+    removed.push(r.direct ? 'config file se entry' : r.cli ? 'claude mcp remove' : 'MCP entry (kuch nahi mila)');
+    ctx.clear(pl ? pl.id : 'mcp:' + name); removed.push('wanted record');
+  } else {
+    const pid = vid(id);
+    const pl = itemFor('plugin', pid);
+    const r = await run(`claude plugin uninstall ${pid}`, 120000);
+    removed.push(r.ok ? 'claude plugin uninstall' : 'CLI uninstall fail (files manually hataye)');
+    removed.push(...purge(pid));
+    ctx.clear(pl ? pl.id : pid); removed.push('wanted record');
+  }
+  return { ok: true, msg: `Force delete ho gaya (${removed.length} step)`, removed };
+}
+
+
+/* ---------- Termux compatibility + Files & Storage ---------- */
+// Static rules: command Termux par chalega ya nahi (device check ke saath)
+function compatOf(cmd) {
+  const c = String(cmd || '');
+  const notes = []; let level = 'ok';
+  const warn = m => { notes.push({ ok: null, msg: m }); if (level === 'ok') level = 'warn'; };
+  const no = m => { notes.push({ ok: false, msg: m }); level = 'no'; };
+  if (/winget|\.exe\b|powershell|cmd \/c/i.test(c)) no('Windows-only command, Termux me nahi chalega');
+  if (/docker/i.test(c)) no('Docker Termux par nahi chalta');
+  if (/\bbrew\b/i.test(c)) no('brew Termux par nahi hai');
+  if (/playwright/i.test(c)) warn('Browser (chromium) Termux par limited hai, Playwright ka browser fail ho sakta hai');
+  if (/\bbun\b|claude-mem/i.test(c)) warn('Bun chahiye (Termux: npm install -g bun). Kabhi fail ho sakta hai');
+  if (/\bgh\b/.test(c)) warn('GitHub CLI chahiye (Termux: pkg install gh)');
+  const tools = needs({ cmd: c }).map(b => ({ name: b, ok: onPath(b), hint: toolCmd(b, { claudePkg: '@anthropic-ai/claude-code' }) || 'Termux me manually install karo' }));
+  for (const t of tools) if (!t.ok) { notes.push({ ok: null, msg: `Tool "${t.name}" nahi mila: ${t.hint}` }); if (level === 'ok') level = 'warn'; }
+  if (!notes.length) notes.push({ ok: true, msg: 'Termux me chalne ke liye koi special cheez nahi' });
+  return { level, notes, tools };
+}
+
+// Har item: static compatibility + is device par asli health
+async function compatList(ctx) {
+  const rows = [];
+  for (const pl of PLJ()) {
+    if (!pl.cmd) { rows.push({ id: pl.id, name: pl.name, desc: pl.desc, status: 'manual', level: 'manual', notes: [{ ok: null, msg: 'Manual item, auto check nahi hota' }] }); continue; }
+    const st = compatOf(pl.cmd);
+    const h = await healthOf(pl, ctx);
+    const status = st.level === 'no' ? 'no' : h.status === 'ok' ? 'works' : h.installed ? 'problem' : 'untested';
+    const notes = [...st.notes, ...h.checks.filter(c => !c.ok).map(c => ({ ok: false, msg: c.name + ': ' + c.msg }))];
+    rows.push({ id: pl.id, name: pl.name, desc: pl.desc, status, level: st.level, notes });
+  }
+  return { rows };
+}
+
+function dirInfo(p) {
+  if (!p || !fs.existsSync(p)) return { path: p, exists: false, size: 0, items: 0 };
+  let size = 0, items = 0;
+  const walk = d => {
+    for (const f of fs.readdirSync(d, { withFileTypes: true })) {
+      if (items > 20000) return;
+      const fp = path.join(d, f.name);
+      try { if (f.isDirectory()) walk(fp); else { size += fs.statSync(fp).size; items++; } } catch { /* skip */ }
+    }
+  };
+  try { if (fs.statSync(p).isDirectory()) walk(p); else { size = fs.statSync(p).size; items = 1; } } catch { /* skip */ }
+  return { path: p, exists: true, size, items };
+}
+
+function filesInfo(ctx) {
+  const P = ctx.paths();
+  const paths = [
+    ['Project (cc-setup code)', P.project], ['Config + logs folder (~/.cc-setup)', P.dir],
+    ['Config file (config.json)', P.cfg], ['Logs (job logs)', P.logs],
+    ['Claude folder (~/.claude)', CLAUDE], ['Claude MCP config (~/.claude.json)', CJ],
+    ['Claude settings (settings.json)', SETTINGS], ['Plugins folder (~/.claude/plugins)', PDIR],
+    ['Skills folder (~/.claude/skills)', path.join(CLAUDE, 'skills')], ['MCP backup (.claude.json.bak)', CJ + '.bak'],
+  ].map(([label, p]) => ({ label, ...dirInfo(p) }));
+  let projectFiles = [];
+  try { projectFiles = fs.readdirSync(P.project).map(f => ({ name: f, ...dirInfo(path.join(P.project, f)) })); } catch { /* ignore */ }
+  const plugins = pluginStatus().map(p => ({ id: p.id, state: p.state, path: p.path }));
+  const mcp = mcpServers().map(s => ({ name: s.name, command: s.command }));
+  const marketplaces = Object.keys(rj(KNOWN, {}));
+  const tools = ['claude', 'node', 'npx', 'python', 'uv', 'uvx', 'bun', 'gh'].map(b => ({ name: b, ok: onPath(b) }));
+  return {
+    paths, projectFiles, installed: { plugins, mcp, marketplaces, tools },
+    totalSize: paths.reduce((a, x) => a + (x.size || 0), 0),
+  };
+}
+
 /* ---------- routes (p = path after 'mp/') ---------- */
 async function route(p, b, ctx) {
   b = b || {};
@@ -583,8 +732,18 @@ async function route(p, b, ctx) {
     case 'diag': return diag(ctx);
     case 'heal': return autoHeal(ctx);
     case 'sync': return syncAll(ctx);
+    case 'sec/list': return sectionsList(ctx);
+    case 'sec/fix': return secFix(b.kind, b.id, b.key, ctx);
+    case 'sec/force': return forceRemove(b.kind, b.id, ctx);
+    case 'compat/check': {
+      const cmd = String(b.cmd || '').trim();
+      if (!cmd) throw new Error('Command ya ID khaali hai');
+      return compatOf(cmd);
+    }
+    case 'compat/list': return compatList(ctx);
+    case 'files/info': return filesInfo(ctx);
     default: return undefined; // cc.js ko pata chale ki route nahi mila
   }
 }
 
-module.exports = { route, isInstalled, autoHeal };
+module.exports = { route, isInstalled, autoHeal, compatOf };
