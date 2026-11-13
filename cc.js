@@ -642,6 +642,7 @@ async function daemon() {
     if (!/^(127\.0\.0\.1|localhost)(:\d+)?$/.test(req.headers.host || '')) return send(403, {});
     const u = new URL(req.url, 'http://x');
     if (u.pathname === '/') return send(200, fs.readFileSync(path.join(__dirname, 'dash.html'), 'utf8'), 'text/html; charset=utf-8');
+    if (u.pathname === '/guide') { try { return send(200, fs.readFileSync(path.join(__dirname, 'README.html'), 'utf8'), 'text/html; charset=utf-8'); } catch { return send(404, 'README.html nahi mila. ccs update chalao'); } }
     if (u.pathname === '/manifest.json') return send(200, MANIFEST, 'application/manifest+json');
     if (u.pathname === '/icon.svg') return send(200, ICON, 'image/svg+xml');
     if (!u.pathname.startsWith('/api/')) return send(404, {});

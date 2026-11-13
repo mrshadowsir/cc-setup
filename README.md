@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://img.shields.io/badge/cc--setup-v4.8-7c5cff?style=for-the-badge&labelColor=0b1020" alt="cc-setup v4.8">
+  <img src="https://img.shields.io/badge/cc--setup-v4.8.1-7c5cff?style=for-the-badge&labelColor=0b1020" alt="cc-setup v4.8.1">
   <img src="https://img.shields.io/badge/Termux-Android-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Termux">
   <img src="https://img.shields.io/badge/Windows-VS%20Code-0078D4?style=for-the-badge&logo=windows&logoColor=white" alt="Windows">
   <img src="https://img.shields.io/badge/Node.js-18%2B-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" alt="Node 18+">
@@ -42,6 +42,12 @@ Termux **F-Droid** se install karo. Play Store wala purana hai.
 pkg update -y
 ```
 
+![STEP 2b](https://img.shields.io/badge/STEP_2b-Packages_upgrade-3DDC84?style=flat-square&labelColor=0b1020)
+
+```
+pkg upgrade -y
+```
+
 ![STEP 3](https://img.shields.io/badge/STEP_3-git_aur_curl-3DDC84?style=flat-square&labelColor=0b1020)
 
 ```
@@ -68,6 +74,18 @@ ccs
 
 > [!WARNING]
 > `pkg update` fail ho to pehle `termux-change-repo` chalao, mirror badlo, phir STEP 2 dobara.
+
+> [!CAUTION]
+> **Error: `CANNOT LINK EXECUTABLE ... SSL_set_quic_tls_early_data_enabled`** ya **`fatal: remote helper 'https' aborted`**
+> Ye packages ka mismatch hai. STEP 2b (`pkg upgrade -y`) chalao, phir:
+
+```
+pkg reinstall -y libcurl git curl
+```
+
+> [!TIP]
+> **App me copy kaise karein:** Dashboard me ☰ menu kholo, **📖 Guide** dabao. Wahan har command ke saath **Copy** button hai.
+> Ya GitHub app me command par lamba dabao, select karke copy karo.
 
 ---
 

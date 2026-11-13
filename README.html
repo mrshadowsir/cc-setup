@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>cc-setup v4.8 · Guide</title>
+<title>cc-setup v4.8.1 · Guide</title>
 <style>
 :root{--bg:#0b1020;--s:#141b33;--s2:#1b2442;--line:#2a3560;--tx:#eef2ff;--mu:#9aa7d0;--ac:#7c5cff;--ac2:#18c7ff;--ok:#38e08c;--wa:#ffc94d;--bad:#ff6b81;--pk:#ff7ad9;--tm:#3DDC84;--win:#0078D4;color-scheme:dark}
 *{box-sizing:border-box;margin:0}
@@ -47,7 +47,7 @@ summary{cursor:pointer;font-weight:700;font-size:16px;color:var(--ac2)}
   <h1>⚡ cc-setup</h1>
   <p>Claude Code + free API gateway + Plugin Center</p>
   <div class="pills">
-    <span class="pill">📱 Phone</span><span class="pill">📲 Tablet</span><span class="pill">💻 Computer</span><span class="pill">v4.8</span>
+    <span class="pill">📱 Phone</span><span class="pill">📲 Tablet</span><span class="pill">💻 Computer</span><span class="pill">v4.8.1</span>
   </div>
 </header>
 
@@ -58,12 +58,18 @@ summary{cursor:pointer;font-weight:700;font-size:16px;color:var(--ac2)}
 <h2>🟦 Termux (Android)</h2>
 <div class="card tm">
   <div class="step"><div class="num">1</div><div class="body"><b>Termux F-Droid se install karo</b><p>Play Store wala purana hai.</p></div></div>
-  <div class="step"><div class="num">2</div><div class="body"><b>Packages update</b><div class="box">pkg update -y<button class="cp">Copy</button></div></div></div>
-  <div class="step"><div class="num">3</div><div class="body"><b>git aur curl</b><div class="box">pkg install -y git curl<button class="cp">Copy</button></div></div></div>
-  <div class="step"><div class="num">4</div><div class="body"><b>Repo download</b><div class="box">git clone https://github.com/mrshadowsir/cc-setup ~/cc-setup<button class="cp">Copy</button></div></div></div>
-  <div class="step"><div class="num">5</div><div class="body"><b>Installer chalao</b><div class="box">bash ~/cc-setup/install.sh<button class="cp">Copy</button></div></div></div>
-  <div class="step"><div class="num">6</div><div class="body"><b>Agli baar sirf</b><div class="box">ccs<button class="cp">Copy</button></div></div></div>
+  <div class="step"><div class="num">2</div><div class="body"><b>Packages list update</b><div class="box">pkg update -y<button class="cp">Copy</button></div></div></div>
+  <div class="step"><div class="num">3</div><div class="body"><b>Packages upgrade (zaroori)</b><div class="box">pkg upgrade -y<button class="cp">Copy</button></div></div></div>
+  <div class="step"><div class="num">4</div><div class="body"><b>git aur curl</b><div class="box">pkg install -y git curl<button class="cp">Copy</button></div></div></div>
+  <div class="step"><div class="num">5</div><div class="body"><b>Repo download</b><div class="box">git clone https://github.com/mrshadowsir/cc-setup ~/cc-setup<button class="cp">Copy</button></div></div></div>
+  <div class="step"><div class="num">6</div><div class="body"><b>Installer chalao</b><div class="box">bash ~/cc-setup/install.sh<button class="cp">Copy</button></div></div></div>
+  <div class="step"><div class="num">7</div><div class="body"><b>Agli baar sirf</b><div class="box">ccs<button class="cp">Copy</button></div></div></div>
   <div class="note w">⚠️ <code>pkg update</code> fail ho to <code>termux-change-repo</code> chalao, mirror badlo, phir step 2.</div>
+  <div class="note d">🛠 <b>Error: <code>CANNOT LINK EXECUTABLE ... SSL_set_quic_tls_early_data_enabled</code></b> ya <code>fatal: remote helper 'https' aborted</code>?<br>Ye purane aur naye packages ka mismatch hai. Step 3 (<code>pkg upgrade -y</code>) chalao, phir ye ek command:</div>
+  <div class="box">pkg reinstall -y libcurl git curl<button class="cp">Copy</button></div>
+  <div class="note i">💡 Phir bhi na chale to repo ZIP se lo (ye bhi curl par chalta hai):</div>
+  <div class="box">curl -L -o ~/cc.zip https://github.com/mrshadowsir/cc-setup/archive/refs/heads/main.zip<button class="cp">Copy</button></div>
+  <div class="box">pkg install -y unzip &amp;&amp; unzip -o ~/cc.zip -d ~ &amp;&amp; mv ~/cc-setup-main ~/cc-setup<button class="cp">Copy</button></div>
 </div>
 
 <h2>🟦 Windows (VS Code)</h2>
@@ -180,13 +186,14 @@ summary{cursor:pointer;font-weight:700;font-size:16px;color:var(--ac2)}
 </main>
 
 <script>
+function fallbackCopy(t){var ta=document.createElement('textarea');ta.value=t;ta.setAttribute('readonly','');ta.style.cssText='position:fixed;top:-1000px;opacity:0';document.body.appendChild(ta);ta.select();ta.setSelectionRange(0,t.length);var ok=false;try{ok=document.execCommand('copy')}catch(e){}ta.remove();return ok}
 document.querySelectorAll('.cp').forEach(function(b){
   b.addEventListener('click',function(){
-    var box=b.parentElement;
-    var t=box.childNodes[0].textContent.trim();
+    var box=b.closest('.box')||b.parentElement;
+    var t=(box.firstChild&&box.firstChild.textContent||box.textContent).trim();
     var done=function(ok){b.textContent=ok?'✅ Copied':'Haath se copy karo';setTimeout(function(){b.textContent='Copy'},1500)};
-    if(navigator.clipboard){navigator.clipboard.writeText(t).then(function(){done(true)},function(){done(false)})}
-    else{done(false)}
+    if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(t).then(function(){done(true)},function(){done(fallbackCopy(t))})}
+    else{done(fallbackCopy(t))}
   });
 });
 </script>

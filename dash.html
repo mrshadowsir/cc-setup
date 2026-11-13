@@ -547,6 +547,7 @@ nav{background:#15181fe6;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur
 <button class="ditem dtop" data-a="menuGo" data-t="home" data-q="Home Setup ke 3 step"><span class="dico">🏠</span><span class="dtxt"><b>Home</b><small>Setup ke 3 step</small></span><span class="dchev">›</span></button>
 <button class="ditem dtop" data-a="menuGo" data-t="task" data-q="Task Claude se kaam karwao"><span class="dico">📝</span><span class="dtxt"><b>Task</b><small>Claude se kaam karwao</small></span><span class="dchev">›</span></button>
 <button class="ditem dtop" data-a="menuGo" data-t="preview" data-q="Preview Live app dekho"><span class="dico">👁️</span><span class="dtxt"><b>Preview</b><small>Live app dekho</small></span><span class="dchev">›</span></button>
+<button class="ditem dtop" data-a="openGuide" data-q="guide copy readme help"><span class="dico">📖</span><span class="dtxt"><b>Guide</b><small>Har command ka Copy button</small></span><span class="dchev">↗</span></button>
 <div class="mgroup">Setup</div>
 <details class="dsec" data-k="gateway" data-q="Gateway Provider aur API key">
 <summary class="ditem dtop"><span class="dico">🌐</span><span class="dtxt"><b>Gateway</b><small>Provider aur API key</small></span><span class="dchev">›</span></summary>
@@ -1053,7 +1054,8 @@ Object.assign(A,{
  },
  menuPsec(e){const s=e.dataset.s;A.menuClose();A.tab({dataset:{t:'plugins'}});A.psec({dataset:{s}})},
  fixall(){recFixAll()},
- reload(){location.reload()}
+ reload(){location.reload()},
+ openGuide(){A.menuClose();window.open('/guide','_blank')}
 });
 
 /* ---- Colorful stat cards ---- */
