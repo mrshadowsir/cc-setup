@@ -1,10 +1,19 @@
 {
   "name": "cc-setup",
-  "version": "4.0.0",
-  "description": "Claude Code + free API gateway manager. Colorful dashboard, background daemon, APK builder (Termux and Windows)",
-  "bin": { "ccs": "cc.js" },
-  "scripts": { "start": "node cc.js", "doctor": "node cc.js doctor", "claude": "node cc.js claude", "stop": "node cc.js stop" },
-  "engines": { "node": ">=18" },
+  "version": "4.2.0",
+  "description": "Claude Code + free API gateway manager. Colorful dashboard, Hub (models + free API providers + OmniRoute), background daemon, APK builder (Termux and Windows)",
+  "bin": {
+    "ccs": "cc.js"
+  },
+  "scripts": {
+    "start": "node cc.js",
+    "doctor": "node cc.js doctor",
+    "claude": "node cc.js claude",
+    "stop": "node cc.js stop"
+  },
+  "engines": {
+    "node": ">=18"
+  },
   "dependencies": {},
   "license": "MIT"
 }

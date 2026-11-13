@@ -11,10 +11,10 @@ const WIN = process.platform === 'win32';
 const TERMUX = (process.env.PREFIX || '').includes('com.termux');
 const HOME = os.homedir(), DIR = path.join(HOME, '.cc-setup'), LOGS = path.join(DIR, 'logs');
 const CFG = path.join(DIR, 'config.json'), PIDS = path.join(DIR, 'pids.json'), TASKS = path.join(DIR, 'tasks.json');
-const PORT = +process.env.CC_PORT || 8787, PROXY_PORT = +process.env.CC_PROXY_PORT || 8788;
+const PORT = +process.env.CC_PORT || 8787, PROXY_PORT = +process.env.CC_PROXY_PORT || 8788, PREVIEW_PORT = +process.env.CC_PREVIEW_PORT || 8789;
 const PIN = process.env.CC_CLAUDE_VER || '2.1.112';
 const REPO = process.env.CC_REPO || 'mrshadowsir/cc-setup', BRANCH = process.env.CC_BRANCH || 'main';
-const FILES = ['cc.js', 'proxy.js', 'apk.js', 'dash.html', 'providers.json', 'plugins.json', 'package.json', 'install.sh', 'install.bat', 'README.md'];
+const FILES = ['cc.js', 'proxy.js', 'preview.js', 'apk.js', 'dash.html', 'providers.json', 'plugins.json', 'package.json', 'install.sh', 'install.bat', 'README.md', 'README.html'];
 const PROXY_URL = `http://127.0.0.1:${PROXY_PORT}`;
 const CLAUDE_PKG = '@anthropic-ai/claude-code' + (TERMUX ? '@' + PIN : '');
 fs.mkdirSync(LOGS, { recursive: true });
@@ -28,13 +28,15 @@ const wj = (f, o) => { fs.writeFileSync(f + '.tmp', JSON.stringify(o, null, 2), 
 const providers = () => rj(path.join(__dirname, 'providers.json'), {});
 const plugins = () => rj(path.join(__dirname, 'plugins.json'), []);
 const VERSION = () => rj(path.join(__dirname, 'package.json'), {}).version || '?';
-const loadCfg = () => ({ provider: 'omniroute', base_url: '', api_key: '', model: '', preset: 'normal', lastDir: '', apkDir: '', token: '', installed: {}, profiles: {}, working: [], auto: false, maxOut: 16000, autoOpen: true, filter: '', wake: true, batteryDone: false, ...rj(CFG, {}) });
+const loadCfg = () => ({ provider: 'omniroute', base_url: '', api_key: '', model: '', preset: 'normal', lastDir: '', apkDir: '', token: '', installed: {}, profiles: {}, working: [], auto: false, maxOut: 16000, autoOpen: true, filter: '', wake: true, batteryDone: false, favs: [], hubOn: [], previewDir: '', previewAuto: true, previewMode: 'static', previewDevPort: 3000, previewCmd: '', ...rj(CFG, {}) });
+const expand = p => { p = String(p || '').trim(); return p === '~' || p.startsWith('~/') || p.startsWith('~\\') ? path.join(HOME, p.slice(1)) : p; };
 const saveCfg = c => wj(CFG, c);
 const norm = u => String(u || '').trim().replace(/\/+$/, '');
 const ptype = c => (providers()[c.provider] || {}).type || 'anthropic';
 const upUrl = (c, p) => ptype(c) === 'openai' ? norm(c.base_url) + p : norm(c.base_url).replace(/\/v1$/, '') + '/v1' + p;
 const upHeaders = c => {
   const k = c.api_key, h = { 'content-type': 'application/json' };
+  if (!k || k === '-') return h; // bina key wale free providers
   if (ptype(c) === 'openai') h.authorization = 'Bearer ' + k;
   else if (/api\.anthropic\.com/.test(c.base_url)) { h['x-api-key'] = k; h['anthropic-version'] = '2023-06-01'; }
   else { h['x-api-key'] = k; h.authorization = 'Bearer ' + k; h['anthropic-version'] = '2023-06-01'; }
@@ -194,16 +196,17 @@ function cached(key, ttl, fn) {
 }
 
 /* ---------- gateway calls ---------- */
-async function listModels(filter, max) {
-  const c = loadCfg(); if (!c.base_url) throw new Error('Pehle base URL save karo');
+async function listModels(filter, max, cc) {
+  const c = cc || loadCfg(); if (!c.base_url) throw new Error('Pehle base URL save karo');
+  if (c.base_url.includes('{')) throw new Error('URL me {account_id} apni asli ID se badlo');
   const r = await fetch(upUrl(c, '/models'), { headers: upHeaders(c), signal: AbortSignal.timeout(20000) });
   if (!r.ok) throw new Error('Models list nahi mili (HTTP ' + r.status + ')');
   const j = await r.json(), f = String(filter || '').toLowerCase();
   const ids = (j.data || j.models || []).map(x => String(x.id || x.name || x).replace(/^models\//, '')).filter(Boolean);
   return ids.filter(i => !f || i.toLowerCase().includes(f)).slice(0, max || 30);
 }
-async function testModel(model) {
-  const c = loadCfg(), t0 = Date.now(), oa = ptype(c) === 'openai';
+async function testModel(model, cc) {
+  const c = cc || loadCfg(), t0 = Date.now(), oa = ptype(c) === 'openai';
   try {
     const r = await fetch(upUrl(c, oa ? '/chat/completions' : '/messages'), { method: 'POST', headers: upHeaders(c), signal: AbortSignal.timeout(25000),
       body: JSON.stringify({ model, max_tokens: oa ? 64 : 16, messages: [{ role: 'user', content: 'hi' }] }) });
@@ -215,7 +218,38 @@ async function testModel(model) {
 function updateWorking(m, ok) {
   const c = loadCfg(), w = (c.working || []).filter(x => x !== m); if (ok) w.unshift(m); c.working = w.slice(0, 20); saveCfg(c);
 }
-let proxy = null;
+
+/* ---------- Hub: har provider ki key/models alag se sambhalo ---------- */
+const credsFor = (c, id) => (id === c.provider ? c : { ...(c.profiles[id] || {}) });
+const provCfg = (c, P, id) => { const cr = credsFor(c, id), d = P[id] || {}; return { provider: id, base_url: cr.base_url || d.base_url || '', api_key: cr.api_key || d.def_key || '' }; };
+const hubOn = (c, id) => id === c.provider || !!credsFor(c, id).api_key || (c.hubOn || []).includes(id);
+function switchProv(c, P, id) {
+  c.profiles[c.provider] = { base_url: c.base_url, api_key: c.api_key, model: c.model, working: c.working };
+  const pr = c.profiles[id] || {};
+  c.provider = id; c.base_url = pr.base_url || P[id].base_url || ''; c.api_key = pr.api_key || ''; c.model = pr.model || ''; c.working = pr.working || [];
+  if (!P[id].cmd) stop('gateway');
+  if (proxy) proxy.clear();
+}
+function updateWorkingFor(id, m, ok) {
+  const c = loadCfg(); if (id === c.provider) return updateWorking(m, ok);
+  const pr = c.profiles[id] = c.profiles[id] || {}, w = (pr.working || []).filter(x => x !== m); if (ok) w.unshift(m); pr.working = w.slice(0, 20); saveCfg(c);
+}
+const modelCache = {};
+async function hubModels(c, P, id, force) {
+  const cf = provCfg(c, P, id), key = cf.base_url + '|' + mask(cf.api_key), hit = modelCache[id];
+  if (!force && hit && hit.key === key && Date.now() - hit.t < 120000) return hit.models;
+  const models = await listModels('', 5000, cf);
+  modelCache[id] = { key, t: Date.now(), models }; return models;
+}
+
+/* ---------- OmniRoute: dashboard se install / start ---------- */
+const OMNI_PORT = 20128;
+const NODE_MAJOR = parseInt(process.versions.node, 10);
+const omniNodeOk = NODE_MAJOR === 22 || (NODE_MAJOR >= 24 && NODE_MAJOR < 27); // OmniRoute ka engines: >=22 <23 || >=24 <27
+const omniVersion = () => cached('omni', 60000, () => new Promise(res => cp.exec('npm ls -g omniroute --depth=0 --json', { timeout: 25000, windowsHide: true }, (e, out) => {
+  try { const j = JSON.parse(String(out || '{}')); res((j.dependencies && j.dependencies.omniroute && j.dependencies.omniroute.version) || ''); } catch { res(''); }
+})));
+let proxy = null, pv = null;
 async function probe() {
   const c = loadCfg(); let cand = [...(c.working || [])];
   try { for (const m of await listModels(c.filter || '', 14)) if (!cand.includes(m)) cand.push(m); } catch { /* working hi sahi */ }
@@ -277,12 +311,15 @@ function fmtLine(line) {
 }
 const setTask = (id, patch) => { const t = rj(TASKS, []), x = t.find(k => k.id === id); if (x) { Object.assign(x, patch); wj(TASKS, t); } };
 async function runTask(b) {
-  const dir = path.resolve(String(b.dir || '').trim() || HOME);
+  const dir = path.resolve(HOME, expand(b.dir));
+  if (b.create && !fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
   if (!fs.existsSync(dir) || !fs.statSync(dir).isDirectory()) throw new Error('Folder nahi mila: ' + dir);
   const prompt = String(b.prompt || '').trim(); if (!prompt) throw new Error('Pehle task likho');
   if (Object.keys(svc).some(k => k.startsWith('task-') && svc[k].child)) throw new Error('Ek task pehle se chal raha hai. Pehle use roko');
   if (!(await exec('claude', ['--version'], 10000).catch(() => null))) throw new Error('Claude Code install nahi hai. Home se Install karo');
-  const c = loadCfg(); c.lastDir = dir; saveCfg(c);
+  const c = loadCfg(); c.lastDir = dir;
+  if (c.previewAuto !== false && c.previewDir !== dir) { c.previewDir = dir; if (pv) pv.setDir(dir); } // preview usi folder ka dikhao jisme kaam ho raha hai
+  saveCfg(c);
   const id = Date.now().toString(36), pf = path.join(DIR, 'prompt-' + id + '.txt');
   fs.writeFileSync(pf, prompt);
   const md = path.join(dir, 'CLAUDE.md'); if (b.claudemd && !fs.existsSync(md)) fs.writeFileSync(md, CLAUDE_MD);
@@ -374,11 +411,14 @@ async function state() {
   let logs = []; try { logs = fs.readdirSync(LOGS).filter(f => f.endsWith('.log')).map(f => ({ n: f.slice(0, -4), t: fs.statSync(path.join(LOGS, f)).mtimeMs })).sort((a, b) => b.t - a.t).map(x => x.n); } catch { /* ignore */ }
   return {
     version: VERSION(), repo: REPO,
-    cfg: { provider: c.provider, base_url: c.base_url, key: mask(c.api_key), model: c.model, preset: c.preset, lastDir: c.lastDir || HOME, apkDir: c.apkDir || '', auto: !!c.auto, working: (c.working || []).length, type: ptype(c), batteryDone: !!c.batteryDone, wake: c.wake !== false },
+    cfg: { provider: c.provider, base_url: c.base_url, key: c.api_key === '-' ? 'bina key' : mask(c.api_key), model: c.model, preset: c.preset, lastDir: c.lastDir || HOME, apkDir: c.apkDir || '', auto: !!c.auto, working: (c.working || []).length, type: ptype(c), batteryDone: !!c.batteryDone, wake: c.wake !== false },
     wake: { supported: TERMUX, on: wakeOn },
     proxy: proxy ? proxy.info() : { incident: null, lastSwitch: null },
-    providers: Object.fromEntries(Object.entries(P).map(([k, v]) => [k, { name: v.name, base_url: v.base_url, hasCmd: !!v.cmd, hint: v.hint || '' }])),
-    gateway: { hasCmd: !!gp.cmd, up: await listening(gp.port), running: !!(svc.gateway && svc.gateway.child) },
+    providers: Object.fromEntries(Object.entries(P).map(([k, v]) => { const cr = credsFor(c, k);
+      return [k, { name: v.name, base_url: v.base_url, url: cr.base_url || v.base_url || '', hasCmd: !!v.cmd, hint: v.hint || '', group: v.group || 'other', key_url: v.key_url || '', limits: v.limits || '', card: v.card || '', note: v.note || '',
+        keyless: v.def_key === '-', key: cr.api_key && cr.api_key !== '-' ? mask(cr.api_key) : '', on: hubOn(c, k), active: k === c.provider, models: v.models || [], filter: v.filter || '', type: v.type || 'anthropic' }]; })),
+    gateway: { hasCmd: !!gp.cmd, up: await listening(gp.port), running: !!(svc.gateway && svc.gateway.child) || (gp.port === OMNI_PORT && !!(svc.omni && svc.omni.child)) },
+    omni: { version: omniVersion(), checked: !!(cache.omni && cache.omni.t), up: await listening(OMNI_PORT), running: !!(svc.omni && svc.omni.child), installing: !!(svc['job-omniroute'] && svc['job-omniroute'].child), nodeOk: omniNodeOk, node: process.version, port: OMNI_PORT, active: c.provider === 'omniroute' },
     claude: { version: ver, checked: !!(cache.claude && cache.claude.t), pinned: TERMUX ? PIN : null, installing: !!(svc['job-claude'] && svc['job-claude'].child) },
     plugins: plugins().map(p => ({ id: p.id, name: p.name, desc: p.desc, note: p.note, rec: !!p.rec, hasCmd: !!p.cmd, installed: !!c.installed[p.id],
       job: svc['job-' + p.id] ? (svc['job-' + p.id].child ? 'running' : (svc['job-' + p.id].code ? 'failed' : '')) : '' })),
@@ -393,13 +433,7 @@ async function route(u, b) {
   switch (p) {
     case 'state': return state();
     case 'config': {
-      if (b.provider && P[b.provider] && b.provider !== c.provider) {
-        c.profiles[c.provider] = { base_url: c.base_url, api_key: c.api_key, model: c.model, working: c.working };
-        const pr = c.profiles[b.provider] || {};
-        c.provider = b.provider; c.base_url = pr.base_url || P[b.provider].base_url || ''; c.api_key = pr.api_key || ''; c.model = pr.model || ''; c.working = pr.working || [];
-        if (!P[b.provider].cmd) stop('gateway');
-        if (proxy) proxy.clear();
-      }
+      if (b.provider && P[b.provider] && b.provider !== c.provider) switchProv(c, P, b.provider);
       if (typeof b.auto === 'boolean') c.auto = b.auto;
       if (typeof b.batteryDone === 'boolean') c.batteryDone = b.batteryDone;
       if (typeof b.wake === 'boolean') { c.wake = b.wake; if (TERMUX) wake(b.wake); }
@@ -418,12 +452,91 @@ async function route(u, b) {
         if (!gp.cmd) throw new Error('Is provider ko local gateway nahi chahiye');
         if (await listening(gp.port)) throw new Error('Port ' + gp.port + ' pehle se chalu hai');
         start('gateway', gp.cmd, { port: gp.port });
-      } else stop('gateway');
+      } else { stop('gateway'); if (c.provider === 'omniroute') stop('omni'); }
       return { ok: true };
     }
     case 'logs': return { text: tail(u.searchParams.get('name') || 'gateway') };
     case 'models': { const f = u.searchParams.get('filter') || ''; c.filter = f; saveCfg(c); return { models: await listModels(f, +u.searchParams.get('max')), working: c.working }; }
     case 'test': { const r = await testModel(b.model); updateWorking(b.model, r.ok); return r; }
+    case 'hub/models': {
+      const want = u.searchParams.get('provider') || 'all', force = u.searchParams.get('force') === '1';
+      const ids = (want === 'all' ? Object.keys(P).filter(k => hubOn(c, k) || (k === 'omniroute')) : [want]).filter(k => P[k]);
+      const groups = await Promise.all(ids.map(async id => {
+        const d = P[id], g = { id, name: d.name, ok: true, err: '', models: [], suggested: false };
+        try {
+          if (id === 'omniroute' && !(await listening(OMNI_PORT))) return null; // band hai to chup-chaap chhodo (OmniRoute tab me Start milega)
+          g.models = await hubModels(c, P, id, force);
+        } catch (e) {
+          g.ok = false; g.err = e.name === 'TimeoutError' ? 'timeout' : (e.message || String(e));
+          if (d.models && d.models.length) { g.models = d.models; g.suggested = true; }
+        }
+        return g;
+      }));
+      const working = {}; for (const id of ids) working[id] = (id === c.provider ? c.working : (c.profiles[id] || {}).working) || [];
+      return { groups: groups.filter(Boolean), working, favs: c.favs || [], active: { provider: c.provider, model: c.model, url: c.base_url } };
+    }
+    case 'hub/use': {
+      const id = String(b.provider || c.provider), m = String(b.model || '').trim();
+      if (!P[id]) throw new Error('Provider nahi mila'); if (!m) throw new Error('Model ka naam chahiye');
+      const cr = credsFor(c, id), base = cr.base_url || P[id].base_url || '', key = cr.api_key || P[id].def_key || '';
+      if (!base) throw new Error('Pehle ' + P[id].name + ' ka URL daalo');
+      if (base.includes('{')) throw new Error('URL me {account_id} apni asli ID se badlo (Free APIs tab)');
+      if (!key) throw new Error(P[id].name + ' ki API key pehle save karo (Free APIs tab)');
+      if (id !== c.provider) switchProv(c, P, id);
+      c.base_url = base; c.api_key = key; c.model = m; saveCfg(c); apply(c);
+      return { ok: true, applied: true };
+    }
+    case 'hub/save': {
+      const id = String(b.provider || ''); if (!P[id]) throw new Error('Provider nahi mila');
+      const patch = {};
+      if (typeof b.base_url === 'string' && b.base_url.trim()) patch.base_url = norm(b.base_url);
+      if (b.api_key) patch.api_key = String(b.api_key).trim();
+      if (!Object.keys(patch).length) throw new Error('Key ya URL likho');
+      if (patch.base_url && patch.base_url.includes('{')) throw new Error('URL me {account_id} ki jagah apni asli Account ID likho');
+      if (id === c.provider) Object.assign(c, patch); else c.profiles[id] = { ...(c.profiles[id] || {}), ...patch };
+      c.hubOn = Array.from(new Set([...(c.hubOn || []), id])); delete modelCache[id]; saveCfg(c);
+      if (id === c.provider && c.base_url && c.api_key && c.model) apply(c);
+      return { ok: true };
+    }
+    case 'hub/clear': {
+      const id = String(b.provider || ''); if (!P[id]) throw new Error('Provider nahi mila');
+      if (id === c.provider) c.api_key = ''; else if (c.profiles[id]) c.profiles[id].api_key = '';
+      c.hubOn = (c.hubOn || []).filter(x => x !== id); delete modelCache[id]; saveCfg(c); return { ok: true };
+    }
+    case 'hub/toggle': {
+      const id = String(b.provider || ''); if (!P[id]) throw new Error('Provider nahi mila');
+      const on = new Set(c.hubOn || []); if (b.on) on.add(id); else on.delete(id); c.hubOn = [...on]; saveCfg(c); return { ok: true };
+    }
+    case 'hub/check': {
+      const id = String(b.provider || ''); if (!P[id]) throw new Error('Provider nahi mila');
+      try { const m = await hubModels(c, P, id, true); return { ok: true, count: m.length }; }
+      catch (e) { return { ok: false, err: e.name === 'TimeoutError' ? 'timeout (internet ya URL check karo)' : (e.message || String(e)) }; }
+    }
+    case 'hub/test': {
+      const id = String(b.provider || c.provider), m = String(b.model || '').trim(); if (!P[id]) throw new Error('Provider nahi mila'); if (!m) throw new Error('Model ka naam chahiye');
+      const r = await testModel(m, provCfg(c, P, id)); updateWorkingFor(id, m, r.ok); return r;
+    }
+    case 'hub/fav': {
+      const k = String(b.key || '').slice(0, 200); if (!k.includes('|')) throw new Error('galat key');
+      const f = new Set(c.favs || []); if (f.has(k)) f.delete(k); else f.add(k); c.favs = [...f].slice(-200); saveCfg(c); return { ok: true, on: f.has(k) };
+    }
+    case 'omni/install': {
+      if (svc['job-omniroute'] && svc['job-omniroute'].child) throw new Error('Install pehle se chal raha hai');
+      start('job-omniroute', 'npm install -g omniroute', { onExit: () => { delete cache.omni; } }); return { ok: true };
+    }
+    case 'omni/start': {
+      if (await listening(OMNI_PORT)) throw new Error('Port ' + OMNI_PORT + ' pehle se chalu hai');
+      const have = omniVersion() || (cache.omni && cache.omni.v);
+      start('omni', have ? 'omniroute' : 'npx -y omniroute', { port: OMNI_PORT }); return { ok: true };
+    }
+    case 'omni/stop': stop('omni'); return { ok: true };
+    case 'omni/use': {
+      if (c.provider !== 'omniroute') switchProv(c, P, 'omniroute');
+      if (!c.base_url) c.base_url = P.omniroute.base_url; if (!c.api_key) c.api_key = P.omniroute.def_key;
+      c.hubOn = Array.from(new Set([...(c.hubOn || []), 'omniroute'])); saveCfg(c);
+      if (c.model) apply(c);
+      return { ok: true, needModel: !c.model };
+    }
     case 'incident/pick': { const m = String(b.model || '').trim(); if (!m) throw new Error('Model ka naam chahiye'); proxy.pick(m); return { ok: true }; }
     case 'incident/retry': proxy.retryNow(); return { ok: true };
     case 'incident/probe': return { options: await probe() };
@@ -464,6 +577,42 @@ async function route(u, b) {
       update(log).then(() => { log('[ok] Dashboard dobara chalu ho raha hai… 5 second baad page reload karo'); setTimeout(respawn, 1500); }, e => log('[!] ' + (e.message || e)));
       return { ok: true };
     }
+    case 'preview/state': {
+      if (!pv) throw new Error('Preview chalu nahi hua');
+      pv.touch(); const i = pv.info(); let suggest = [];
+      if (i.ok) { const pj = rj(path.join(i.dir, 'package.json'), null); if (pj && pj.scripts) suggest = ['dev', 'start', 'serve', 'preview'].filter(k => pj.scripts[k]).map(k => 'npm run ' + k); }
+      const dv = svc['preview-dev'], dp = c.previewDevPort;
+      return { ...i, port: PREVIEW_PORT, mode: c.previewMode, devPort: dp, cmd: c.previewCmd, auto: c.previewAuto !== false, suggest, home: HOME, lastDir: c.lastDir || '',
+        dev: { running: !!(dv && dv.child), up: !!((await listening(dp)) || (await listening(dp, '::1'))) } };
+    }
+    case 'preview/set': {
+      if (!pv) throw new Error('Preview chalu nahi hua');
+      if (typeof b.dir === 'string') {
+        if (!b.dir.trim()) throw new Error('Folder ka path likho');
+        const d = path.resolve(HOME, expand(b.dir));
+        if (!fs.existsSync(d)) { if (b.create) fs.mkdirSync(d, { recursive: true }); else throw new Error('Folder nahi mila: ' + d + ' (naya banana ho to "Naya folder" dabao)'); }
+        if (!fs.statSync(d).isDirectory()) throw new Error('Ye folder nahi hai: ' + d);
+        if (c.previewDir !== d) { c.previewDir = d; pv.setDir(d); }
+      }
+      if (b.mode === 'static' || b.mode === 'dev') c.previewMode = b.mode;
+      if (b.devPort !== undefined && b.devPort !== '') {
+        const n = +b.devPort; if (!(n > 0 && n < 65536)) throw new Error('Port galat hai (1 se 65535)');
+        if ([PORT, PROXY_PORT, PREVIEW_PORT].includes(n)) throw new Error('Ye port ccs ka hai, dusra chuno');
+        c.previewDevPort = n;
+      }
+      if (typeof b.cmd === 'string') c.previewCmd = b.cmd.trim();
+      if (typeof b.auto === 'boolean') c.previewAuto = b.auto;
+      saveCfg(c); return { ok: true };
+    }
+    case 'preview/dev': {
+      if (b.op === 'stop') { stop('preview-dev'); return { ok: true }; }
+      const cmd = String(b.cmd || c.previewCmd || '').trim();
+      if (!/^(npm|npx|pnpm|yarn|bun|node|deno|python3?|php)\s/.test(cmd) || /[;&|`$<>\n\r]/.test(cmd)) throw new Error('Command npm/npx/pnpm/yarn/node/python/php se shuru ho aur ; & | $ na ho (jaise: npm run dev)');
+      if (!c.previewDir || !fs.existsSync(c.previewDir)) throw new Error('Pehle project folder lagao');
+      if (svc['preview-dev'] && svc['preview-dev'].child) throw new Error('Dev server pehle se chal raha hai');
+      c.previewCmd = cmd; saveCfg(c);
+      start('preview-dev', cmd, { cwd: c.previewDir, port: c.previewDevPort }); return { ok: true };
+    }
     case 'task/run': return runTask(b);
     case 'task/stop': Object.keys(svc).filter(k => k.startsWith('task-')).forEach(stop); return { ok: true };
     case 'task/log': { const id = String(u.searchParams.get('id') || '').replace(/\W/g, ''); return { text: taskLog(id), running: !!(svc['task-' + id] && svc['task-' + id].child) }; }
@@ -500,6 +649,9 @@ async function daemon() {
     proxy.on('error', e => console.log('[!] Proxy start nahi hua: ' + e.message));
     proxy.listen(PROXY_PORT);
   }
+  pv = require(path.join(__dirname, 'preview.js'))();
+  { const d0 = cfg.previewDir || cfg.lastDir || ''; if (d0 && fs.existsSync(d0)) pv.setDir(d0); }
+  pv.listen(PREVIEW_PORT, e => { if (e) console.log(`[!] Preview port ${PREVIEW_PORT} busy hai (${e.message}). CC_PREVIEW_PORT badlo.`); });
   srv.listen(PORT, '127.0.0.1', () => {
     try { fs.writeFileSync(path.join(DIR, 'dash.pid'), String(process.pid)); } catch { /* ignore */ }
     if (TERMUX && cfg.wake !== false) wake(true);

@@ -58,6 +58,57 @@ details{margin-top:10px}summary{cursor:pointer;color:var(--ac2);font-weight:600;
 .cmd{display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}.cmd:last-child{border:0}
 .cmd code{flex:1;font:15px ui-monospace,Consolas,monospace;color:var(--ac2)}.cmd .mu{display:block}
 @media (prefers-reduced-motion:no-preference){.bar i{transition:width .5s}}
+
+/* ---- Hub ---- */
+.seg{display:flex;gap:6px;background:var(--s);border:1px solid var(--line);border-radius:16px;padding:5px;margin:14px 0 4px;position:sticky;top:calc(92px + env(safe-area-inset-top));z-index:4;box-shadow:0 -14px 0 0 var(--bg),0 6px 16px #0006}
+.seg button{flex:1;border:0;background:none;color:var(--mu);min-height:44px;padding:6px 4px;border-radius:12px;font-size:13px}
+.seg button.on{background:linear-gradient(135deg,var(--ac),var(--ac2));color:#fff;box-shadow:0 4px 14px #7c5cff55}
+.sub{display:none}.sub.on{display:block}
+.btns .sm{padding:8px 6px;white-space:nowrap}
+.av{width:34px;height:34px;border-radius:11px;display:inline-grid;place-items:center;font-weight:800;font-size:15px;color:#fff;flex:none;text-shadow:0 1px 2px #0006}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:4px 0 10px;scrollbar-width:none;-webkit-overflow-scrolling:touch}.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;min-height:38px;padding:6px 14px;border-radius:99px;font-size:13px;background:var(--s2);white-space:nowrap}
+.chip.on{background:linear-gradient(135deg,var(--ac),var(--ac2));border:0;color:#fff}.chip.er{border-color:#5a2b3a;color:var(--bad)}
+.tag{display:inline-block;font-size:11.5px;font-weight:700;padding:2px 9px;border-radius:99px;background:#ffffff14;color:var(--mu);margin:2px 4px 2px 0}
+.tag.fr{background:#38e08c22;color:var(--ok)}.tag.wr{background:#ffc94d22;color:var(--wa)}.tag.bd{background:#ff6b8122;color:var(--bad)}.tag.ac{background:#7c5cff33;color:#c9bbff}
+.mrow{background:var(--s2);border:1px solid var(--line);border-radius:16px;padding:12px;margin:10px 0}
+.mrow.act{border-color:var(--ok);box-shadow:0 0 0 1px #38e08c55 inset;background:#122a2a}
+.mtop{display:flex;gap:8px;align-items:flex-start}.mtop .nm{flex:1;min-width:0;overflow-wrap:anywhere;font-size:14.5px;padding-top:6px}
+.star{background:none;border:0;min-height:36px;width:36px;padding:0;font-size:21px;flex:none}
+.msub{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:4px 0 8px 2px;font-size:13px}.msub .av{width:22px;height:22px;border-radius:7px;font-size:11px}
+.macts{display:flex;gap:8px}.macts button{flex:1;min-width:0}
+.nowrow{display:flex;gap:12px;align-items:center}.nowrow .nm{flex:1;min-width:0;overflow-wrap:anywhere}
+#now{border:1px solid var(--ok);background:linear-gradient(135deg,#12302a,#14213d);border-radius:18px;padding:14px;margin:12px 0}
+.gh{margin:18px 2px 6px;font-size:15px;color:var(--ac2)}
+details.pv{background:var(--s);border:1px solid var(--line);border-radius:16px;margin:10px 0;overflow:hidden}
+details.pv[open]{border-color:var(--ac)}
+details.pv>summary{display:flex;gap:12px;align-items:center;padding:12px 14px;list-style:none;cursor:pointer;color:var(--tx);font-weight:400}
+details.pv>summary::-webkit-details-marker{display:none}
+details.pv>summary::after{content:'▾';color:var(--mu);margin-left:auto;transition:transform .2s}details.pv[open]>summary::after{transform:rotate(180deg)}
+details.pv .nm{flex:1;min-width:0}.pvb{padding:0 14px 14px;border-top:1px solid var(--line)}
+.urlrow{display:flex;gap:8px}.urlrow input{flex:1;min-width:0;font:13.5px ui-monospace,Consolas,monospace}.urlrow button{flex:none;min-width:52px}
+.note{background:#ffc94d14;border:1px solid #ffc94d44;color:var(--wa);border-radius:12px;padding:10px 12px;margin:10px 0;font-size:13.5px}
+a.lnk{display:flex;align-items:center;justify-content:center;gap:6px;min-height:48px;border-radius:12px;font-weight:700;text-decoration:none;background:linear-gradient(135deg,var(--ac),var(--ac2));color:#fff;margin:12px 0 0}
+a.lnk.o{background:var(--s2);border:1px solid var(--line);color:var(--tx)}
+.res{margin-top:8px;font-size:14px;min-height:20px}
+input[type=search]{-webkit-appearance:none;appearance:none}
+@media (prefers-reduced-motion:no-preference){.mrow,details.pv{transition:border-color .2s}}
+
+/* ---- Preview ---- */
+body.pvwide{max-width:1240px}
+.pvbar{display:flex;gap:8px;align-items:center}.pvbar input{flex:1;min-width:0;padding:10px 12px;font:13.5px ui-monospace,Consolas,monospace}.pvbar button{flex:none;min-width:44px;padding:8px 10px}
+.pvstage{margin-top:10px;position:relative;overflow:hidden;border-radius:14px;background:repeating-conic-gradient(#0e1530 0 25%,#0b1020 0 50%) 0 0/20px 20px;border:1px solid var(--line)}
+.pvframe{background:#fff;transform-origin:top left;box-shadow:0 10px 40px #000a;border-radius:6px;overflow:hidden}
+.pvframe.phone{border:10px solid #05070f;border-radius:34px}.pvframe.tablet{border:8px solid #05070f;border-radius:22px}.pvframe.full{border-radius:0}
+.pvframe iframe{border:0;width:100%;height:100%;background:#fff;display:block}
+.pvstat{display:flex;gap:8px;align-items:center;font-size:13px;margin-top:10px;flex-wrap:wrap}
+pre.mini{max-height:240px;font-size:12px;margin-top:10px}
+.con{font:12.5px/1.45 ui-monospace,Consolas,monospace;max-height:200px;overflow:auto;background:#080c1a;border:1px solid var(--line);border-radius:12px;padding:8px;margin-top:8px}
+.con div{padding:3px 0;border-bottom:1px solid #ffffff10;white-space:pre-wrap;word-break:break-word}.con .error{color:var(--bad)}.con .warn{color:var(--wa)}
+.chg{display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line);font-size:14px}.chg:last-child{border:0}.chg .nm{flex:1;min-width:0;overflow-wrap:anywhere}
+.pvfs:fullscreen{background:#0b1020;display:grid;place-items:start center;overflow:auto}
+@media (min-width:980px){#t-preview.on{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(320px,1fr);column-gap:16px;align-items:start}
+ #t-preview.on>#pv-card{grid-column:1;grid-row:1/span 6;position:sticky;top:104px}#t-preview.on>.card:not(#pv-card){grid-column:2}}
 </style>
 </head>
 <body>
@@ -112,7 +163,7 @@ details{margin-top:10px}summary{cursor:pointer;color:var(--ac2);font-weight:600;
   <label for="preset">Mode</label>
   <select id="preset"><option value="normal">Normal</option><option value="big">Bade kaam (lamba output, lamba timeout, edits auto-allow)</option></select>
   <label class="ck"><input type="checkbox" id="ck-auto2"><span>Model fail ho to apne aap agla chalta model lagao (warna tumse puchhta hai)</span></label>
-  <div class="btns"><button class="p" data-a="save">💾 Save</button></div>
+  <div class="btns"><button class="p" data-a="save">💾 Save</button><button data-a="tofree">🆓 Free API keys lo</button></div>
   <div class="row"><span class="dot" id="d-gw"></span><div class="nm">Local gateway <div class="mu" id="s-gw"></div></div><button id="b-gw" data-a="gw">Start</button></div>
  </div>
 
@@ -152,14 +203,98 @@ details{margin-top:10px}summary{cursor:pointer;color:var(--ac2);font-weight:600;
  <div class="card c2"><h2>🕘 Purane tasks</h2><div id="hist"></div></div>
 </div>
 
-<!-- ============ MODELS ============ -->
+<!-- ============ PREVIEW ============ -->
+<div class="tab" id="t-preview">
+ <div class="card c2" id="pv-card"><h2>👁️ Live Preview <span class="pill" id="pv-pill" style="margin-left:auto;background:#ffffff18">…</span></h2>
+  <div class="pvbar">
+   <button class="sm" data-a="pvreload" title="Reload">🔄</button>
+   <input id="pv-path" list="pv-pages" value="/" autocapitalize="off" autocomplete="off" aria-label="Page path"><datalist id="pv-pages"></datalist>
+   <button class="sm" data-a="pvopen" title="Naye tab me kholo">↗</button>
+   <button class="sm" data-a="pvfull" title="Poori screen">⛶</button>
+  </div>
+  <div class="chips" id="pv-devs" style="margin-top:10px;padding-bottom:0"></div>
+  <div class="pvstage" id="pv-stage"><div class="pvframe phone" id="pv-frame"><iframe id="pv-if" title="Project preview" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-downloads" allow="clipboard-write; fullscreen; geolocation; camera; microphone"></iframe></div></div>
+  <div class="pvstat"><span class="dot" id="pv-dot"></span><span class="mu" id="pv-stat">…</span></div>
+  <p class="mu" style="margin-top:6px">Preview ke andar app ko chalao, click karo, type karo, bilkul asli ki tarah. File badalte hi ye <b>apne aap</b> update hota hai (CSS badle to bina reload ke).</p>
+ </div>
+
+ <div class="card c4"><h2>🛠️ Naya kaam (yahin se)</h2>
+  <label for="pv-dir">Project folder</label><input id="pv-dir" autocapitalize="off" autocomplete="off" placeholder="~/projects/meri-site">
+  <label for="pv-prompt">Kya banana hai</label><textarea id="pv-prompt" style="min-height:90px" placeholder="Jaise: ek sundar portfolio website banao, dark theme, 3 sections"></textarea>
+  <label class="ck"><input type="checkbox" id="pv-cont"><span>Pichhli baat jaari rakho (isi folder ka)</span></label>
+  <label class="ck"><input type="checkbox" id="pv-auto"><span>Full auto (commands bhi bina puchhe, sirf apne project me)</span></label>
+  <div class="btns"><button class="p" id="pv-run" data-a="pvrun">▶ Banao</button><button class="d" data-a="trstop">⏹ Roko</button></div>
+  <pre id="pv-tlog" class="mini">Abhi koi task nahi. Task chalate hi yahan live dikhega aur preview update hota jayega.</pre>
+ </div>
+
+ <div class="card c3"><h2>📂 Preview kis cheez ka</h2>
+  <label for="pv-mode">Type</label>
+  <select id="pv-mode"><option value="static">📁 Folder (HTML / CSS / JS, turant reload)</option><option value="dev">⚙️ Dev server (React, Vite, Next, Flask… port se)</option></select>
+  <div id="pv-devbox" style="display:none">
+   <label for="pv-cmd">Dev server command</label><input id="pv-cmd" autocapitalize="off" autocomplete="off" placeholder="npm run dev">
+   <div class="chips" id="pv-sug" style="padding:8px 0 0"></div>
+   <label for="pv-port">Port (app kis port par chalta hai)</label><input id="pv-port" inputmode="numeric" placeholder="3000">
+   <div class="btns"><button class="g" data-a="pvdevstart">▶ Dev server chalao</button><button class="d" data-a="pvdevstop">⏹ Roko</button></div>
+   <div class="mu" id="pv-devs-s"></div>
+   <p class="mu">Vite ho to command me <b class="mono">--host 127.0.0.1</b> jodo. Log: Logs tab &gt; preview-dev.</p>
+  </div>
+  <div class="btns"><button class="p" data-a="pvset">✔ Lagao</button><button data-a="pvnew">➕ Naya folder banao</button><button data-a="pvtask">📝 Task wala folder</button></div>
+  <label class="ck"><input type="checkbox" id="pv-follow" checked><span>Task chalate hi preview usi folder ka dikhao</span></label>
+ </div>
+
+ <div class="card c5"><h2>🕘 Abhi kya badla</h2><div id="pv-chg"><p class="mu">Abhi koi badlav nahi.</p></div></div>
+ <div class="card c1"><h2>🐞 Console <span class="pill" id="pv-cnt" style="margin-left:auto;background:#ffffff18">0</span></h2>
+  <div class="btns" style="margin:0"><button class="sm" data-a="pvclr">Saaf karo</button></div>
+  <div class="con" id="pv-con"><div class="mu">Page ke console.log aur errors yahan dikhenge.</div></div>
+ </div>
+</div>
+
+<!-- ============ HUB (Models + Free APIs + OmniRoute) ============ -->
 <div class="tab" id="t-models">
- <div class="card c3"><h2>🤖 Models</h2>
-  <label for="flt">Filter (jaise free)</label><input id="flt" autocapitalize="off" value="free">
-  <div class="btns"><button class="p" data-a="load">Models laao</button><button data-a="testall" id="b-all">Sab test karo</button></div>
-  <label for="cm">Ya apna model naam</label><input id="cm" autocapitalize="off" autocomplete="off">
-  <div class="btns"><button data-a="usecustom">Ye model lagao (test ke bina)</button></div>
-  <div class="mu" id="s-list"></div><div id="list"></div>
+ <div class="seg" id="seg">
+  <button class="on" data-a="seg" data-s="m">🤖 Models</button>
+  <button data-a="seg" data-s="f">🆓 Free APIs</button>
+  <button data-a="seg" data-s="o">🛰️ OmniRoute</button>
+ </div>
+ <div id="now"></div>
+
+ <!-- ---- Models ---- -->
+ <div class="sub on" id="s-m">
+  <div class="card c3">
+   <h2>🤖 Models</h2>
+   <input id="q" type="search" autocapitalize="off" autocomplete="off" placeholder="🔍 Model dhundo…">
+   <div class="chips" id="qchips" style="margin-top:8px"></div>
+   <div class="chips" id="pchips"></div>
+   <div class="btns" style="margin-top:0"><button class="p sm" data-a="load" style="min-width:90px">🔄 Refresh</button><button class="sm" data-a="favonly" id="b-fav" style="min-width:90px">⭐ Favs</button><button class="sm" data-a="testvis" id="b-tv" style="min-width:90px">⚡ Test 10</button></div>
+   <div class="mu" id="s-list"></div>
+   <details id="perr-d" style="display:none"><summary>⚠️ Kuch providers se list nahi aayi</summary><div id="perr" class="mu"></div></details>
+   <div id="list"></div>
+   <div class="btns"><button id="more" data-a="more" style="display:none">Aur dikhao ⬇</button></div>
+  </div>
+  <div class="card c4"><h2>✍️ Apna model naam</h2>
+   <p class="mu">Jo model list me na dikhe, uska naam yahan likho. Abhi wale provider par lagega.</p>
+   <input id="cm" autocapitalize="off" autocomplete="off" placeholder="model-ka-naam">
+   <div class="btns"><button data-a="usecustom">Ye model lagao (test ke bina)</button></div>
+  </div>
+ </div>
+
+ <!-- ---- Free APIs ---- -->
+ <div class="sub" id="s-f">
+  <div class="card c2"><h2>🆓 Free API providers</h2>
+   <p class="mu">Card kholo: URL copy karo, <b>API key lene jao</b>, key paste karke <b>Save</b>, phir <b>Key test</b>. Limits badalti rehti hain, key page par confirm kar lena.</p>
+   <input id="fq" type="search" autocapitalize="off" autocomplete="off" placeholder="🔍 Provider dhundo" style="margin-top:6px">
+   <div class="chips" id="fchips" style="margin-top:8px"></div>
+  </div>
+  <div id="flist"></div>
+ </div>
+
+ <!-- ---- OmniRoute ---- -->
+ <div class="sub" id="s-o">
+  <div class="card c1"><h2>🛰️ OmniRoute</h2>
+   <p class="mu">Ek hi local gateway jo kai free providers ko ek endpoint (<span class="mono">localhost:20128</span>) par jodta hai. Yahin se install, start aur Claude se jodna ho jata hai.</p>
+   <div id="omni"></div>
+   <pre id="olog" style="display:none;margin-top:10px"></pre>
+  </div>
  </div>
 </div>
 
@@ -203,7 +338,8 @@ details{margin-top:10px}summary{cursor:pointer;color:var(--ac2);font-weight:600;
 <nav>
  <button class="on" data-a="tab" data-t="home"><span>🏠</span>Home</button>
  <button data-a="tab" data-t="task"><span>📝</span>Task</button>
- <button data-a="tab" data-t="models"><span>🤖</span>Models</button>
+ <button data-a="tab" data-t="preview"><span>👁️</span>Preview</button>
+ <button data-a="tab" data-t="models"><span>⚡</span>Hub</button>
  <button data-a="tab" data-t="apk"><span>📦</span>APK</button>
  <button data-a="tab" data-t="plugins"><span>🧩</span>Plugins</button>
  <button data-a="tab" data-t="logs"><span>📜</span>Logs</button>
@@ -214,7 +350,8 @@ const $=s=>document.querySelector(s);
 let T='';try{T=new URLSearchParams(location.search).get('t')||localStorage.t||'';if(T)localStorage.t=T}catch{}
 history.replaceState(null,'',location.pathname);
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-let S=null,tab='home',models=[],res={},stopT=false,init=false,curTask=null,incKey='',swAt=0,working=[],busy=false,ulogOn=false;
+let S=null,tab='home',init=false,curTask=null,incKey='',swAt=0,busy=false,ulogOn=false;
+let seg='m',H={groups:[],favs:[],working:{},loaded:false,loading:false},hq='',hprov='all',hfav=false,hshow=40,tres={},openP=new Set(),fq='',ff='all',stopV=false;
 const txt=(el,t)=>{t=String(t);if(el.textContent!==t)el.textContent=t};
 const htm=(el,h)=>{if(el._h!==h){el._h=h;el.innerHTML=h}};
 function toast(m,bad){const t=$('#toast');t.textContent=m;t.className=bad?'bad':'';t.style.display='block';clearTimeout(toast.h);toast.h=setTimeout(()=>t.style.display='none',3800)}
@@ -229,7 +366,7 @@ htm($('#cmds'),CMDS.map(([c,d])=>`<div class="cmd"><div style="flex:1"><code>${e
 function paint(){
  const c=S.cfg,k=S.claude,v=k.version;
  if(!init){init=true;
-  htm($('#prov'),Object.entries(S.providers).map(([x,y])=>`<option value="${esc(x)}">${esc(y.name)}</option>`).join(''));
+  htm($('#prov'),Object.entries(GN).map(([g,t])=>{const it=Object.entries(S.providers).filter(([,y])=>y.group===g);return it.length?`<optgroup label="${t}">`+it.map(([x,y])=>`<option value="${esc(x)}">${esc(y.name)}</option>`).join('')+'</optgroup>':''}).join(''));
   $('#prov').value=c.provider;$('#url').value=c.base_url||S.providers[c.provider].base_url;$('#cm').value=c.model;$('#preset').value=c.preset;$('#ck-auto2').checked=c.auto;$('#key').value='';
   $('#dir').value=c.lastDir;if(c.apkDir)$('#apk-dir').value=c.apkDir;$('#ck-wake').checked=c.wake}
  txt($('#sub'),S.platform+' · '+dur(S.uptime)+' · v'+S.version);
@@ -266,16 +403,11 @@ function paint(){
  const sw=S.proxy.lastSwitch;if(sw&&sw.at!==swAt){if(swAt)toast((sw.auto?'Apne aap badla: ':'Model badla: ')+sw.model+'. Kaam wahin se chal raha hai');swAt=sw.at}
  htm($('#hist'),S.tasks.length?S.tasks.map(t=>{const st=t.status==='done'?'<span class=ok>poora</span>':t.status==='running'?'<span class=wa>chal raha</span>':t.status==='stopped'?'roka gaya':'<span class=bad>fail</span>';
   return `<div class="row hist" data-a="pick" data-id="${esc(t.id)}"><div class="nm">${esc(t.prompt)}<div class="mu">${st} · ${ago(t.started)}</div></div>${t.status==='failed'||t.status==='stopped'?`<button class="sm" data-a="resume" data-id="${esc(t.id)}">Jaari rakho</button>`:''}</div>`}).join(''):'<p class="mu">Koi task nahi.</p>');
+ if(tab==='models')paintHub();
 }
-function paintList(){
- htm($('#list'),models.map(m=>{const r=res[m];const st=!r?'':r==='..'?'test ho raha…':r.ok?`<span class=ok>chalta hai · ${(r.ms/1000).toFixed(1)}s</span>`:`<span class=bad>${esc(String(r.err).slice(0,60))}</span>`;
-  return `<div class="row"><div class="nm mono">${working.includes(m)?'★ ':''}${esc(m)}<div class="mu">${st}</div></div><button class="sm" data-a="test" data-id="${esc(m)}">Test</button><button class="p sm" data-a="use" data-id="${esc(m)}">Lagao</button></div>`}).join(''));
- const ok=models.filter(m=>res[m]&&res[m].ok).length;txt($('#s-list'),models.length?`${models.length} models · ${ok} chalte hue`:'');
-}
-async function testOne(m){res[m]='..';paintList();res[m]=await api('test',{model:m});working=working.filter(x=>x!==m);if(res[m].ok)working.unshift(m);paintList()}
 async function useModel(m){const r=await api('config',{model:m});if(!r.error){toast(r.applied?'Model lag gaya: '+m:'Model save hua. Gateway URL aur key bhi daalo');refresh()}}
 const A={
- tab(e){tab=e.dataset.t;document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x.id==='t-'+tab));document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x.dataset.t===tab));scrollTo(0,0);tick(true)},
+ tab(e){tab=e.dataset.t;document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x.id==='t-'+tab));document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x.dataset.t===tab));scrollTo(0,0);document.body.classList.toggle('pvwide',tab==='preview');if(tab==='preview')setTimeout(pvOpen,30);if(tab==='models'){paintHub();if(seg==='m'&&!H.loaded&&!H.loading)loadHub()}tick(true)},
  goto(e){$('#c-'+e.dataset.g).scrollIntoView({behavior:'smooth',block:'start'})},
  async save(){const r=await api('config',{provider:$('#prov').value,base_url:$('#url').value,api_key:$('#key').value,preset:$('#preset').value});if(!r.error){$('#key').value='';toast(r.applied?'Save aur Claude me lag gaya ✅':'Save ho gaya. Ab model chuno');refresh()}},
  async gw(){const was=S.gateway.running;await api('svc',{op:was?'stop':'start'});toast(was?'Band ho raha hai':'Start ho raha hai. Pehli baar time lagta hai');setTimeout(refresh,1500)},
@@ -284,11 +416,7 @@ const A={
  async pcustom(){const c=$('#pcmd').value.trim();if(!c){toast('Command likho',1);return}const r=await api('plugin/run',{cmd:c});if(!r.error)toast('Chal raha hai. Logs tab (job-custom) dekho')},
  async doctor(){const b=$('#b-doc');b.disabled=true;b.textContent='Check ho raha hai…';const r=await api('doctor',{});b.disabled=false;b.textContent='Sab check karo';
   if(r.checks)htm($('#doc'),r.checks.map(x=>`<div class="row"><span class="dot ${x.ok?'ok':'bad'}"></span><div class="nm"><b>${esc(x.name)}</b> <span class="mu">${esc(x.msg)}</span>${x.fix?`<div class="wa">${esc(x.fix)}</div>`:''}</div></div>`).join(''))},
- async load(){txt($('#s-list'),'Laa raha hu…');const r=await api('models?filter='+encodeURIComponent($('#flt').value)+'&max=30');if(r.models){models=r.models;working=r.working||[];res={};paintList();if(!models.length)txt($('#s-list'),'Koi model nahi mila. Filter badlo')}else txt($('#s-list'),'')},
- test(e){testOne(e.dataset.id)},
- use(e){useModel(e.dataset.id)},
  usecustom(){const m=$('#cm').value.trim();if(m)useModel(m);else toast('Model ka naam likho',1)},
- async testall(){const b=$('#b-all');if(b.dataset.run){stopT=true;return}b.dataset.run=1;b.textContent='Roko';stopT=false;for(const m of models){if(stopT)break;await testOne(m)}delete b.dataset.run;b.textContent='Sab test karo'},
  async copy(e){const ok=await copyText(e.dataset.c);toast(ok?'Copy ho gaya ✅ '+e.dataset.c:'Copy nahi hua. Haath se likho: '+e.dataset.c,!ok)},
  async bat(e){const r=await api('battery/open',{which:e.dataset.w});if(!r.error)toast('Setting khul gayi. Termux dhundo aur "No restrictions" chuno')},
  async batdone(){await api('config',{batteryDone:true});toast('Badhiya! Ab background me bina ruke chalega 🎉');refresh()},
@@ -307,6 +435,210 @@ const A={
  async stopall(){await api('stopall',{});toast('Sab process rok diye');setTimeout(refresh,800)},
  async quit(){if(confirm('Dashboard aur sab services band karu?')){await api('quit',{});document.body.innerHTML='<p style="padding:40px 0">Band ho gaya. Dobara chalane ke liye terminal me: ccs</p>'}}
 };
+
+/* ================= HUB ================= */
+const GN={gateway:'🛰️ Gateway',free:'🆓 Free APIs',hard:'🧗 Mushkil signup',local:'💻 Local',other:'⚙️ Dusre'};
+const QF=['free','coder','flash','70b','120b','gpt-oss','llama','qwen','gemma','deepseek','mistral'];
+const pn=id=>(S&&S.providers[id]&&S.providers[id].name)||id;
+const hue=id=>{let h=0;for(const ch of String(id))h=(h*31+ch.charCodeAt(0))%360;return h};
+const av=id=>`<span class="av" style="background:linear-gradient(135deg,hsl(${hue(id)} 75% 55%),hsl(${(hue(id)+55)%360} 75% 42%))">${esc((pn(id)[0]||'?').toUpperCase())}</span>`;
+const flat=()=>{const o=[];for(const g of H.groups)for(const m of g.models)o.push({p:g.id,m,sug:g.suggested});return o};
+function filtered(){
+ const terms=hq.toLowerCase().split(/\s+/).filter(Boolean),favs=new Set(H.favs),c=S.cfg;
+ const sc=x=>(c.provider===x.p&&c.model===x.m?-4:0)+(favs.has(x.p+'|'+x.m)?-2:0)+((H.working[x.p]||[]).includes(x.m)?-1:0);
+ return flat().filter(x=>(hprov==='all'||x.p===hprov)&&(!hfav||favs.has(x.p+'|'+x.m))&&terms.every(t=>(x.m+' '+pn(x.p)).toLowerCase().includes(t)))
+  .map((x,i)=>({x,i,s:sc(x)})).sort((a,b)=>a.s-b.s||a.i-b.i).map(o=>o.x);
+}
+function paintHub(){
+ if(!S)return;const c=S.cfg,pv=S.providers[c.provider]||{};
+ $('#now').style.display=seg==='m'?'':'none';
+ htm($('#now'),c.model?`<div class="nowrow">${av(c.provider)}<div class="nm"><div class="mu">Abhi laga hua</div><b class="mono">${esc(c.model)}</b><div class="mu">${esc(pn(c.provider))}</div></div></div><div class="btns" style="margin-bottom:0"><button class="sm" data-a="copy" data-c="${esc(c.model)}">📋 Model copy</button><button class="sm" data-a="copy" data-c="${esc(pv.url||c.base_url||'')}">📋 URL copy</button></div>`:`<div class="mu">Abhi koi model nahi laga. Neeche se chuno 👇</div>`);
+ if(seg==='m')paintModels();else if(seg==='f')paintFree();else paintOmni();
+}
+function paintModels(){
+ if(!S)return;const c=S.cfg,favs=new Set(H.favs),L=filtered(),all=flat();
+ htm($('#qchips'),QF.map(f=>`<button class="chip${hq.trim().toLowerCase()===f?' on':''}" data-a="qf" data-f="${f}">${f}</button>`).join(''));
+ htm($('#pchips'),H.groups.length?`<button class="chip${hprov==='all'?' on':''}" data-a="hprov" data-id="all">Sab (${all.length})</button>`+H.groups.map(g=>`<button class="chip${hprov===g.id?' on':''}${g.ok?'':' er'}" data-a="hprov" data-id="${esc(g.id)}">${esc(g.name.split(' (')[0])} · ${g.ok||g.suggested?g.models.length:'⚠️'}</button>`).join(''):'');
+ $('#b-fav').className='sm'+(hfav?' p':'');
+ const shown=L.slice(0,hshow);
+ htm($('#list'),H.loading&&!H.loaded?'<p class="mu">Laa raha hu…</p>':shown.map(x=>{
+  const k=x.p+'|'+x.m,r=tres[k],act=c.provider===x.p&&c.model===x.m,fv=favs.has(k),w=(H.working[x.p]||[]).includes(x.m);
+  const st=r==='..'?'<span class="wa">test ho raha…</span>':r?(r.ok?`<span class="ok">✔ chalta hai · ${(r.ms/1000).toFixed(1)}s</span>`:`<span class="bad">✘ ${esc(String(r.err).slice(0,70))}</span>`):(w?'<span class="ok">★ pehle chala tha</span>':'');
+  return `<div class="mrow${act?' act':''}"><div class="mtop"><button class="star" data-a="fav" data-p="${esc(x.p)}" data-m="${esc(x.m)}" aria-label="favorite">${fv?'⭐':'☆'}</button><div class="nm mono">${esc(x.m)}</div></div>
+<div class="msub">${av(x.p)}<span class="mu">${esc(pn(x.p))}</span>${/free/i.test(x.m)?'<span class="tag fr">FREE</span>':''}${x.sug?'<span class="tag">suggested</span>':''}${st}</div>
+<div class="macts"><button class="sm" data-a="copy" data-c="${esc(x.m)}">📋 Copy</button><button class="sm" data-a="mtest" data-p="${esc(x.p)}" data-m="${esc(x.m)}">⚡ Test</button>${act?'<button class="sm g" disabled>✓ Laga</button>':`<button class="p sm" data-a="muse" data-p="${esc(x.p)}" data-m="${esc(x.m)}">Lagao</button>`}</div></div>`}).join('')
+  ||(H.loaded?(all.length?'<p class="mu">Is filter se koi model nahi mila.</p>':'<div class="note">Abhi list khali hai. Ya to kisi free provider ki key save karo, ya OmniRoute chalu karo.<div class="btns"><button class="p" data-a="seg" data-s="f">🆓 Free API key lo</button><button data-a="seg" data-s="o">🛰️ OmniRoute</button></div></div>'):''));
+ const ok=Object.values(tres).filter(r=>r&&r.ok).length;
+ txt($('#s-list'),H.loaded?`${L.length} models · ${H.groups.length} providers${ok?' · '+ok+' chalte hue':''}`:(H.loading?'Saare providers se laa raha hu…':''));
+ const bad=H.groups.filter(g=>!g.ok);$('#perr-d').style.display=bad.length?'':'none';htm($('#perr'),bad.map(g=>`<div>• <b>${esc(g.name)}</b>: ${esc(g.err)}${g.suggested?' (suggested models dikha raha hu)':''}</div>`).join(''));
+ const mo=$('#more');mo.style.display=L.length>hshow?'':'none';txt(mo,`Aur dikhao ⬇ (${L.length-hshow} baaki)`);
+}
+async function loadHub(force){
+ if(H.loading)return;H.loading=true;paintModels();
+ const r=await api('hub/models?provider=all'+(force?'&force=1':''));H.loading=false;
+ if(r.groups){H={...H,...r,loaded:true};if(hprov!=='all'&&!r.groups.some(g=>g.id===hprov))hprov='all'}
+ paintModels();
+}
+async function testHub(p,m){
+ const k=p+'|'+m;tres[k]='..';paintModels();const r=await api('hub/test',{provider:p,model:m});tres[k]=r.error?{ok:false,err:r.error}:r;
+ H.working[p]=(H.working[p]||[]).filter(x=>x!==m);if(tres[k].ok)H.working[p].unshift(m);paintModels();
+}
+function paintFree(){
+ const P=S.providers,q=fq.toLowerCase().trim();
+ const F=[['all','Sab'],['keyless','Bina key'],['nocard','Bina card/phone'],['saved','Meri keys']];
+ htm($('#fchips'),F.map(([k,t])=>`<button class="chip${ff===k?' on':''}" data-a="ff" data-f="${k}">${t}</button>`).join(''));
+ const list=Object.entries(P).filter(([,p])=>['free','hard','local'].includes(p.group)).filter(([id,p])=>(!q||(p.name+' '+id+' '+p.limits).toLowerCase().includes(q))
+  &&(ff==='all'||(ff==='keyless'&&p.keyless)||(ff==='nocard'&&p.card==='no')||(ff==='saved'&&(p.key||p.on))));
+ const GH=[['free','🆓 Free providers'],['hard','🧗 Mushkil signup (China KYC)'],['local','💻 Apne PC par (local)']];
+ htm($('#flist'),GH.map(([g,t])=>{const it=list.filter(([,p])=>p.group===g);return it.length?`<h3 class="gh">${t} <span class="mu">(${it.length})</span></h3>`+it.map(provCard).join(''):''}).join('')||'<p class="mu">Kuch nahi mila. Filter badlo.</p>');
+}
+function provCard([id,p]){
+ const st=p.keyless?`<span class="tag fr">bina key chalta hai</span>`:p.key?`<span class="tag fr">✅ key saved ${esc(p.key)}</span>`:'<span class="tag">🔑 key chahiye</span>';
+ const cd=p.card==='phone'?'<span class="tag wr">📱 phone verify</span>':p.card==='kyc'?'<span class="tag bd">🪪 KYC</span>':'<span class="tag fr">💳 card nahi</span>';
+ return `<details class="pv" data-id="${esc(id)}"${openP.has(id)?' open':''}><summary>${av(id)}<div class="nm"><b>${esc(p.name)}</b><div class="mu">${esc(p.limits||p.hint)}</div></div></summary>
+<div class="pvb"><div style="margin-top:10px">${st}${cd}${p.active?'<span class="tag ac">⚡ abhi gateway</span>':''}${p.on&&p.keyless?'<span class="tag ac">Hub me jura</span>':''}</div>
+<label for="u-${esc(id)}">Base URL (API URL)</label>
+<div class="urlrow"><input id="u-${esc(id)}" value="${esc(p.url)}" inputmode="url" autocapitalize="off" autocomplete="off"><button class="sm" data-a="copyin" data-for="u-${esc(id)}">📋</button></div>
+${p.note?`<div class="note">ℹ️ ${esc(p.note)}</div>`:''}
+${p.key_url?`<a class="lnk" href="${esc(p.key_url)}" target="_blank" rel="noopener noreferrer">${p.keyless?'ℹ️ Provider page kholo':'🔑 API key lene jao'} ↗</a>`:''}
+<label for="k-${esc(id)}">API key ${p.key?'<span class="ok">(saved: '+esc(p.key)+')</span>':''}</label>
+<input id="k-${esc(id)}" type="password" autocomplete="off" placeholder="${p.keyless?'optional (khali chhod sakte ho)':'key yahan paste karo'}">
+<div class="btns"><button class="p" data-a="fsave" data-id="${esc(id)}">💾 Save</button><button class="g" data-a="fcheck" data-id="${esc(id)}">✔ Key test</button></div>
+<div class="btns"><button data-a="fmodels" data-id="${esc(id)}">🤖 Models</button><button data-a="fgw" data-id="${esc(id)}">⚡ Gateway</button>${p.keyless?`<button data-a="ftog" data-id="${esc(id)}" data-on="${p.on?0:1}">${p.on?'➖ Hub se hatao':'➕ Hub me jodo'}</button>`:p.key?`<button class="d" data-a="fclear" data-id="${esc(id)}">🗑 Key hatao</button>`:''}</div>
+<div class="res mu" id="r-${esc(id)}"></div></div></details>`;
+}
+function paintOmni(){
+ const o=S.omni;if(!o)return;
+ const s1=o.installing?'<span class="wa">Install ho raha hai… (neeche log)</span>':o.version?`<span class="ok">✔ v${esc(o.version)} install hai</span>`:!o.checked?'check ho raha hai…':'<span class="bad">Install nahi hai</span>';
+ const s2=o.up?`<span class="ok">✔ chal raha hai (port ${o.port})</span>${o.running?'':' · kisi aur jagah se'}`:'<span class="mu">band hai</span>';
+ const s3=o.active?'<span class="ok">✔ Claude abhi OmniRoute use kar raha hai</span>':'Claude ko OmniRoute se jodo';
+ const st=(n,ok,t,d,btn)=>`<div class="step${ok?' ok':''}"><div class="num">${n}</div><div class="nm"><b>${t}</b><div class="mu">${d}</div></div>${btn}</div>`;
+ htm($('#omni'),(o.nodeOk?'':`<div class="note">⚠️ Tumhara Node <b>${esc(o.node)}</b> hai. OmniRoute ko Node 22 ya 24+ chahiye (23 nahi). Install fail ho to pehle Node badlo.</div>`)
+  +st(1,!!o.version,'Install',s1,`<button class="p sm" data-a="oinst" ${o.installing?'disabled':''}>${o.version?'⬆ Update':'⬇ Install'}</button>`)
+  +st(2,o.up,'Start',s2,o.running?'<button class="d sm" data-a="ostop">⏹ Stop</button>':`<button class="p sm" data-a="ostart" ${o.up?'disabled':''}>▶ Start</button>`)
+  +st(3,o.active,'Claude se jodo',s3,`<button class="p sm" data-a="ouse" ${o.active?'disabled':''}>Jodo</button>`)
+  +`<a class="lnk o" href="http://localhost:${o.port}/dashboard" target="_blank" rel="noopener">🌐 OmniRoute dashboard ↗</a>`
+  +`<p class="mu" style="margin-top:10px">Wahan provider keys jodo. Phir yahan <b>Models</b> tab me OmniRoute ke models dikhenge. Agar wahan API key lagayi ho to Home &gt; Gateway me wo key daalo.</p>`
+  +`<div class="btns"><button data-a="copy" data-c="http://localhost:${o.port}/v1">📋 Endpoint URL</button><button data-a="copy" data-c="npm install -g omniroute">📋 Install cmd</button></div>`);
+}
+async function pollOmni(){
+ if(tab!=='models'||seg!=='o'||!S||!S.omni)return;const o=S.omni,p=$('#olog');
+ if(!o.installing&&!p._on)return;const r=await api('logs?name=job-omniroute');
+ if(r.text){p.style.display='block';p._on=1;setLog(p,r.text,'…')}
+}
+Object.assign(A,{
+ seg(e){seg=e.dataset.s;document.querySelectorAll('#seg button').forEach(x=>x.classList.toggle('on',x.dataset.s===seg));['m','f','o'].forEach(x=>$('#s-'+x).classList.toggle('on',x===seg));
+  if(tab!=='models')A.tab({dataset:{t:'models'}});paintHub();if(seg==='m'&&!H.loaded&&!H.loading)loadHub();scrollTo(0,0)},
+ tofree(){A.seg({dataset:{s:'f'}})},
+ load(){hshow=40;loadHub(true)},
+ more(){hshow+=40;paintModels()},
+ qf(e){const f=e.dataset.f;hq=hq.trim().toLowerCase()===f?'':f;$('#q').value=hq;hshow=40;paintModels()},
+ hprov(e){hprov=e.dataset.id;hshow=40;paintModels()},
+ favonly(){hfav=!hfav;hshow=40;paintModels()},
+ async fav(e){const k=e.dataset.p+'|'+e.dataset.m,on=H.favs.includes(k);H.favs=on?H.favs.filter(x=>x!==k):[...H.favs,k];paintModels();await api('hub/fav',{key:k})},
+ mtest(e){testHub(e.dataset.p,e.dataset.m)},
+ async muse(e){const r=await api('hub/use',{provider:e.dataset.p,model:e.dataset.m});if(!r.error){toast('Model lag gaya ✅ '+e.dataset.m+' ('+pn(e.dataset.p)+')');await refresh()}},
+ async testvis(){const b=$('#b-tv');if(b.dataset.run){stopV=true;return}b.dataset.run=1;b.textContent='⏹ Roko';stopV=false;
+  for(const x of filtered().slice(0,10)){if(stopV)break;await testHub(x.p,x.m)}delete b.dataset.run;b.textContent='⚡ Test 10'},
+ ff(e){ff=e.dataset.f;paintFree()},
+ async copyin(e){const v=$('#'+e.dataset.for).value.trim();const ok=await copyText(v);toast(ok?'Copy ho gaya ✅ '+v:'Copy nahi hua. Haath se likho: '+v,!ok)},
+ async fsave(e,quiet){const id=e.dataset.id,p=S.providers[id],k=$('#k-'+id).value.trim(),u=$('#u-'+id).value.trim();
+  if(!k&&u===p.url){if(!quiet)toast(p.keyless?'Kuch badla nahi':'Pehle API key paste karo',1);return false}
+  const r=await api('hub/save',{provider:id,api_key:k,base_url:u});if(r.error)return false;
+  $('#k-'+id).value='';H.loaded=false;await refresh();if(!quiet)toast('Save ho gaya ✅ '+p.name);return true},
+ async fcheck(e){const id=e.dataset.id,p=S.providers[id];
+  if($('#k-'+id).value.trim()||$('#u-'+id).value.trim()!==p.url){if(!(await A.fsave(e,true)))return}
+  const el=()=>$('#r-'+id);if(el())el().textContent='Check ho raha hai…';
+  const r=await api('hub/check',{provider:id});if(!el())return;
+  if(r.error){el().innerHTML='<span class="bad">❌ '+esc(r.error)+'</span>';return}
+  el().innerHTML=r.ok?`<span class="ok">✅ Key sahi hai · ${r.count} models mile.</span> Ab <b>Models dekho</b> dabao.`:`<span class="bad">❌ ${esc(String(r.err).slice(0,160))}</span><br>Key/URL dobara check karo.`;if(r.ok)H.loaded=false},
+ fmodels(e){const id=e.dataset.id,p=S.providers[id];if(!p.key&&!p.keyless&&!p.on&&!p.active){toast('Pehle '+p.name+' ki key save karo',1);return}
+  hprov=id;hq='';$('#q').value='';hshow=40;A.seg({dataset:{s:'m'}});loadHub(true)},
+ async fgw(e){const id=e.dataset.id,r=await api('config',{provider:id});if(!r.error){init=false;await refresh();hprov=id;toast(pn(id)+' ab gateway hai. Model chuno 👇');A.seg({dataset:{s:'m'}});loadHub(true)}},
+ async ftog(e){const r=await api('hub/toggle',{provider:e.dataset.id,on:e.dataset.on==='1'});if(!r.error){H.loaded=false;await refresh();toast(e.dataset.on==='1'?'Hub me jud gaya':'Hub se hata diya')}},
+ async fclear(e){if(!confirm('Is provider ki saved key hata du?'))return;const r=await api('hub/clear',{provider:e.dataset.id});if(!r.error){H.loaded=false;await refresh();toast('Key hata di')}},
+ async oinst(){const r=await api('omni/install',{});if(!r.error){const p=$('#olog');p._on=1;p.style.display='block';p.textContent='Install shuru…';toast('Install shuru. Neeche live log dikhega, 1-3 minute lag sakte hain');refresh()}},
+ async ostart(){const r=await api('omni/start',{});if(!r.error){toast('Start ho raha hai. Pehli baar thoda time lagta hai');setTimeout(refresh,2000)}},
+ async ostop(){await api('omni/stop',{});toast('Band ho raha hai');setTimeout(refresh,1200)},
+ async ouse(){const r=await api('omni/use',{});if(!r.error){init=false;await refresh();hprov='omniroute';toast(r.needModel?'Jud gaya. Ab OmniRoute ka koi model chuno 👇':'Claude ab OmniRoute se judta hai ✅');A.seg({dataset:{s:'m'}});loadHub(true)}}
+});
+/* ================= PREVIEW ================= */
+const DEVS={phone:[390,844,'📱 Phone',10],tablet:[820,1180,'📲 Tablet',8],laptop:[1280,800,'💻 Laptop',0],full:[0,0,'🖥 Full',0]};
+const PV={dev:'phone',rot:false,key:'',cur:'',s:null,dir:null,cons:[],errs:0,filled:false,gen:0};
+try{PV.dev=localStorage.pvdev||(innerWidth<600?'full':'phone');if(!DEVS[PV.dev])PV.dev='phone'}catch{}
+function pvHost(s){return s.mode==='dev'?'localhost':location.hostname}
+function pvBase(s){return 'http://'+pvHost(s)+':'+(s.mode==='dev'?s.devPort:s.port)}
+function pvPaintDevs(){htm($('#pv-devs'),Object.entries(DEVS).map(([k,v])=>`<button class="chip${PV.dev===k?' on':''}" data-a="pvdev" data-d="${k}">${v[2]}</button>`).join('')+(PV.dev==='phone'||PV.dev==='tablet'||PV.dev==='laptop'?`<button class="chip${PV.rot?' on':''}" data-a="pvrot">🔁 Ghumao</button>`:''))}
+function pvFit(){
+ const st=$('#pv-stage'),fr=$('#pv-frame');let [w,h,,b]=DEVS[PV.dev];const sw=st.clientWidth;if(!sw)return;
+ fr.className='pvframe '+PV.dev;
+ if(!w){const H=Math.max(420,innerHeight-250);fr.style.cssText=`width:100%;height:${H}px`;st.style.height=H+'px';return}
+ if(PV.rot)[w,h]=[h,w];
+ const fw=w+2*b,fh=h+2*b,k=Math.min(1,(sw-12)/fw,(innerHeight*0.74)/fh);
+ fr.style.cssText=`width:${fw}px;height:${fh}px;transform:scale(${k});margin:6px 0 6px ${Math.max(0,(sw-fw*k)/2)}px`;
+ st.style.height=Math.round(fh*k+12)+'px'}
+function pvLoad(force){
+ const s=PV.s;if(!s)return;const key=[s.mode,s.dir,s.devPort,s.port,s.ok].join('|');
+ if(!force&&key===PV.key)return;PV.key=key;PV.cur='';
+ const f=$('#pv-if');
+ if(s.mode==='static'&&!s.ok){f.removeAttribute('src');return}
+ f.src=pvBase(s)+($('#pv-path').value.startsWith('/')?$('#pv-path').value:'/')}
+function pvOpen(){pvPaintDevs();pvFit();pvPoll()}
+function pvConPaint(){
+ const sh=PV.cons.slice(-80);htm($('#pv-con'),sh.length?sh.map(c=>`<div class="${c[0]}">${esc(c[1])}</div>`).join(''):'<div class="mu">Page ke console.log aur errors yahan dikhenge.</div>');
+ txt($('#pv-cnt'),PV.errs?PV.errs+' error':String(PV.cons.length));$('#pv-cnt').style.color=PV.errs?'var(--bad)':'';
+ const c=$('#pv-con');c.scrollTop=c.scrollHeight}
+addEventListener('message',e=>{
+ const f=$('#pv-if');if(!f||e.source!==f.contentWindow||!e.data||e.data.ccs!==1)return;
+ if(e.data.t==='l'){const p=e.data.a[0];PV.cur=p;PV.cons=[];PV.errs=0;pvConPaint();if(document.activeElement!==$('#pv-path'))$('#pv-path').value=p}
+ else if(e.data.t==='c'){const[k,m]=e.data.a;PV.cons.push([k,m]);if(k==='error')PV.errs++;if(PV.cons.length>300)PV.cons.shift();pvConPaint()}});
+async function pvPoll(){
+ if(tab!=='preview'||document.hidden)return;const gen=++PV.gen;
+ const s=await api('preview/state');if(s.error||gen!==PV.gen)return;PV.s=s;
+ const dir=$('#pv-dir');
+ if(!PV.filled){PV.filled=true;dir.value=s.dir||s.lastDir||'';$('#pv-mode').value=s.mode;$('#pv-cmd').value=s.cmd||'';$('#pv-port').value=s.devPort;$('#pv-follow').checked=s.auto}
+ else if(PV.dir!==s.dir&&document.activeElement!==dir)dir.value=s.dir;
+ PV.dir=s.dir;
+ const dv=s.mode==='dev';$('#pv-devbox').style.display=dv?'':'none';
+ htm($('#pv-sug'),s.suggest.map(x=>`<button class="chip" data-a="pvsug" data-c="${esc(x)}">${esc(x)}</button>`).join(''));
+ txt($('#pv-devs-s'),s.dev.running?(s.dev.up?'✅ Chal raha hai, port '+s.devPort:'⏳ Start ho raha hai… (port '+s.devPort+')'):s.dev.up?'✅ Port '+s.devPort+' par kuch chal raha hai (bahar se)':'Band hai');
+ htm($('#pv-pages'),s.pages.map(p=>`<option value="/${esc(p)}">`).join(''));
+ txt($('#pv-pill'),dv?(s.dev.up?'⚙️ Dev':'⏳ Dev'):s.ok?(s.clients?'🟢 Live':'⚪ Ready'):'📂 Folder lo');
+ const ago0=s.changes[0];
+ txt($('#pv-stat'),dv?(s.dev.up?'Dev server se live ('+pvBase(s)+')':'Dev server band hai. Upar se chalao ya apne terminal me chalao'):!s.ok?'Folder chuno':s.files+' files dekh raha hu'+(ago0?' · aakhri badlav '+ago(ago0.t):' · badlav ka intezar'));
+ dot('pv-dot',dv?(s.dev.up?'ok':'wa'):s.ok?(s.clients?'ok':'wa'):'');
+ htm($('#pv-chg'),s.changes.length?s.changes.slice(0,12).map(c=>`<div class="chg"><span>${c.k==='+'?'🆕':c.k==='-'?'🗑️':'✏️'}</span><div class="nm mono">${esc(c.f)}</div><span class="mu">${ago(c.t)}</span></div>`).join(''):'<p class="mu">Abhi koi badlav nahi.</p>');
+ pvLoad();
+ if(curTask){const r=await api('task/log?id='+encodeURIComponent(curTask));if(r.text!==undefined)setLog($('#pv-tlog'),r.text.slice(-4000),r.running?'Claude soch raha hai…':'Output khali.');$('#pv-run').disabled=!!r.running}
+}
+const pvSet=async create=>{const s=PV.s||{};const r=await api('preview/set',{dir:$('#pv-dir').value.trim()||undefined,create,mode:$('#pv-mode').value,devPort:$('#pv-port').value,cmd:$('#pv-cmd').value,auto:$('#pv-follow').checked});if(!r.error){PV.filled=true;toast(create?'Folder ban gaya aur preview me lag gaya ✅':'Preview me lag gaya ✅');PV.key='';await pvPoll()}};
+Object.assign(A,{
+ pvdev(e){PV.dev=e.dataset.d;try{localStorage.pvdev=PV.dev}catch{}pvPaintDevs();pvFit()},
+ pvrot(){PV.rot=!PV.rot;pvPaintDevs();pvFit()},
+ pvreload(){const s=PV.s;if(!s)return;if(s.mode==='static'&&PV.cur){try{$('#pv-if').contentWindow.postMessage({ccs:'reload'},'*')}catch{}}else pvLoad(true)},
+ pvopen(){const s=PV.s;if(!s)return;const p=$('#pv-path').value;window.open(pvBase(s)+(p.startsWith('/')?p:'/'+p),'_blank','noopener')},
+ async pvfull(){const st=$('#pv-stage');try{if(document.fullscreenElement)await document.exitFullscreen();else await st.requestFullscreen()}catch{toast('Poori screen is browser me nahi khuli. ↗ se naye tab me kholo',1)}},
+ pvclr(){PV.cons=[];PV.errs=0;pvConPaint()},
+ pvset(){pvSet(false)},pvnew(){pvSet(true)},
+ pvtask(){if(S&&S.cfg.lastDir){$('#pv-dir').value=S.cfg.lastDir;pvSet(false)}else toast('Abhi koi task folder nahi hai',1)},
+ pvsug(e){$('#pv-cmd').value=e.dataset.c},
+ async pvdevstart(){await pvSet(false);const r=await api('preview/dev',{op:'start',cmd:$('#pv-cmd').value});if(!r.error){toast('Dev server start ho raha hai. Pehli baar time lagta hai');setTimeout(pvPoll,1500)}},
+ async pvdevstop(){await api('preview/dev',{op:'stop'});toast('Dev server roka');setTimeout(pvPoll,800)},
+ async pvrun(){const dir=$('#pv-dir').value.trim(),p=$('#pv-prompt').value.trim(),auto=$('#pv-auto').checked;
+  if(!dir||!p){toast('Folder aur "kya banana hai" dono likho',1);return}
+  if(auto&&!confirm('Full auto me Claude bina puchhe commands chalayega. Sirf apne project folder me use karo. Aage badhu?'))return;
+  const a=await api('preview/set',{dir,create:true,auto:$('#pv-follow').checked});if(a.error)return;
+  const r=await api('task/run',{dir,prompt:p,claudemd:true,cont:$('#pv-cont').checked,auto,create:true});
+  if(r.id){curTask=r.id;PV.key='';toast('Task shuru. Preview apne aap update hoga 👁️');refresh();pvPoll()}}
+});
+$('#pv-mode').addEventListener('change',()=>pvSet(false));
+$('#pv-path').addEventListener('keydown',e=>{if(e.key==='Enter'){PV.cur='';pvLoad(true)}});
+addEventListener('resize',()=>{if(tab==='preview')pvFit()});
+document.addEventListener('fullscreenchange',()=>setTimeout(pvFit,50));
+setInterval(pvPoll,1200);
+$('#q').addEventListener('input',()=>{hq=$('#q').value;hshow=40;paintModels()});
+$('#fq').addEventListener('input',()=>{fq=$('#fq').value;paintFree()});
+document.addEventListener('toggle',e=>{const d=e.target;if(d&&d.classList&&d.classList.contains('pv')){d.open?openP.add(d.dataset.id):openP.delete(d.dataset.id)}},true);
 document.addEventListener('click',e=>{const el=e.target.closest('[data-a]');if(el&&A[el.dataset.a])A[el.dataset.a](el)});
 $('#prov').addEventListener('change',async()=>{const r=await api('config',{provider:$('#prov').value});if(!r.error){init=false;await refresh();toast('Provider badal gaya'+(r.applied?' aur Claude me lag gaya':'. URL, key aur model daalo'))}});
 $('#ck-auto2').addEventListener('change',()=>api('config',{auto:$('#ck-auto2').checked}));
@@ -318,7 +650,7 @@ async function pollTask(){if(tab!=='task'||!curTask)return;const r=await api('ta
 async function pollApk(){if(tab!=='apk')return;const r=await api('logs?name=job-apk');if(r.text!==undefined)setLog($('#alog'),r.text,'Abhi koi build nahi.')}
 async function pollUpd(){if(!ulogOn)return;const r=await api('logs?name=job-update');if(r.text!==undefined){const p=$('#ulog');setLog(p,r.text,'…');if(/dobara chalu ho raha/.test(r.text)){ulogOn=false;setTimeout(()=>location.reload(),6000)}}}
 async function refresh(){const r=await api('state');if(!r.error){S=r;paint()}}
-async function tick(force){if(document.hidden||(busy&&!force))return;busy=true;try{await refresh();await pollLog();await pollTask();await pollApk();await pollUpd()}finally{busy=false}}
+async function tick(force){if(document.hidden||(busy&&!force))return;busy=true;try{await refresh();await pollLog();await pollTask();await pollApk();await pollUpd();await pollOmni()}finally{busy=false}}
 setInterval(tick,3000);document.addEventListener('visibilitychange',()=>tick(true));tick(true);
 </script>
 </body>

@@ -1,4 +1,4 @@
-# cc-setup v4
+# cc-setup v4.1
 
 Termux (Android) aur Windows par **Claude Code + free API gateway**, ek rang-birangi dashboard ke saath.
 `ccs` likho, dashboard khul jata hai. Terminal band karo, tab bhi background me chalta rahta hai.
@@ -36,6 +36,28 @@ Agli baar dashboard ke liye sirf:
 ```
 ccs
 ```
+
+## Hub tab (models, free APIs, OmniRoute)
+
+Dashboard ke neeche **Hub** (⚡) me 3 hisse hain:
+
+- **🤖 Models**: jin providers ki key save hai, un sab ke models ek hi list me. Search karo, provider chip se chhanto, ⭐ favorite banao, **📋 Copy** se naam copy karo, **⚡ Test** se check karo, **Lagao** se seedha Claude me lagao (provider apne aap badal jata hai).
+- **🆓 Free APIs**: 16 free providers (Gemini, Groq, OpenRouter, Cerebras, Mistral, NVIDIA, Cloudflare, Z AI, Cohere, GitHub Models, Hugging Face, Kilo, LLM7, OVH, Gonka, Aion) + 2 mushkil signup wale + Ollama (local). Har card me API URL (copy), key lene ka link, free limit, aur **Save / Key test**. Bina key wale providers (Kilo, LLM7, OVH, Ollama) ko **➕ Hub me jodo** se list me lao.
+- **🛰️ OmniRoute**: Install (`npm install -g omniroute`), Start/Stop aur Claude se jodna, sab dashboard se. OmniRoute ko Node 22 ya 24+ chahiye (23 nahi).
+
+Cloudflare ke URL me `{account_id}` ki jagah apni Account ID likho.
+
+## Live Preview (👁️ tab)
+
+Dashboard ke **Preview** tab me apna app/website turant dikhta hai, bilkul VS Code ke live preview jaisa:
+
+- **Folder lagao** (ya Task chalao, to preview apne aap usi folder ka ho jata hai). Jaise hi Claude koi file likhta/badalta hai, preview **1 second se kam me** apne aap update hota hai. CSS badle to page reload bhi nahi hota.
+- Preview ke andar app ko **chalao, click karo, type karo**, asli ki tarah.
+- 📱 Phone / 📲 Tablet / 💻 Laptop / 🖥 Full size, 🔁 ghumao, ⛶ poori screen, ↗ naye tab me.
+- Neeche **Console** (errors aur console.log), **Abhi kya badla** (file list) aur Claude ka **live task log**.
+- Wahin se naya kaam shuru karo: folder + "kya banana hai" > **Banao**. Folder na ho to bana diya jata hai.
+- React / Vite / Next / Flask jaise projects ke liye Type me **Dev server** chuno, command (jaise `npm run dev`) aur port daalo.
+- Preview server `127.0.0.1:8789` par chalta hai (`CC_PREVIEW_PORT` se badlo). Sirf tumhare phone/PC par, bahar se koi nahi dekh sakta.
 
 ## Battery restriction hatao (zaroori, ek baar)
 
@@ -137,7 +159,7 @@ Files GitHub (`mrshadowsir/cc-setup`, branch `main`) se aati hain aur dashboard 
 
 ## Files
 
-`cc.js` (tool) · `proxy.js` (smart proxy) · `apk.js` (APK builder) · `dash.html` (dashboard) · `providers.json` · `plugins.json` · `package.json` · `install.sh` · `install.bat`
+`cc.js` (tool) · `proxy.js` (smart proxy) · `preview.js` (live preview) · `apk.js` (APK builder) · `dash.html` (dashboard) · `providers.json` · `plugins.json` · `package.json` · `install.sh` · `install.bat` · `README.html` (rangeen guide, browser me kholo)
 
 Sab files ek hi level par hain, koi folder nahi. GitHub par sirf files upload karke kaam chal jata hai.
 
@@ -147,4 +169,7 @@ Sab files ek hi level par hain, koi folder nahi. GitHub par sirf files upload ka
 - Android ka battery system alag alag phone par alag hota hai. Upar ke settings ke baad bhi koi phone process maare to `ccs battery app` se app info kholo aur check karo.
 - Browser se battery buttons tab hi khulte hain jab Termux ko "Display over other apps" permission ho. Warna Termux me `ccs battery` chalao.
 - Local APK build Termux par practical nahi hai (Android SDK nahi chalta), isliye cloud build default hai.
-- Free providers ke models roz badalte hain: Models tab me dobara test karo.
+- Free providers ke models roz badalte hain: Hub > Models me dobara test karo.
+- Free limits aur URL providers badalte rehte hain (list Nov 2026 me check ki gayi thi). Key lene wale page par ek baar confirm kar lo, aur `providers.json` me badal sakte ho.
+- Kuch free providers prompts log ya training me use kar sakte hain (har card ke note me likha hai). Private code/data mat bhejo.
+- OmniRoute ka install Termux par aapke phone ke Node version aur native packages par depend karta hai. Fail ho to Logs tab me `job-omniroute` dekho.
