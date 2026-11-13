@@ -333,7 +333,7 @@ async function runSteps(pl, key, ctx) {
   }
   if (!steps.length) return { ok: true, msg: 'Is option me kuch karne ko nahi (sab theek hai)' };
   ctx.start('job-mp-' + sid(pl.id), steps.join(' && '), {
-    cwd: os.homedir(), onExit: code => { if (code === 0) ctx.mark(pl.id); },
+    cwd: os.homedir(), onExit: code => { if (code === 0) { ensureMcpFile(pl); ctx.mark(pl.id); } },
   });
   return { ok: true, msg: `${key === 'all' ? 'Fix' : 'Fix option'} shuru (${steps.length} step). Logs me job-mp dekho`, steps: steps.length };
 }
@@ -354,6 +354,65 @@ async function optionsFor(pl, ctx) {
   opts.push({ key: 'copy', label: '📋 Manual command copy karo', cmd: planSteps(pl, h, ctx, selFor('reinstall')).join(' && ') || pl.cmd });
   opts.push({ key: 'logs', label: '📜 Logs dekho' });
   return { status: h.status, checks: h.checks, options: opts };
+}
+
+
+/* ---------- self-heal + diagnostics ---------- */
+const HEAL = new Map();   // id -> { n, t }  (auto-fix retry limit)
+
+// MCP entry config me nahi hai to seedha ~/.claude.json me likho (cmd se)
+function ensureMcpFile(pl) {
+  const mcp = fromCmd(pl.cmd, /mcp add --scope user (\S+)/);
+  if (!mcp) return false;
+  const j = rj(CJ, {});
+  j.mcpServers = j.mcpServers && typeof j.mcpServers === 'object' ? j.mcpServers : {};
+  if (j.mcpServers[mcp]) return true;
+  const after = String(pl.cmd).split(' -- ')[1];
+  if (!after) return false;
+  const [command, ...args] = after.trim().split(/\s+/);
+  if (fs.existsSync(CJ)) fs.copyFileSync(CJ, CJ + '.bak');
+  j.mcpServers[mcp] = { type: 'stdio', command, args, env: {} };
+  wj(CJ, j);
+  return true;
+}
+
+// Wanted items (dashboard se install hue) ko check karo; problem ho to fix. Ek tick me ek item.
+async function autoHeal(ctx) {
+  if (ctx.running().length) return { ok: true, msg: 'Pehle se job chal raha hai' };
+  const wanted = new Set(ctx.wanted());
+  for (const pl of PLJ()) {
+    if (!pl.cmd || !wanted.has(pl.id)) continue;
+    if (fromCmd(pl.cmd, /mcp add --scope user (\S+)/)) ensureMcpFile(pl);
+    const h = await healthOf(pl, ctx);
+    if (h.status === 'ok') continue;
+    const a = HEAL.get(pl.id) || { n: 0, t: 0 };
+    if (Date.now() - a.t > 3600000) a.n = 0;
+    if (a.n >= 3) { ctx.log('job-mp-autoheal', `[skip] ${pl.name}: 1 ghante me 3 baar fix ho chuka, ab manual Fix options dekho`); continue; }
+    a.n++; a.t = Date.now(); HEAL.set(pl.id, a);
+    ctx.log('job-mp-autoheal', `[autoheal] ${pl.name}: problem mila, fix ${a.n}/3`);
+    try { await runSteps(pl, 'all', ctx); } catch (e) { ctx.log('job-mp-autoheal', '[!] ' + (e.message || e)); }
+    return { ok: true, msg: 'Auto-heal: ' + pl.name };
+  }
+  return { ok: true, msg: 'Sab wanted items theek hain' };
+}
+
+// Asli state: file, Claude CLI ka output, paths, sab ek jagah
+async function diag(ctx) {
+  const j = rj(CJ, null);
+  const cli = await run('claude mcp list', 30000);
+  const cliP = await run('claude plugin list', 30000);
+  return {
+    home: os.homedir(),
+    configDir: CLAUDE,
+    claudeJson: { path: CJ, exists: !!j, mcpServers: j && j.mcpServers ? Object.keys(j.mcpServers) : [] },
+    pluginsDir: fs.existsSync(PDIR) ? fs.readdirSync(PDIR) : [],
+    knownMarketplaces: Object.keys(rj(KNOWN, {})),
+    installedPlugins: installedRaw().map(p => p.id),
+    wanted: ctx.wanted(),
+    running: ctx.running(),
+    cliMcpList: cli.out.trim().slice(0, 1500),
+    cliPluginList: cliP.out.trim().slice(0, 1500),
+  };
 }
 
 /* ---------- routes (p = path after 'mp/') ---------- */
@@ -393,7 +452,8 @@ async function route(p, b, ctx) {
       const list = installedRaw();
       for (const p of list) s.enabledPlugins[p.id] = !!b.on;
       saveSettings(s);
-      return { ok: true, count: list.length, msg: (b.on ? 'Sab ON' : 'Sab OFF') + ' kiye (' + list.length + ')' };
+      if (!list.length) return { ok: true, count: 0, msg: 'Koi plugin nahi hai. MCP servers ka ON/OFF nahi hota (unhe Delete kar sakte ho)' };
+      return { ok: true, count: list.length, msg: (b.on ? 'Sab ON' : 'Sab OFF') + ' kiye (' + list.length + ' plugins)' };
     }
 
     case 'health': {
@@ -493,8 +553,10 @@ async function route(p, b, ctx) {
       return runSteps(pl, b.key || 'all', ctx);
     }
 
+    case 'diag': return diag(ctx);
+    case 'heal': return autoHeal(ctx);
     default: return undefined; // cc.js ko pata chale ki route nahi mila
   }
 }
 
-module.exports = { route, isInstalled };
+module.exports = { route, isInstalled, autoHeal };

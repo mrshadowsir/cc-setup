@@ -484,7 +484,7 @@ nav{background:#15181fe6;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur
  <div class="psub" id="ps-inst">
   <div class="card c3"><h2>✅ Installed plugins</h2>
    <p class="mu"><span class="tag fr">● Active</span> installed + ON + files maujood. <span class="tag">⏸ OFF</span> band hai. <span class="tag bd">⚠ Files gayab</span> reinstall ya delete karo.</p>
-   <div class="btns"><button data-a="mpBulk" data-on="1">Sab ON</button><button data-a="mpBulk" data-on="0">Sab OFF</button><button data-a="mpHealth">🩺 Health check</button></div>
+   <div class="btns"><button data-a="mpBulk" data-on="1">Sab ON</button><button data-a="mpBulk" data-on="0">Sab OFF</button><button data-a="mpHealth">🩺 Health check</button><button data-a="mpDiag">🧪 Diagnostic</button><button data-a="mpHeal">🔧 Auto-heal abhi</button></div>
    <div id="mp-inst"></div>
    <div id="mp-health"></div>
   </div>
@@ -1072,6 +1072,12 @@ function statsPaint(){
  ];
  htm($('#stats'),tiles.map(([c,ic,l,v,sub])=>`<div class="stat ${c}"><span class="sico">${ic}</span><div class="stxt"><small>${esc(l)}</small><b>${esc(v)}</b><em>${esc(sub)}</em></div></div>`).join(''));
 }
+
+/* ---- Diagnostic + auto-heal ---- */
+Object.assign(A,{
+ mpDiag(){api('mp/diag').then(r=>{if(r.error)return;htm($('#mp-health'),'<div class="gh">🧪 Diagnostic (asli state)</div><pre class="mono" style="white-space:pre-wrap;word-break:break-word;font-size:12px;background:var(--s2);padding:10px;border-radius:12px">'+esc(JSON.stringify(r,null,2))+'</pre>')})},
+ mpHeal(){api('mp/heal',{}).then(r=>{if(!r.error){toast(r.msg);setTimeout(recLoad,3000);mpLoad()}})}
+});
 document.addEventListener('click',e=>{const el=e.target.closest('[data-a]');if(el&&A[el.dataset.a])A[el.dataset.a](el)});
 $('#prov').addEventListener('change',async()=>{const r=await api('config',{provider:$('#prov').value});if(!r.error){init=false;await refresh();toast('Provider badal gaya'+(r.applied?' aur Claude me lag gaya':'. URL, key aur model daalo'))}});
 $('#ck-auto2').addEventListener('change',()=>api('config',{auto:$('#ck-auto2').checked}));

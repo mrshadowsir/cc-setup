@@ -429,6 +429,16 @@ async function state() {
   };
 }
 const pluginsHub = require('./plugins-hub.js');
+const hubCtx = () => ({
+  mark: id => { const k = loadCfg(); k.installed[id] = true; saveCfg(k); },
+  cfgInstalled: id => !!loadCfg().installed[id],
+  wanted: () => { const inst = loadCfg().installed || {}; return Object.keys(inst).filter(k => inst[k]); },
+  claudePkg: CLAUDE_PKG,
+  start,
+  running: () => Object.keys(svc).filter(k => k.startsWith('job-mp-') && svc[k].child).map(k => k.slice(7)),
+  log: (n, t) => { try { fs.appendFileSync(logf(n), t + '\n'); } catch { /* ignore */ } },
+});
+
 async function route(u, b) {
   const p = u.pathname.slice(5), c = loadCfg(), P = providers();
   switch (p) {
@@ -621,7 +631,7 @@ async function route(u, b) {
     case 'quit': setTimeout(() => shutdown(), 200); return { ok: true };
     default: {
       if (p.startsWith('mp/')) {
-        const mctx = { mark: id => { const k = loadCfg(); k.installed[id] = true; saveCfg(k); }, cfgInstalled: id => !!loadCfg().installed[id], claudePkg: CLAUDE_PKG, start, running: () => Object.keys(svc).filter(k => k.startsWith('job-mp-') && svc[k].child).map(k => k.slice(7)), log: (n, t) => { try { fs.appendFileSync(logf(n), t + '\n'); } catch { /* ignore */ } } };
+        const mctx = hubCtx();
         const r = await pluginsHub.route(p.slice(3), b, mctx);
         if (r !== undefined) { if (r.clearCfg) { const k = loadCfg(); delete k.installed[r.clearCfg]; saveCfg(k); } return r; }
       }
@@ -662,6 +672,8 @@ async function daemon() {
   { const d0 = cfg.previewDir || cfg.lastDir || ''; if (d0 && fs.existsSync(d0)) pv.setDir(d0); }
   pv.listen(PREVIEW_PORT, e => { if (e) console.log(`[!] Preview port ${PREVIEW_PORT} busy hai (${e.message}). CC_PREVIEW_PORT badlo.`); });
   srv.listen(PORT, '127.0.0.1', () => {
+    setTimeout(() => pluginsHub.autoHeal(hubCtx()).catch(() => {}), 60000);
+    setInterval(() => pluginsHub.autoHeal(hubCtx()).catch(() => {}), 600000);
     try { fs.writeFileSync(path.join(DIR, 'dash.pid'), String(process.pid)); } catch { /* ignore */ }
     if (TERMUX && cfg.wake !== false) wake(true);
     console.log(`ccs daemon ready v${VERSION()} port ${PORT} wake=${wakeOn}`);
