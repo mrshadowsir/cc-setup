@@ -32,6 +32,44 @@ function run(cmd, timeout = 120000) {
   }));
 }
 
+/* ---------- MCP servers + recommended status (asli state se) ---------- */
+const CJ = path.join(os.homedir(), '.claude.json');   // MCP (user scope) yahin likhe jate hain
+const fromCmd = (cmd, re) => { const m = String(cmd || '').match(re); return m ? m[1] : ''; };
+function mcpServers() {
+  const j = rj(CJ, {});
+  const m = j.mcpServers && typeof j.mcpServers === 'object' ? j.mcpServers : {};
+  return Object.entries(m).map(([name, v]) => ({
+    name, command: [v && v.command, ...((v && v.args) || [])].filter(Boolean).join(' ') || (v && (v.url || v.type)) || '',
+  }));
+}
+function mcpStatus() {
+  return mcpServers().map(s => ({
+    id: 'mcp:' + s.name, name: s.name, mkt: 'MCP', version: '', path: s.command, installedAt: '',
+    enabled: true, exists: true, custom: false, state: 'active', kind: 'mcp',
+  }));
+}
+// Recommended item (plugins.json ka cmd) asli me installed hai ya nahi. null = pata nahi (cfg fallback)
+function isInstalled(pl) {
+  const cmd = (pl && pl.cmd) || '';
+  const mcp = fromCmd(cmd, /mcp add --scope user (\S+)/);
+  if (mcp) return mcpServers().some(s => s.name === mcp);
+  const pid = fromCmd(cmd, /plugin install (\S+)/);
+  if (pid) return installedRaw().some(x => x.id === pid);
+  const mkt = fromCmd(cmd, /marketplace add (\S+)/);
+  if (mkt) return mkt.split('/').pop() in rj(KNOWN, {});
+  return null;
+}
+async function removeMcp(name) {
+  const r = await run(`claude mcp remove ${name} --scope user`, 60000);
+  const j = rj(CJ, null);
+  let direct = false;
+  if (j && j.mcpServers && name in j.mcpServers) {
+    fs.copyFileSync(CJ, CJ + '.bak');              // pehle backup
+    delete j.mcpServers[name]; wj(CJ, j); direct = true;
+  }
+  return { ok: r.ok || direct, cli: r.ok, direct };
+}
+
 /* ---------- read state ---------- */
 const settings = () => rj(SETTINGS, {});
 function saveSettings(s) { wj(SETTINGS, s); }
@@ -71,7 +109,7 @@ function countFiles(dir, limit = 500) {
   return n;
 }
 
-function installedStatus() {
+function pluginStatus() {
   const en = settings().enabledPlugins || {};
   return installedRaw().map(p => {
     const [name, mkt = ''] = p.id.split('@');
@@ -81,6 +119,8 @@ function installedStatus() {
     return { id: p.id, name, mkt, version: p.version, path: p.path, installedAt: p.installedAt, enabled, exists, custom: mkt !== OFFICIAL, state };
   });
 }
+
+function installedStatus() { return pluginStatus().concat(mcpStatus()); }
 
 function catalog(installedIds) {
   return marketplaces().flatMap(m => m.plugins.map(p => {
@@ -167,6 +207,11 @@ async function route(p, b, ctx) {
     }
 
     case 'uninstall': {
+      if (String(b.id || '').startsWith('mcp:')) {
+        const nm = vname(String(b.id).slice(4));
+        const r = await removeMcp(nm);
+        return { ok: r.ok, msg: r.ok ? `MCP "${nm}" permanently hata diya` : 'MCP hata nahi paya. Logs dekho' };
+      }
       const id = vid(b.id);
       const r = await run(`claude plugin uninstall ${id}`, 120000);
       const removed = purge(id);
@@ -189,7 +234,7 @@ async function route(p, b, ctx) {
     }
 
     case 'health': {
-      const rows = installedStatus().map(p => ({
+      const rows = installedStatus().filter(p => p.kind !== 'mcp').map(p => ({
         id: p.id, state: p.state,
         files: p.exists ? countFiles(p.path) : 0,
         ok: p.exists && countFiles(p.path, 1) > 0,
@@ -246,8 +291,30 @@ async function route(p, b, ctx) {
       return { ok: true, count: ids.length, markets: markets.length };
     }
 
+    case 'rec/uninstall': {
+      const list = rj(path.join(__dirname, 'plugins.json'), []);
+      const pl = list.find(x => x.id === b.id);
+      if (!pl) throw new Error('Ye item plugins.json me nahi hai');
+      const mcp = fromCmd(pl.cmd, /mcp add --scope user (\S+)/);
+      const pid = fromCmd(pl.cmd, /plugin install (\S+)/);
+      let msg;
+      if (mcp) {
+        const r = await removeMcp(vname(mcp));
+        if (!r.ok) throw new Error('MCP hata nahi paya. Logs dekho');
+        msg = `${mcp} MCP hata diya`;
+      } else if (pid) {
+        vid(pid);
+        await run(`claude plugin uninstall ${pid}`, 120000);
+        const rem = purge(pid);
+        msg = `${pid} permanently delete ho gaya (${rem.length} cheezein)`;
+      } else {
+        msg = 'Ye item automatic delete nahi hota. Status reset kar diya';
+      }
+      return { ok: true, msg, clearCfg: b.id };
+    }
+
     default: return undefined; // cc.js ko pata chale ki route nahi mila
   }
 }
 
-module.exports = { route };
+module.exports = { route, isInstalled };

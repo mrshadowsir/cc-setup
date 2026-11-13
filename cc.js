@@ -420,7 +420,7 @@ async function state() {
     gateway: { hasCmd: !!gp.cmd, up: await listening(gp.port), running: !!(svc.gateway && svc.gateway.child) || (gp.port === OMNI_PORT && !!(svc.omni && svc.omni.child)) },
     omni: { version: omniVersion(), checked: !!(cache.omni && cache.omni.t), up: await listening(OMNI_PORT), running: !!(svc.omni && svc.omni.child), installing: !!(svc['job-omniroute'] && svc['job-omniroute'].child), nodeOk: omniNodeOk, node: process.version, port: OMNI_PORT, active: c.provider === 'omniroute' },
     claude: { version: ver, checked: !!(cache.claude && cache.claude.t), pinned: TERMUX ? PIN : null, installing: !!(svc['job-claude'] && svc['job-claude'].child) },
-    plugins: plugins().map(p => ({ id: p.id, name: p.name, desc: p.desc, note: p.note, rec: !!p.rec, hasCmd: !!p.cmd, installed: !!c.installed[p.id],
+    plugins: plugins().map(p => ({ id: p.id, name: p.name, desc: p.desc, note: p.note, rec: !!p.rec, hasCmd: !!p.cmd, installed: (() => { const d = pluginsHub.isInstalled(p); return d === null ? !!c.installed[p.id] : d; })(),
       job: svc['job-' + p.id] ? (svc['job-' + p.id].child ? 'running' : (svc['job-' + p.id].code ? 'failed' : '')) : '' })),
     apk: { running: !!(svc['job-apk'] && svc['job-apk'].child) },
     tasks: rj(TASKS, []).reverse().slice(0, 12), runningTask: run ? run.slice(5) : null, logs,
@@ -623,7 +623,7 @@ async function route(u, b) {
       if (p.startsWith('mp/')) {
         const mctx = { start, running: () => Object.keys(svc).filter(k => k.startsWith('job-mp-') && svc[k].child).map(k => k.slice(7)), log: (n, t) => { try { fs.appendFileSync(logf(n), t + '\n'); } catch { /* ignore */ } } };
         const r = await pluginsHub.route(p.slice(3), b, mctx);
-        if (r !== undefined) return r;
+        if (r !== undefined) { if (r.clearCfg) { const k = loadCfg(); delete k.installed[r.clearCfg]; saveCfg(k); } return r; }
       }
       throw new Error('unknown: ' + p);
     }

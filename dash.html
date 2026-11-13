@@ -141,6 +141,21 @@ html,body{min-height:100%}
  #t-plugins .card.wide{grid-column:1/-1}
  .psub.on{display:contents}
 }
+
+/* ---- Menu + separate sections ---- */
+.menubtn{flex:none;margin-left:10px;width:46px;height:46px;min-height:46px;padding:0;border-radius:14px;background:#00000033;border:0;color:#fff;font-size:22px;font-weight:800}
+.menu[hidden]{display:none}
+.menu{position:fixed;inset:0;z-index:25;background:var(--bg);overflow-y:auto;padding:calc(14px + env(safe-area-inset-top)) 14px calc(24px + env(safe-area-inset-bottom))}
+.mhead{display:flex;align-items:center;justify-content:space-between;gap:10px;max-width:1100px;margin:0 auto 14px}
+.mhead b{font-size:20px}
+.mgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;max-width:1100px;margin:0 auto}
+.mtile{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;min-height:110px;padding:14px;border-radius:18px;background:var(--s);border:1px solid var(--line);border-top:5px solid var(--ac);color:var(--tx)}
+.mtile.c2{border-top-color:var(--ac2)}.mtile.c3{border-top-color:var(--ok)}.mtile.c4{border-top-color:var(--wa)}.mtile.c5{border-top-color:var(--pk)}
+.mtile .mi{font-size:28px;line-height:1}
+.mtile b{font-size:16px}
+.mtile small{color:var(--mu);font-size:12.5px;font-weight:400;line-height:1.3}
+@media (min-width:700px){.mgrid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (min-width:1024px){.mgrid{grid-template-columns:repeat(4,minmax(0,1fr))}.menu{padding-left:268px}.menubtn{display:none}}
 </style>
 </head>
 <body>
@@ -148,7 +163,7 @@ html,body{min-height:100%}
 
 <div class="hero"><div class="logo">cc</div>
  <div><b>ccs dashboard</b><small id="sub">chalu ho raha hai…</small></div>
- <div class="pill" id="pill">…</div></div>
+ <div class="pill" id="pill">…</div><button class="menubtn" data-a="menuOpen" aria-label="Menu">☰</button></div>
 
 <div id="inc" role="alert">
  <b>⚠️ Model band ho gaya: <span id="inc-m"></span></b>
@@ -162,14 +177,17 @@ html,body{min-height:100%}
 
 <!-- ============ HOME ============ -->
 <div class="tab on" id="t-home">
- <div class="card c1"><h2>🚀 3 step me shuru karo</h2>
+<div class="card c1"><h2>🚀 3 step me shuru karo</h2>
   <div class="step" id="st1"><div class="num">1</div><div class="nm"><b>Claude Code install</b><div class="mu" id="s-claude"></div></div><button class="p sm" id="b-claude" data-a="claude">Install</button></div>
   <div class="step" id="st2"><div class="num">2</div><div class="nm"><b>Gateway aur API key</b><div class="mu" id="s-key"></div></div><button class="p sm" data-a="goto" data-g="gw">Daalo</button></div>
   <div class="step" id="st3"><div class="num">3</div><div class="nm"><b>Model chuno</b><div class="mu" id="s-model"></div></div><button class="p sm" data-a="tab" data-t="models">Chuno</button></div>
   <p class="mu" style="margin-top:10px">Teeno ho jayein to terminal me likho <b class="mono">ccs claude</b></p>
  </div>
+<div class="card c4"><h2>☰ Sab sections</h2><p class="mu">Battery, Gateway, Health, Update, Memory aur Commands ab alag-alag pages par hain. Upar <b>☰ Menu</b> dabao.</p><div class="btns"><button class="p" data-a="menuOpen">☰ Menu kholo</button></div></div>
+</div>
 
- <div class="card c4" id="c-bat"><h2>🔋 Battery restriction hatao <span class="pill" id="bat-pill" style="margin-left:auto;background:#ffffff18">…</span></h2>
+<div class="tab" id="t-battery">
+<div class="card c4" id="c-bat"><h2>🔋 Battery restriction hatao <span class="pill" id="bat-pill" style="margin-left:auto;background:#ffffff18">…</span></h2>
   <p class="mu" id="bat-info">Taaki phone lock ho ya app peeche chali jaye, tab bhi kaam chalta rahe.</p>
   <label class="ck"><input type="checkbox" id="ck-wake"><span>Background me chalta rahe (wake-lock) <span class="mu" id="wake-s"></span></span></label>
   <div id="bat-btns">
@@ -186,8 +204,10 @@ html,body{min-height:100%}
    </details>
   </div>
  </div>
+</div>
 
- <div class="card c2" id="c-gw"><h2>🌐 Gateway</h2>
+<div class="tab" id="t-gateway">
+<div class="card c2" id="c-gw"><h2>🌐 Gateway</h2>
   <label for="prov">Provider (badalte hi apne aap lag jata hai)</label><select id="prov"></select>
   <div class="mu" id="hint"></div>
   <label for="url">Base URL</label><input id="url" inputmode="url" autocapitalize="off" autocomplete="off">
@@ -198,23 +218,31 @@ html,body{min-height:100%}
   <div class="btns"><button class="p" data-a="save">💾 Save</button><button data-a="tofree">🆓 Free API keys lo</button></div>
   <div class="row"><span class="dot" id="d-gw"></span><div class="nm">Local gateway <div class="mu" id="s-gw"></div></div><button id="b-gw" data-a="gw">Start</button></div>
  </div>
+</div>
 
- <div class="card c5"><h2>⌨️ Commands (Copy dabao)</h2>
+<div class="tab" id="t-commands">
+<div class="card c5"><h2>⌨️ Commands (Copy dabao)</h2>
   <div id="cmds"></div>
  </div>
+</div>
 
- <div class="card c3"><h2>🩺 Health check</h2>
+<div class="tab" id="t-health">
+<div class="card c3"><h2>🩺 Health check</h2>
   <div class="btns"><button class="g" data-a="doctor" id="b-doc">Sab check karo</button></div>
   <div id="doc"></div>
  </div>
+</div>
 
- <div class="card c1"><h2>⬆️ Update</h2>
+<div class="tab" id="t-update">
+<div class="card c1"><h2>⬆️ Update</h2>
   <p class="mu">Version <b id="ver"></b>. Naya version GitHub se aata hai (<span id="repo"></span>), dashboard khud dobara chalu hota hai.</p>
   <div class="btns"><button class="p" data-a="update">Update karo</button></div>
   <pre id="ulog" style="display:none"></pre>
  </div>
+</div>
 
- <div class="card c2"><h2>🧠 Memory</h2>
+<div class="tab" id="t-memory">
+<div class="card c2"><h2>🧠 Memory</h2>
   <div class="bar"><i id="ram"></i></div><div class="mu" id="s-ram"></div>
   <div class="btns"><button class="d" data-a="stopall">Sab process roko</button><button class="d" data-a="quit">Dashboard band</button></div>
  </div>
@@ -433,6 +461,11 @@ html,body{min-height:100%}
 <div class="tab" id="t-logs"><div class="card c3"><h2>📜 Logs</h2>
  <label for="lsel">Kiska log</label><select id="lsel"></select><div style="height:10px"></div><pre id="log">Kuch nahi chal raha.</pre></div></div>
 
+<div id="menu" class="menu" hidden>
+ <div class="mhead"><b>📋 Sab sections</b><button class="g" data-a="menuClose">✕ Band</button></div>
+ <div class="mgrid"><button class="mtile c1" data-a="menuGo" data-t="home"><span class="mi">🏠</span><b>Home</b><small>Setup 3 step</small></button><button class="mtile c1" data-a="menuGo" data-t="task"><span class="mi">📝</span><b>Task</b><small>Claude se kaam</small></button><button class="mtile c1" data-a="menuGo" data-t="preview"><span class="mi">👁️</span><b>Preview</b><small>Live app dekho</small></button><button class="mtile c1" data-a="menuGo" data-t="models"><span class="mi">⚡</span><b>Hub</b><small>Models aur free API</small></button><button class="mtile c1" data-a="menuGo" data-t="apk"><span class="mi">📦</span><b>APK</b><small>App banao</small></button><button class="mtile c1" data-a="menuGo" data-t="plugins"><span class="mi">🧩</span><b>Plugins</b><small>Install / Delete</small></button><button class="mtile c1" data-a="menuGo" data-t="logs"><span class="mi">📜</span><b>Logs</b><small>Errors dekho</small></button><button class="mtile c4" data-a="menuGo" data-t="battery"><span class="mi">🔋</span><b>Battery</b><small>Wake-lock aur restriction</small></button><button class="mtile c2" data-a="menuGo" data-t="gateway"><span class="mi">🌐</span><b>Gateway</b><small>Provider aur API key</small></button><button class="mtile c5" data-a="menuGo" data-t="commands"><span class="mi">⌨️</span><b>Commands</b><small>Copy karo</small></button><button class="mtile c3" data-a="menuGo" data-t="health"><span class="mi">🩺</span><b>Health</b><small>Sab check karo</small></button><button class="mtile c1" data-a="menuGo" data-t="update"><span class="mi">⬆️</span><b>Update</b><small>Naya version</small></button><button class="mtile c2" data-a="menuGo" data-t="memory"><span class="mi">🧠</span><b>Memory</b><small>RAM aur stop</small></button></div>
+</div>
+
 <nav>
  <button class="on" data-a="tab" data-t="home"><span>🏠</span>Home</button>
  <button data-a="tab" data-t="task"><span>📝</span>Task</button>
@@ -486,9 +519,9 @@ function paint(){
  const used=S.sys.total-S.sys.free;$('#ram').style.width=Math.round(used/S.sys.total*100)+'%';
  const b=S.sys.battery;txt($('#s-ram'),`RAM ${Math.round(used/1048576)} / ${Math.round(S.sys.total/1048576)} MB`+(b?` · Battery ${b.percentage}%`:'')+(S.platform==='Windows'?'':` · Load ${S.sys.load.toFixed(1)}`));
  txt($('#ver'),'v'+S.version);txt($('#repo'),S.repo);
- htm($('#plist'),S.plugins.map(p=>{const st=p.installed?'<span class=ok>✔ Installed</span>':p.job==='running'?'<span class=wa>Ho raha hai…</span>':p.job==='failed'?'<span class=bad>Fail. Logs dekho</span>':'';
-  return `<div class="row"><div class="nm"><b>${esc(p.name)}</b>${p.rec?' <span class=ok>★ Recommended</span>':''}<div class="mu">${esc(p.desc)} ${st}</div>${p.note?`<div class="mu">${esc(p.note)}</div>`:''}</div>
-  <button class="p sm" data-a="plug" data-id="${esc(p.id)}" ${p.installed||p.job==='running'||!p.hasCmd?'disabled':''}>Install</button></div>`}).join(''));
+ htm($('#plist'),S.plugins.map(p=>{const st=p.installed?'<span class=ok>✔ Installed</span>':p.job==='running'?'<span class=wa>Ho raha hai…</span>':p.job==='failed'?'<span class=bad>Fail. Logs dekho</span>':'<span class=mu>Install nahi hai</span>';
+  const btn=p.installed?`<button class="sm bad-btn" data-a="recdel" data-id="${esc(p.id)}">🗑 Delete</button>`:`<button class="p sm" data-a="plug" data-id="${esc(p.id)}" ${p.job==='running'||!p.hasCmd?'disabled':''}>${p.hasCmd?'Install':'Manual'}</button>`;
+  return `<div class="row"><div class="nm"><b>${esc(p.name)}</b>${p.rec?' <span class=ok>★ Recommended</span>':''}<div class="mu">${esc(p.desc)} ${st}</div>${p.note?`<div class="mu">${esc(p.note)}</div>`:''}</div>${btn}</div>`}).join(''));
  const sel=$('#lsel'),cur=sel.value,names=S.logs.length?S.logs:['gateway'];
  if(sel._n!==names.join()){sel._n=names.join();sel.innerHTML=names.map(n=>`<option>${esc(n)}</option>`).join('');sel.value=names.includes(cur)?cur:names[0]}
  const run=S.runningTask;if(run&&!curTask)curTask=run;
@@ -506,7 +539,10 @@ function paint(){
 async function useModel(m){const r=await api('config',{model:m});if(!r.error){toast(r.applied?'Model lag gaya: '+m:'Model save hua. Gateway URL aur key bhi daalo');refresh()}}
 const A={
  tab(e){tab=e.dataset.t;document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x.id==='t-'+tab));document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x.dataset.t===tab));scrollTo(0,0);document.body.classList.toggle('pvwide',tab==='preview');if(tab==='preview')setTimeout(pvOpen,30);if(tab==='plugins')mpLoad();if(tab==='models'){paintHub();if(seg==='m'&&!H.loaded&&!H.loading)loadHub()}tick(true)},
- goto(e){$('#c-'+e.dataset.g).scrollIntoView({behavior:'smooth',block:'start'})},
+ goto(e){const cd=$('#c-'+e.dataset.g);const tb=cd&&cd.closest('.tab');if(tb)A.tab({dataset:{t:tb.id.slice(2)}});if(cd)cd.scrollIntoView({behavior:'smooth',block:'start'})},
+ menuOpen(){$('#menu').hidden=false;scrollTo(0,0)},
+ menuClose(){$('#menu').hidden=true},
+ menuGo(e){$('#menu').hidden=true;A.tab({dataset:{t:e.dataset.t}})},
  async save(){const r=await api('config',{provider:$('#prov').value,base_url:$('#url').value,api_key:$('#key').value,preset:$('#preset').value});if(!r.error){$('#key').value='';toast(r.applied?'Save aur Claude me lag gaya ✅':'Save ho gaya. Ab model chuno');refresh()}},
  async gw(){const was=S.gateway.running;await api('svc',{op:was?'stop':'start'});toast(was?'Band ho raha hai':'Start ho raha hai. Pehli baar time lagta hai');setTimeout(refresh,1500)},
  async claude(){await api('claude/install',{});toast('Install shuru. Logs tab dekho');refresh()},
@@ -752,7 +788,7 @@ function mpPaint(){
  const row=p=>{const busy=MP.running.includes(sidc(p.id));return `<div class="row"><div class="nm"><b>${esc(p.name)}</b> <span class="tag">${esc(p.mkt)}</span>${p.installed?' <span class="ok">✔ Installed</span>':''}${busy?' <span class="wa">Ho raha hai…</span>':''}<div class="mu">${esc(p.desc)}</div></div>${p.installed?`<button class="sm bad-btn" data-a="mpUninstall" data-id="${esc(p.id)}">🗑 Delete</button>`:`<button class="p sm" data-a="mpInstall" data-id="${esc(p.id)}" ${busy?'disabled':''}>Install</button>`}</div>`};
  htm($('#mp-cat'),cat.length?cat.slice(0,150).map(row).join('')+(cat.length>150?`<p class="mu">${cat.length-150} aur. Search karke dhundo.</p>`:''):(MP.catalog.length?'<p class="mu">Ye search me koi plugin nahi mila.</p>':'<p class="mu">Abhi koi plugin list me nahi. Neeche "Official marketplace jodo" dabao.</p>'));
  const inst=MP.installed;
- htm($('#mp-inst'),inst.length?inst.map(p=>`<div class="row"><div class="nm"><b>${esc(p.name)}</b> <span class="mu">@${esc(p.mkt)}${p.version?' · v'+esc(p.version):''}</span><div>${stTag(p.state)}</div><div class="mu mono" style="font-size:12px;overflow-wrap:anywhere">${esc(p.path)}</div></div><div class="macts"><button class="sm" data-a="mpToggle" data-id="${esc(p.id)}" data-on="${p.enabled?0:1}">${p.enabled?'OFF karo':'ON karo'}</button><button class="sm bad-btn" data-a="mpUninstall" data-id="${esc(p.id)}">🗑</button></div></div>`).join(''):'<p class="mu">Abhi koi plugin installed nahi hai. Marketplace tab se install karo.</p>');
+ htm($('#mp-inst'),inst.length?inst.map(p=>`<div class="row"><div class="nm"><b>${esc(p.name)}</b> <span class="mu">@${esc(p.mkt)}${p.version?' · v'+esc(p.version):''}</span><div>${stTag(p.state)}</div><div class="mu mono" style="font-size:12px;overflow-wrap:anywhere">${esc(p.path)}</div></div><div class="macts">${p.kind==='mcp'?'':`<button class="sm" data-a="mpToggle" data-id="${esc(p.id)}" data-on="${p.enabled?0:1}">${p.enabled?'OFF karo':'ON karo'}</button>`}<button class="sm bad-btn" data-a="mpUninstall" data-id="${esc(p.id)}">🗑 Delete</button></div></div>`).join(''):'<p class="mu">Abhi koi plugin installed nahi hai. Marketplace tab se install karo.</p>');
  const cust=inst.filter(p=>p.custom);
  htm($('#mp-cust'),cust.length?cust.map(p=>`<div class="row"><div class="nm"><b>${esc(p.name)}</b> <span class="tag ac">${esc(p.mkt)}</span><div>${stTag(p.state)}</div></div><button class="sm bad-btn" data-a="mpUninstall" data-id="${esc(p.id)}">🗑 Delete</button></div>`).join(''):'<p class="mu">Koi custom plugin nahi. Official marketplace ke bahar wale plugins yahan dikhenge.</p>');
  htm($('#mp-mkts'),MP.marketplaces.length?MP.marketplaces.map(m=>`<div class="row"><div class="nm"><b>${esc(m.name)}</b>${m.official?' <span class="ok">★ official</span>':''}<div class="mu">${esc(m.source)} · ${m.count} plugins</div></div>${m.official?'':`<button class="sm bad-btn" data-a="mpRmMkt" data-name="${esc(m.name)}">Hatao</button>`}</div>`).join(''):'<p class="mu">Koi marketplace nahi.</p>');
@@ -764,6 +800,7 @@ document.addEventListener('change',async e=>{if(e.target.id!=='mp-file')return;c
   const r=await api('mp/restore',{ids,markets:mk});if(!r.error){toast(`Restore shuru (${r.count} plugins). Logs tab me job-mp-restore dekho`);setTimeout(mpLoad,5000)}}
  catch{toast('Ye backup file sahi nahi hai',1)}});
 Object.assign(A,{
+ recdel(e){const id=e.dataset.id;if(!confirm('Ye item permanently delete ho jayega (MCP ya plugin files). Pakka?'))return;api('mp/rec/uninstall',{id}).then(r=>{if(!r.error){toast(r.msg,!r.ok);mpLoad();refresh()}})},
  psec(e){psec=e.dataset.s;document.querySelectorAll('.psub').forEach(x=>x.classList.toggle('on',x.id==='ps-'+psec));document.querySelectorAll('#pseg button').forEach(x=>x.classList.toggle('on',x.dataset.s===psec));if(psec==='adv')mpSkills()},
  mpRefresh(){api('mp/mkt/update',{}).then(r=>{if(!r.error){toast('Marketplace update shuru. Kuch second baad list refresh hogi');setTimeout(mpLoad,8000)}})},
  mpOfficial(){api('mp/mkt/add',{repo:'anthropics/claude-plugins-official'}).then(r=>{if(!r.error){toast('Official marketplace jud raha hai. Logs dekho');setTimeout(mpLoad,8000)}})},
