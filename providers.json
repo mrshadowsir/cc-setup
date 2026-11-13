@@ -1,0 +1,10 @@
+{
+  "omniroute":  {"name":"OmniRoute (local gateway)","type":"anthropic","cmd":"npx -y omniroute","port":20128,"base_url":"http://localhost:20128","hint":"Free gateway. Start dabao, phir API key daalo"},
+  "gemini":     {"name":"Google Gemini (direct API)","type":"openai","cmd":null,"port":null,"base_url":"https://generativelanguage.googleapis.com/v1beta/openai","hint":"Key: aistudio.google.com/apikey. Model jaise gemini-2.5-flash"},
+  "groq":       {"name":"Groq (direct API)","type":"openai","cmd":null,"port":null,"base_url":"https://api.groq.com/openai/v1","hint":"Key: console.groq.com/keys"},
+  "openai":     {"name":"OpenAI-compatible (direct)","type":"openai","cmd":null,"port":null,"base_url":"https://api.openai.com/v1","hint":"DeepSeek, Mistral wagairah ka URL bhi chalega"},
+  "anthropic":  {"name":"Anthropic (direct)","type":"anthropic","cmd":null,"port":null,"base_url":"https://api.anthropic.com","hint":"Asli Anthropic key"},
+  "openrouter": {"name":"OpenRouter","type":"anthropic","cmd":null,"port":null,"base_url":"https://openrouter.ai/api","hint":"Key: openrouter.ai/keys. Filter me free likho"},
+  "ccr":        {"name":"Claude Code Router","type":"anthropic","cmd":"npx -y @musistudio/claude-code-router start","port":3456,"base_url":"http://localhost:3456"},
+  "custom":     {"name":"Custom (Anthropic format)","type":"anthropic","cmd":null,"port":null,"base_url":"","hint":"Apna URL daalo"}
+}
