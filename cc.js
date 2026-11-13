@@ -14,7 +14,7 @@ const CFG = path.join(DIR, 'config.json'), PIDS = path.join(DIR, 'pids.json'), T
 const PORT = +process.env.CC_PORT || 8787, PROXY_PORT = +process.env.CC_PROXY_PORT || 8788, PREVIEW_PORT = +process.env.CC_PREVIEW_PORT || 8789;
 const PIN = process.env.CC_CLAUDE_VER || '2.1.112';
 const REPO = process.env.CC_REPO || 'mrshadowsir/cc-setup', BRANCH = process.env.CC_BRANCH || 'main';
-const FILES = ['cc.js', 'proxy.js', 'preview.js', 'apk.js', 'dash.html', 'providers.json', 'plugins.json', 'package.json', 'install.sh', 'install.bat', 'README.md', 'README.html'];
+const FILES = ['cc.js', 'proxy.js', 'preview.js', 'apk.js', 'plugins-hub.js', 'dash.html', 'providers.json', 'plugins.json', 'package.json', 'install.sh', 'install.bat', 'README.md', 'README.html'];
 const PROXY_URL = `http://127.0.0.1:${PROXY_PORT}`;
 const CLAUDE_PKG = '@anthropic-ai/claude-code' + (TERMUX ? '@' + PIN : '');
 fs.mkdirSync(LOGS, { recursive: true });
@@ -428,6 +428,7 @@ async function state() {
     sys: { free: os.freemem(), total: os.totalmem(), load: os.loadavg()[0], battery: bat },
   };
 }
+const pluginsHub = require('./plugins-hub.js');
 async function route(u, b) {
   const p = u.pathname.slice(5), c = loadCfg(), P = providers();
   switch (p) {
@@ -618,7 +619,14 @@ async function route(u, b) {
     case 'task/log': { const id = String(u.searchParams.get('id') || '').replace(/\W/g, ''); return { text: taskLog(id), running: !!(svc['task-' + id] && svc['task-' + id].child) }; }
     case 'stopall': Object.keys(svc).forEach(stop); return { ok: true };
     case 'quit': setTimeout(() => shutdown(), 200); return { ok: true };
-    default: throw new Error('unknown: ' + p);
+    default: {
+      if (p.startsWith('mp/')) {
+        const mctx = { start, running: () => Object.keys(svc).filter(k => k.startsWith('job-mp-') && svc[k].child).map(k => k.slice(7)), log: (n, t) => { try { fs.appendFileSync(logf(n), t + '\n'); } catch { /* ignore */ } } };
+        const r = await pluginsHub.route(p.slice(3), b, mctx);
+        if (r !== undefined) return r;
+      }
+      throw new Error('unknown: ' + p);
+    }
   }
 }
 

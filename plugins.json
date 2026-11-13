@@ -1,11 +1,129 @@
 [
-  {"id":"apk-builder","name":"APK Builder","desc":"Claude ko APK banana sikhata hai: naya app ya tumhara project, cloud ya local build","rec":true,"cmd":"node \"{DIR}/cc.js\" apk-setup","note":"Termux me gh bhi install hota hai. Pehli baar: gh auth login"},
-  {"id":"seq-think","name":"Sequential Thinking","desc":"Bade kaam ko step-by-step sochta hai","rec":true,"cmd":"claude mcp add --scope user sequential-thinking -- npx -y @modelcontextprotocol/server-sequential-thinking"},
-  {"id":"context7","name":"Context7","desc":"Libraries ke latest docs, purane code se bachata hai","rec":true,"cmd":"claude mcp add --scope user context7 -- npx -y @upstash/context7-mcp"},
-  {"id":"memory","name":"Memory","desc":"Sessions ke beech cheezein yaad rakhta hai","rec":true,"cmd":"claude mcp add --scope user memory -- npx -y @modelcontextprotocol/server-memory"},
-  {"id":"official","name":"claude-plugins-official","desc":"Official plugin marketplace","cmd":"claude plugin marketplace add anthropics/claude-plugins-official"},
-  {"id":"claude-mem","name":"claude-mem","desc":"Sessions ki memory (plugin)","cmd":"claude plugin marketplace add thedotmack/claude-mem && claude plugin install claude-mem@thedotmack","note":"Bun chahiye, Termux par fail ho sakta hai"},
-  {"id":"headroom","name":"headroom","desc":"Token bachat (Python)","cmd":"python -m pip install headroom-ai","note":"Python chahiye (Termux: pkg install python)"},
-  {"id":"one-skill","name":"one-skill-to-rule-them-all","desc":"Skill pack","cmd":"","note":"Command nahi pata. Plugins tab me neeche 'Apna plugin command' se chalao"},
-  {"id":"replica","name":"replica-skill","desc":"Skill pack","cmd":"","note":"Command nahi pata. Plugins tab me neeche 'Apna plugin command' se chalao"}
+  {
+    "id": "apk-builder",
+    "name": "APK Builder",
+    "desc": "Claude ko APK banana sikhata hai: naya app ya tumhara project, cloud ya local build",
+    "rec": true,
+    "cmd": "node \"{DIR}/cc.js\" apk-setup",
+    "note": "Termux me gh bhi install hota hai. Pehli baar: gh auth login"
+  },
+  {
+    "id": "seq-think",
+    "name": "Sequential Thinking",
+    "desc": "Bade kaam ko step-by-step sochta hai",
+    "rec": true,
+    "cmd": "claude mcp add --scope user sequential-thinking -- npx -y @modelcontextprotocol/server-sequential-thinking"
+  },
+  {
+    "id": "context7",
+    "name": "Context7",
+    "desc": "Libraries ke latest docs, purane code se bachata hai",
+    "rec": true,
+    "cmd": "claude mcp add --scope user context7 -- npx -y @upstash/context7-mcp"
+  },
+  {
+    "id": "memory",
+    "name": "Memory",
+    "desc": "Sessions ke beech cheezein yaad rakhta hai",
+    "rec": true,
+    "cmd": "claude mcp add --scope user memory -- npx -y @modelcontextprotocol/server-memory"
+  },
+  {
+    "id": "official",
+    "name": "claude-plugins-official",
+    "desc": "Official plugin marketplace",
+    "cmd": "claude plugin marketplace add anthropics/claude-plugins-official"
+  },
+  {
+    "id": "claude-mem",
+    "name": "claude-mem",
+    "desc": "Sessions ki memory (plugin)",
+    "cmd": "claude plugin marketplace add thedotmack/claude-mem && claude plugin install claude-mem@thedotmack",
+    "note": "Bun chahiye, Termux par fail ho sakta hai"
+  },
+  {
+    "id": "headroom",
+    "name": "headroom",
+    "desc": "Token bachat (Python)",
+    "cmd": "python -m pip install headroom-ai",
+    "note": "Python chahiye (Termux: pkg install python)"
+  },
+  {
+    "id": "one-skill",
+    "name": "one-skill-to-rule-them-all",
+    "desc": "Skill pack",
+    "cmd": "",
+    "note": "Command nahi pata. Plugins tab me neeche 'Apna plugin command' se chalao"
+  },
+  {
+    "id": "replica",
+    "name": "replica-skill",
+    "desc": "Skill pack",
+    "cmd": "",
+    "note": "Command nahi pata. Plugins tab me neeche 'Apna plugin command' se chalao"
+  },
+  {
+    "id": "m-code-review",
+    "name": "code-review",
+    "desc": "📱💻 Code ko review karta hai, bugs aur galtiyan pakadta hai",
+    "rec": true,
+    "cmd": "claude plugin install code-review@claude-plugins-official",
+    "note": "Pehle Marketplace me 'Official marketplace jodo' dabao"
+  },
+  {
+    "id": "m-commit",
+    "name": "commit-commands",
+    "desc": "📱💻 Git commit, push aur PR ek command me",
+    "rec": true,
+    "cmd": "claude plugin install commit-commands@claude-plugins-official",
+    "note": "Pehle Official marketplace jodo. Git chahiye"
+  },
+  {
+    "id": "m-security",
+    "name": "security-guidance",
+    "desc": "📱💻 Code me security risks (keys, injection, unsafe code) pakadta hai",
+    "rec": true,
+    "cmd": "claude plugin install security-guidance@claude-plugins-official",
+    "note": "Pehle Official marketplace jodo"
+  },
+  {
+    "id": "m-frontend",
+    "name": "frontend-design",
+    "desc": "📱💻 Website/UI ko achha aur modern design deta hai",
+    "rec": true,
+    "cmd": "claude plugin install frontend-design@claude-plugins-official",
+    "note": "Pehle Official marketplace jodo"
+  },
+  {
+    "id": "pc-feature-dev",
+    "name": "feature-dev",
+    "desc": "💻 Naya feature step-by-step banata hai, bade projects ke liye",
+    "rec": true,
+    "cmd": "claude plugin install feature-dev@claude-plugins-official",
+    "note": "Pehle Official marketplace jodo. PC par best"
+  },
+  {
+    "id": "pc-playwright",
+    "name": "Playwright (browser)",
+    "desc": "💻 Browser chalata hai, click/test/screenshot karta hai",
+    "rec": true,
+    "cmd": "claude mcp add --scope user playwright -- npx -y @playwright/mcp@latest",
+    "note": "Install ke baad ek baar: npx playwright install chromium. Termux par browser nahi chalta"
+  },
+  {
+    "id": "pc-fetch",
+    "name": "Fetch (web pages)",
+    "desc": "💻📱 Web page ka content laata hai, docs aur links padhta hai",
+    "rec": false,
+    "cmd": "claude mcp add --scope user fetch -- uvx mcp-server-fetch",
+    "note": "uv chahiye: pip install uv (Termux me bhi chal sakta hai)"
+  },
+  {
+    "id": "pc-github",
+    "name": "GitHub (MCP)",
+    "desc": "💻 Repo, issues aur PR GitHub se seedha Claude ke haath me",
+    "rec": false,
+    "cmd": "claude mcp add --scope user github -- npx -y @modelcontextprotocol/server-github",
+    "note": "Pehle GitHub par token banao. Phir terminal me: claude mcp add --scope user github -e GITHUB_PERSONAL_ACCESS_TOKEN=TOKEN -- npx -y @modelcontextprotocol/server-github"
+  }
 ]

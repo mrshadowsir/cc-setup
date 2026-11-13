@@ -2,529 +2,193 @@
 <html lang="hi">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#7c5cff">
-<title>ccs guide — 0 se Advance tak</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>cc-setup v4.3 · Guide</title>
 <style>
-:root{--bg:#0b1020;--s:#141b33;--s2:#1b2442;--line:#2a3560;--tx:#eef2ff;--mu:#9aa7d0;--ac:#7c5cff;--ac2:#18c7ff;--ok:#38e08c;--wa:#ffc94d;--bad:#ff6b81;--pk:#ff7ad9;color-scheme:dark}
+:root{--bg:#0b1020;--s:#141b33;--s2:#1b2442;--line:#2a3560;--tx:#eef2ff;--mu:#9aa7d0;--ac:#7c5cff;--ac2:#18c7ff;--ok:#38e08c;--wa:#ffc94d;--bad:#ff6b81;--pk:#ff7ad9;--tm:#3DDC84;--win:#0078D4;color-scheme:dark}
 *{box-sizing:border-box;margin:0}
-html{scroll-behavior:smooth;scroll-padding-top:150px;-webkit-text-size-adjust:100%}
-body{background:radial-gradient(1200px 600px at 10% -10%,#2a1f6e55,transparent),radial-gradient(900px 500px at 100% 0,#0b5a7a44,transparent),var(--bg);color:var(--tx);font:16px/1.7 system-ui,-apple-system,"Segoe UI",sans-serif}
-a{color:var(--ac2)}
-.wrap{max-width:1180px;margin:auto;padding:0 16px;display:grid;grid-template-columns:250px minmax(0,1fr);gap:28px}
-/* hero + top bar */
-.hero{background:linear-gradient(135deg,#7c5cff 0%,#4f7bff 50%,#18c7ff 100%);padding:34px 16px 70px;text-align:center}
-.hero h1{font-size:clamp(28px,6vw,46px);line-height:1.15;text-shadow:0 4px 20px #0005}
-.hero p{max-width:680px;margin:12px auto 0;font-size:18px;opacity:.95}
-.badges{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:18px}
-.badges span{background:#0003;padding:6px 14px;border-radius:99px;font-weight:700;font-size:14px}
-.bar{position:sticky;top:0;z-index:20;background:#0f1630ee;backdrop-filter:blur(10px);border-bottom:1px solid var(--line);margin-top:-46px}
-.bar .in{max-width:1180px;margin:auto;padding:10px 16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.os{display:flex;gap:6px;background:var(--s);border:1px solid var(--line);border-radius:14px;padding:4px;flex:1;min-width:260px}
-.os button{flex:1;border:0;background:none;color:var(--mu);font:inherit;font-weight:700;font-size:14px;padding:9px 6px;border-radius:10px;cursor:pointer;min-height:44px}
-.os button.on{background:linear-gradient(135deg,var(--ac),var(--ac2));color:#fff;box-shadow:0 4px 14px #7c5cff55}
-.srch{flex:1;min-width:200px;background:var(--s2);border:1px solid var(--line);color:var(--tx);padding:11px 14px;border-radius:12px;font:inherit;min-height:44px}
-.burger{display:none;background:var(--s2);border:1px solid var(--line);color:#fff;border-radius:12px;font-size:20px;padding:6px 14px;min-height:44px}
-/* menu */
-nav.menu{position:sticky;top:78px;align-self:start;max-height:calc(100vh - 96px);overflow:auto;padding:6px 0 30px}
-nav.menu a{display:flex;gap:10px;align-items:center;text-decoration:none;color:var(--mu);padding:10px 12px;border-radius:12px;font-weight:600;font-size:15px;border-left:4px solid transparent}
-nav.menu a:hover{background:var(--s);color:#fff}
-nav.menu a.on{background:var(--s2);color:#fff;border-left-color:var(--ac2)}
-nav.menu .grp{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ac);margin:14px 12px 4px;font-weight:800}
-/* sections */
-main{padding:26px 0 80px;min-width:0}
-section{margin-bottom:34px}
-section>h2{font-size:26px;display:flex;gap:10px;align-items:center;margin-bottom:6px}
-section>.lead{color:var(--mu);margin-bottom:16px}
-.card{background:var(--s);border:1px solid var(--line);border-radius:20px;padding:18px;margin:14px 0}
-.c1{border-top:5px solid var(--ac)}.c2{border-top:5px solid var(--ac2)}.c3{border-top:5px solid var(--ok)}.c4{border-top:5px solid var(--wa)}.c5{border-top:5px solid var(--pk)}.c6{border-top:5px solid var(--bad)}
-.card h3{font-size:19px;margin-bottom:6px}
-.mu{color:var(--mu)}
-.steps{counter-reset:s;list-style:none;padding:0}
-.steps>li{counter-increment:s;display:flex;gap:14px;padding:14px;background:var(--s2);border-radius:16px;margin:12px 0;border:1px solid var(--line)}
-.steps>li::before{content:counter(s);flex:none;width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--ac),var(--ac2));display:grid;place-items:center;font-weight:800}
-.steps>li>div{min-width:0;flex:1}
-/* command card */
-.cmd{background:#080c1a;border:1px solid var(--line);border-radius:16px;margin:12px 0;overflow:hidden}
-.cmd .top{display:flex;gap:8px;align-items:center;padding:10px 12px;background:#0f1630;flex-wrap:wrap}
-.cmd .t{font-weight:700;flex:1;min-width:120px}
-.tag{font-size:11.5px;font-weight:800;padding:3px 10px;border-radius:99px;white-space:nowrap}
-.l1{background:#38e08c22;color:var(--ok)}.l2{background:#ffc94d22;color:var(--wa)}.l3{background:#ff6b8122;color:var(--bad)}
-.o{background:#7c5cff33;color:#c9bbff}
-.cmd .row{display:flex;gap:10px;align-items:stretch;padding:10px 12px}
-.cmd code{flex:1;min-width:0;font:15px/1.5 ui-monospace,Consolas,monospace;color:var(--ac2);overflow-x:auto;white-space:pre;padding:8px 2px;-webkit-overflow-scrolling:touch}
-.copy{flex:none;min-width:96px;border:0;border-radius:12px;font:inherit;font-weight:800;color:#fff;cursor:pointer;background:linear-gradient(135deg,var(--ac),var(--ac2));padding:10px 14px;min-height:46px}
-.copy:active{transform:scale(.96)}
-.copy.done{background:linear-gradient(135deg,#1fbf75,#38e08c);color:#04210f}
-.cmd .d{padding:0 14px 12px;color:var(--mu);font-size:14.5px}
-.note{background:#ffc94d14;border:1px solid #ffc94d55;color:var(--wa);border-radius:14px;padding:12px 14px;margin:12px 0;font-size:14.5px}
-.tip{background:#38e08c14;border:1px solid #38e08c55;color:var(--ok);border-radius:14px;padding:12px 14px;margin:12px 0;font-size:14.5px}
-.warn{background:#ff6b8114;border:1px solid #ff6b8155;color:var(--bad);border-radius:14px;padding:12px 14px;margin:12px 0;font-size:14.5px}
-table{width:100%;border-collapse:collapse;font-size:14.5px}
-th,td{text-align:left;padding:10px;border-bottom:1px solid var(--line);vertical-align:top}th{color:var(--ac2)}
-.tw{overflow-x:auto}
-kbd,.k{font:13.5px ui-monospace,Consolas,monospace;background:var(--s2);border:1px solid var(--line);padding:1px 7px;border-radius:7px}
-.flow{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:12px 0}
-.flow span{background:var(--s2);border:1px solid var(--line);padding:8px 14px;border-radius:12px;font-weight:700}
-.flow i{color:var(--ac2);font-style:normal;font-weight:800}
-details{background:var(--s2);border:1px solid var(--line);border-radius:14px;padding:4px 14px;margin:10px 0}
-summary{cursor:pointer;font-weight:700;padding:10px 0;color:var(--ac2)}
-.hide{display:none!important}
-.m-only{display:none;width:100%;margin-bottom:12px}
-.empty{display:none;text-align:center;color:var(--mu);padding:30px}
-footer{text-align:center;color:var(--mu);padding:30px 16px 60px;border-top:1px solid var(--line)}
-#toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(80px);background:#1b2f5c;border:1px solid var(--ac2);padding:12px 20px;border-radius:14px;z-index:50;transition:.25s;font-weight:700;pointer-events:none}
-#toast.show{transform:translateX(-50%) translateY(0)}
-@media (max-width:860px){
- .wrap{grid-template-columns:1fr;gap:0}
- .burger{display:block}
- nav.menu{display:none;position:fixed;inset:0 0 0 auto;width:min(82vw,320px);z-index:40;background:#0f1630;border-left:1px solid var(--line);top:0;max-height:100vh;padding:70px 12px 30px;box-shadow:-20px 0 60px #000a}
- nav.menu.open{display:block}
- .cmd .row{flex-direction:column}.copy{width:100%}
- .os{min-width:0}
- .bar .in{flex-wrap:nowrap}
- .bar .srch{display:none}
- .m-only{display:block!important}
-}
+body{background:var(--bg);color:var(--tx);font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif;padding:0 0 60px}
+.wrap{max-width:1100px;margin:auto;padding:0 18px}
+.hero{background:linear-gradient(135deg,#7c5cff 0%,#4f7bff 45%,#18c7ff 100%);padding:56px 18px 48px;text-align:center;border-radius:0 0 32px 32px;box-shadow:0 10px 40px #0009}
+.hero h1{font-size:clamp(34px,6vw,56px);letter-spacing:-1px}
+.hero p{font-size:clamp(16px,2.4vw,20px);opacity:.95;margin-top:8px}
+.pills{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:20px}
+.pill{background:#00000038;padding:7px 14px;border-radius:99px;font-weight:700;font-size:14px}
+h2{font-size:clamp(22px,3.4vw,28px);margin:44px 0 14px;display:flex;align-items:center;gap:10px}
+.card{background:var(--s);border:1px solid var(--line);border-radius:20px;padding:20px;margin:14px 0;border-top:5px solid var(--ac)}
+.card.tm{border-top-color:var(--tm)}.card.win{border-top-color:var(--win)}.card.ok{border-top-color:var(--ok)}.card.wa{border-top-color:var(--wa)}.card.pk{border-top-color:var(--pk)}.card.ac2{border-top-color:var(--ac2)}.card.bad{border-top-color:var(--bad)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.grid .card{margin:0}
+.step{display:flex;gap:14px;align-items:flex-start;margin:16px 0}
+.num{flex:none;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-weight:800;color:#fff;background:linear-gradient(135deg,var(--ac),var(--ac2));box-shadow:0 4px 14px #7c5cff55}
+.step .body{flex:1;min-width:0}
+.step p{color:var(--mu)}
+.box{position:relative;background:#080c1a;border:1px solid var(--line);border-radius:14px;padding:14px 92px 14px 14px;margin:10px 0;font:14px/1.5 ui-monospace,Consolas,monospace;color:#c8fff0;overflow-x:auto;white-space:pre}
+.cp{position:absolute;top:8px;right:8px;background:linear-gradient(135deg,var(--ac),var(--ac2));color:#fff;border:0;border-radius:10px;padding:7px 12px;font-weight:700;font-size:13px;cursor:pointer;min-height:34px}
+.tag{display:inline-block;font-size:12px;font-weight:700;padding:3px 10px;border-radius:99px;margin:2px 4px 2px 0}
+.t-ok{background:#38e08c22;color:var(--ok)}.t-off{background:#8a93b822;color:var(--mu)}.t-bad{background:#ff6b8122;color:var(--bad)}.t-ac{background:#7c5cff33;color:#c9bbff}.t-wa{background:#ffc94d22;color:var(--wa)}
+table{width:100%;border-collapse:collapse;margin:10px 0;font-size:15px}
+th{background:var(--s2);color:#fff;text-align:left;padding:10px;border-bottom:2px solid var(--ac)}
+td{padding:10px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:nth-child(even) td{background:#ffffff06}
+.note{border-radius:14px;padding:12px 16px;margin:12px 0;font-size:15px}
+.note.i{background:#18c7ff18;border:1px solid #18c7ff66}.note.w{background:#ffc94d14;border:1px solid #ffc94d66}.note.d{background:#ff6b8114;border:1px solid #ff6b8166}
+code{background:#ffffff14;padding:2px 6px;border-radius:6px;font-family:ui-monospace,Consolas,monospace;font-size:.92em}
+.ok{color:var(--ok)}.bad{color:var(--bad)}.wa{color:var(--wa)}
+details{background:var(--s);border:1px solid var(--line);border-radius:16px;padding:12px 16px;margin:12px 0}
+details[open]{border-color:var(--ac)}
+summary{cursor:pointer;font-weight:700;font-size:16px;color:var(--ac2)}
+.foot{text-align:center;color:var(--mu);margin-top:40px;font-size:14px}
 </style>
 </head>
 <body>
 
 <header class="hero">
- <h1>⚡ ccs — Claude Code + Free API Gateway</h1>
- <p>0 se Advance tak poori guide. Har command ke saath <b>Copy</b> button hai. Neeche apna device chuno (📱 Mobile, 🪟 Windows VS Code, 🐧 Linux) aur sirf wahi commands dikhengi.</p>
- <div class="badges"><span>v4.2</span><span>📱 Termux</span><span>🪟 Windows</span><span>🐧 Linux</span><span>👁️ Live Preview</span></div>
+  <h1>⚡ cc-setup</h1>
+  <p>Claude Code + free API gateway + Plugin Center</p>
+  <div class="pills">
+    <span class="pill">📱 Phone</span><span class="pill">📲 Tablet</span><span class="pill">💻 Computer</span><span class="pill">v4.3</span>
+  </div>
 </header>
 
-<div class="bar"><div class="in">
- <button class="burger" id="burger" aria-label="Menu">☰</button>
- <div class="os" id="os">
-  <button data-os="termux">📱 Mobile (Termux)</button>
-  <button data-os="win">🪟 Windows / VS Code</button>
-  <button data-os="linux">🐧 Linux</button>
- </div>
- <input class="srch" id="srch" type="search" placeholder="🔍 Command dhundo (jaise: update, apk, battery)">
-</div></div>
+<main class="wrap">
 
-<div class="wrap">
-<nav class="menu" id="menu">
- <div class="grp">Shuru karo</div>
- <a href="#intro">🏁 Ye kya hai</a>
- <a href="#install">⬇️ Install karo</a>
- <a href="#setup">🚀 Pehla setup</a>
- <div class="grp">Roz ka kaam</div>
- <a href="#daily">⌨️ Roz ke commands</a>
- <a href="#claude">🤖 Claude chalana</a>
- <a href="#preview">👁️ Live Preview</a>
- <a href="#hub">⚡ Hub: models & free API</a>
- <div class="grp">Extra</div>
- <a href="#battery">🔋 Battery (Android)</a>
- <a href="#apk">📦 APK banana</a>
- <a href="#advance">🧠 Advance</a>
- <a href="#fix">🛠️ Dikkat aaye to</a>
- <a href="#cheat">📋 Sab commands</a>
-</nav>
+<div class="note i">💡 Har command <b>alag box</b> me hai. Box ke kone me <b>Copy</b> dabao. Ek box = ek step.</div>
 
-<main>
-
-<!-- ===================== INTRO ===================== -->
-<section id="intro">
- <h2>🏁 Ye kya hai?</h2>
- <p class="lead">ccs ek chhota tool hai jo tumhare phone ya computer par <b>Claude Code</b> chalata hai, <b>free AI models</b> se jodta hai, aur ek rang-birangi <b>dashboard</b> deta hai. Terminal band karne par bhi background me chalta rehta hai.</p>
- <div class="card c1">
-  <h3>Poora flow (ek nazar me)</h3>
-  <div class="flow"><span>1️⃣ Install</span><i>→</i><span>2️⃣ <b class="k">ccs</b> likho</span><i>→</i><span>3️⃣ Dashboard me key + model</span><i>→</i><span>4️⃣ <b class="k">ccs claude</b></span><i>→</i><span>5️⃣ Preview me dekho</span></div>
-  <p class="mu">Kuch bhi pehle se aana zaruri nahi. Neeche har step alag se samjhaya hai. Command box me <b>Copy</b> dabao, terminal me paste karo, Enter dabao. Bas.</p>
- </div>
- <div class="card c3">
-  <h3>Teen aasan shabd</h3>
-  <ul style="padding-left:20px">
-   <li><b>Terminal</b>: wo kaali screen jahan command likhte hain. Mobile par <b>Termux</b> app, Windows par <b>VS Code ka terminal</b>, Linux par normal terminal.</li>
-   <li><b>Command</b>: ek line jo terminal me paste karke Enter dabate hain.</li>
-   <li><b>Dashboard</b>: browser me khulne wala control panel (<span class="k">ccs</b> likhne par khud khulta hai).</li>
-  </ul>
- </div>
-</section>
-
-<!-- ===================== INSTALL ===================== -->
-<section id="install">
- <h2>⬇️ Install karo</h2>
- <p class="lead">Upar se apna device chuno. Sirf usi device ke steps dikhenge. Har step ek ek karke chalao.</p>
-
- <div data-os-only="termux">
-  <div class="card c1"><h3>📱 Android (Termux)</h3>
-   <div class="warn">Termux sirf <b>F-Droid</b> se install karo. Play Store wala purana hai aur kaam nahi karta.</div>
-   <ol class="steps">
-    <li><div><b>Termux kholo</b><div class="mu">F-Droid se install karke app kholo. Kaali screen aayegi, wahi terminal hai.</div></div></li>
-    <li><div><b>Ek command me install</b><div class="mu">Ye git aur curl lagata hai aur ccs install kar deta hai.</div><div class="cmds" data-g="t_install"></div></div></li>
-    <li><div><b>Agar "pkg update" fail ho</b><div class="mu">Mirror badalna padta hai. Ye chalao, ek mirror chuno, phir upar wala install command dobara chalao.</div><div class="cmds" data-g="t_mirror"></div></div></li>
-    <li><div><b>Dashboard khulne ka intezar karo</b><div class="mu">Browser apne aap khulta hai. Na khule to terminal me diya hua link copy karke browser me paste karo.</div></div></li>
-   </ol>
-  </div>
- </div>
-
- <div data-os-only="win">
-  <div class="card c2"><h3>🪟 Windows + VS Code</h3>
-   <ol class="steps">
-    <li><div><b>Node.js lagao</b><div class="mu">VS Code me <span class="k">Terminal &gt; New Terminal</span> kholo (ya Start me PowerShell).</div><div class="cmds" data-g="w_node"></div></div></li>
-    <li><div><b>Git lagao</b><div class="cmds" data-g="w_git"></div></div></li>
-    <li><div class="warn" style="margin:0">Dono ke baad <b>VS Code poora band karke dobara kholo</b>, warna naye commands nahi milenge.</div></li>
-    <li><div><b>ccs download karo</b><div class="cmds" data-g="w_clone"></div></div></li>
-    <li><div><b>Install chalao</b><div class="mu">Ye <span class="k">ccs</span> command bana deta hai aur dashboard kholta hai.</div><div class="cmds" data-g="w_inst"></div></div></li>
-   </ol>
-  </div>
- </div>
-
- <div data-os-only="linux">
-  <div class="card c3"><h3>🐧 Linux</h3>
-   <ol class="steps">
-    <li><div><b>Node.js 18 ya naya chahiye.</b> Pehle check karo:<div class="cmds" data-g="l_check"></div><div class="mu">Version 18 se kam ho ya "not found" aaye to neeche se ek tareeka chuno.</div></div></li>
-    <li><div><b>Node + git lagao</b> (apne distro ka chuno)
-     <details><summary>Ubuntu / Debian</summary><div class="cmds" data-g="l_apt"></div></details>
-     <details><summary>Fedora</summary><div class="cmds" data-g="l_dnf"></div></details>
-     <details><summary>Arch</summary><div class="cmds" data-g="l_pac"></div></details>
-     <details><summary>Koi bhi distro: nvm se (recommended agar purana Node mila)</summary><div class="cmds" data-g="l_nvm"></div></details>
-    </div></li>
-    <li><div><b>ccs install karo</b><div class="cmds" data-g="l_inst"></div></div></li>
-    <li><div><b>Agar "ccs: command not found" aaye</b><div class="mu">Matlab <span class="k">~/.local/bin</span> PATH me nahi hai. Ye jodo, phir terminal dobara kholo.</div><div class="cmds" data-g="l_path"></div></div></li>
-   </ol>
-  </div>
- </div>
-</section>
-
-<!-- ===================== SETUP ===================== -->
-<section id="setup">
- <h2>🚀 Pehla setup (dashboard me)</h2>
- <p class="lead">Install hote hi dashboard khulta hai. Na khule to terminal me ye likho:</p>
- <div class="cmds" data-g="open"></div>
- <ol class="steps">
-  <li><div><b>Claude Code install</b><div class="mu">Home tab ke Step 1 me <b>Install</b> dabao. (Terminal se chahiye to neeche command hai.)</div><div class="cmds" data-g="cc_inst"></div></div></li>
-  <li><div><b>API key daalo</b><div class="mu">Home &gt; Gateway me provider chuno, URL aur key paste karo, <b>Save</b>. Free key chahiye to <b>🆓 Free API keys lo</b> dabao.</div></div></li>
-  <li><div><b>Model chuno</b><div class="mu"><b>Hub</b> tab &gt; Models &gt; <b>Refresh</b>, phir <b>⚡ Test</b> se check karo aur <b>Lagao</b> dabao.</div></div></li>
-  <li><div><b>Claude chalao</b><div class="mu">Teeno step hote hi terminal me:</div><div class="cmds" data-g="run"></div></div></li>
- </ol>
- <div class="tip">Home tab ka <b>🩺 Health check</b> dabao. Wo batata hai kya baaki hai aur kaise theek karna hai.</div>
-</section>
-
-<!-- ===================== DAILY ===================== -->
-<section id="daily">
- <h2>⌨️ Roz ke commands</h2>
- <p class="lead">Ye sabse zyada kaam aate hain. Pehle inhe yaad kar lo.</p>
- <div class="cmds" data-g="daily"></div>
-</section>
-
-<!-- ===================== CLAUDE ===================== -->
-<section id="claude">
- <h2>🤖 Claude chalana</h2>
- <p class="lead">Do tareeke hain. Dono me model fail ho to dashboard par laal box aata hai aur kaam wahin se aage badhta hai.</p>
- <div class="card c1"><h3>Tareeka 1: Terminal me (chat jaisa)</h3>
-  <div class="cmds" data-g="run"></div>
-  <div class="note">Hamesha <b>ccs claude</b> likho. Seedha <span class="k">claude</span> mat chalao, kyunki asli key settings me nahi rakhi jaati.</div>
- </div>
- <div class="card c2"><h3>Tareeka 2: Dashboard ke Task tab se (background)</h3>
-  <ol class="steps">
-   <li><div>Task tab kholo, <b>Project folder</b> ka poora path likho.</div></li>
-   <li><div><b>Kya banana hai</b> me likho, jaise: "todo app banao, tests likho".</div></li>
-   <li><div><b>▶ Task chalao</b> dabao. Live output wahin dikhta hai. Screen band ho tab bhi chalta hai.</div></li>
-  </ol>
-  <div class="mu">Beech me ruk jaye to purane tasks me <b>Jaari rakho</b> dabao, wahin se aage chalega.</div>
- </div>
-</section>
-
-<!-- ===================== PREVIEW ===================== -->
-<section id="preview">
- <h2>👁️ Live Preview</h2>
- <p class="lead">Dashboard ka <b>Preview</b> tab tumhara banta hua app/website turant dikhata hai, bilkul VS Code ke live preview jaisa. Claude file badalta hai aur preview <b>1 second me</b> apne aap update ho jata hai.</p>
- <div class="card c4">
-  <h3>Kaise use karein</h3>
-  <ol class="steps">
-   <li><div><b>Preview tab kholo</b> (neeche ka 👁️ button).</div></li>
-   <li><div><b>Folder likho</b> jahan project hai (naya ho to <b>➕ Naya folder banao</b> dabao). Task chalate hi ye apne aap set ho jata hai.</div></li>
-   <li><div><b>Kya banana hai</b> likho aur <b>▶ Banao</b> dabao. Jaise jaise files banti hain, preview badalta jata hai.</div></li>
-   <li><div>Preview ke andar <b>click, scroll, type</b> karo, asli app ki tarah check karo.</div></li>
-  </ol>
- </div>
- <div class="card c5">
-  <h3>Preview ke buttons</h3>
-  <div class="tw"><table>
-   <tr><th>Button</th><th>Kaam</th></tr>
-   <tr><td>📱 📲 💻 🖥</td><td>Phone, Tablet, Laptop ya poori width ka size</td></tr>
-   <tr><td>🔁 Ghumao</td><td>Portrait/Landscape badlo</td></tr>
-   <tr><td>🔄</td><td>Dobara reload</td></tr>
-   <tr><td>Path box</td><td>Dusra page kholo (jaise <span class="k">/about.html</span>)</td></tr>
-   <tr><td>↗</td><td>Naye browser tab me kholo</td></tr>
-   <tr><td>⛶</td><td>Poori screen</td></tr>
-   <tr><td>🐞 Console</td><td>Page ke errors aur <span class="k">console.log</span> yahin dikhte hain</td></tr>
-   <tr><td>🕘 Abhi kya badla</td><td>Konsi file abhi badli</td></tr>
-  </table></div>
- </div>
- <div class="card c3">
-  <h3>React / Vite / Next / Flask jaise projects</h3>
-  <p class="mu">Preview me <b>Type</b> ko <b>⚙️ Dev server</b> karo. Command aur port daalo, <b>▶ Dev server chalao</b> dabao. Ye commands useful hain:</p>
-  <div class="cmds" data-g="devsrv"></div>
-  <div class="note">Vite ho to command me <span class="k">--host 127.0.0.1</span> jodo, warna preview nahi khulega.</div>
- </div>
- <div class="tip">Preview sirf tumhare device par (<span class="k">127.0.0.1:8789</span>) chalta hai. Bahar se koi nahi dekh sakta. Port badalna ho to Advance section dekho.</div>
-</section>
-
-<!-- ===================== HUB ===================== -->
-<section id="hub">
- <h2>⚡ Hub: models, free API, OmniRoute</h2>
- <p class="lead">Dashboard ke Hub tab me teen hisse hain.</p>
- <div class="card c3"><h3>🤖 Models</h3><p class="mu">Jin providers ki key save hai unke sab models ek list me. Search karo, ⭐ favorite banao, <b>📋 Copy</b> se naam copy karo, <b>⚡ Test</b> se check karo aur <b>Lagao</b> se seedha Claude me lagao.</p></div>
- <div class="card c2"><h3>🆓 Free APIs</h3><p class="mu">16 free providers (Gemini, Groq, OpenRouter, Cerebras, Mistral, NVIDIA, Cloudflare wagairah). Card kholo, <b>API key lene jao</b>, key paste karo, <b>Save</b>, phir <b>Key test</b>. Bina key wale (Kilo, LLM7, OVH, Ollama) ko <b>➕ Hub me jodo</b> dabao.</p>
-  <div class="note">Cloudflare ke URL me <span class="k">{account_id}</span> ki jagah apni asli Account ID likho. Kuch free providers prompts log kar sakte hain, private code mat bhejo.</div></div>
- <div class="card c1"><h3>🛰️ OmniRoute</h3><p class="mu">Ek hi local gateway jo kai free providers ko ek endpoint par jodta hai. Dashboard se Install, Start aur Claude se jodna ho jata hai. Terminal se chahiye to:</p>
-  <div class="cmds" data-g="omni"></div>
-  <div class="note">OmniRoute ko Node 22 ya 24+ chahiye (23 nahi). Node version check karne ka command Install section me hai.</div></div>
-</section>
-
-<!-- ===================== BATTERY ===================== -->
-<section id="battery">
- <h2>🔋 Battery restriction hatao</h2>
- <div data-os-only="termux">
-  <p class="lead">Android kabhi kabhi background kaam maar deta hai. Ye <b>ek baar</b> kar lo (1 minute) to ccs bina ruke chalta rahega.</p>
-  <div class="cmds" data-g="battery"></div>
-  <ol class="steps">
-   <li><div>Settings &gt; Apps &gt; Termux &gt; Battery &gt; <b>No restrictions</b> chuno.</div></li>
-   <li><div>Redmi/Xiaomi: Settings &gt; Apps &gt; Permissions &gt; <b>Autostart</b> &gt; Termux ON.</div></li>
-   <li><div>Recent apps me Termux card dabake pakdo &gt; <b>Lock</b> (taala).</div></li>
-   <li><div>Termux notification me <b>Wake lock</b> dikhna chahiye (ccs khud laga deta hai).</div></li>
-  </ol>
-  <details><summary>Advance: Android 12+ par phir bhi process mar jaye</summary>
-   <p class="mu">PC se adb ke saath ye chalao (ek baar):</p>
-   <div class="cmds" data-g="phantom"></div></details>
- </div>
- <div data-os-only="win linux"><p class="lead">Ye step sirf Android (Termux) ke liye hai. PC par bas computer ko <b>sleep me mat jane do</b> (Power settings &gt; Sleep: Never). ccs terminal band karne par bhi chalta rehta hai.</p></div>
-</section>
-
-<!-- ===================== APK ===================== -->
-<section id="apk">
- <h2>📦 APK banana</h2>
- <p class="lead">Apni website ya web app ka Android app (APK) banao. Dashboard ke <b>APK</b> tab se ya terminal se.</p>
- <div class="card c4"><h3>Ek baar ka setup (cloud build)</h3>
-  <p class="mu">Termux par cloud build sabse aasan hai (Android SDK nahi chahiye). Pehle gh lagao aur GitHub me login karo:</p>
-  <div class="cmds" data-g="apk_setup"></div>
- </div>
- <div class="card c5"><h3>Naya project aur build</h3>
-  <ol class="steps">
-   <li><div><b>Naya project banao</b><div class="cmds" data-g="apk_new"></div></div></li>
-   <li><div><b>Build karo</b> (APK <span class="k">apk-out</span> folder me aati hai)<div class="cmds" data-g="apk_build"></div></div></li>
-  </ol>
-  <div class="tip">Termux me ek baar <span class="k">termux-setup-storage</span> chalao to APK Downloads folder me bhi copy hogi.</div>
- </div>
- <div class="note">Debug APK banti hai (Play Store release ke liye nahi). Local build sirf PC par chalta hai jahan JDK 17 aur Android SDK ho.</div>
-</section>
-
-<!-- ===================== ADVANCE ===================== -->
-<section id="advance">
- <h2>🧠 Advance</h2>
- <p class="lead">Jab basic aa jaye tab ye kaam aate hain.</p>
-
- <div class="card c1"><h3>Status, restart, band</h3><div class="cmds" data-g="adv_ctl"></div></div>
-
- <div class="card c2"><h3>Port badalna (agar koi port busy ho)</h3>
-  <p class="mu">Default: dashboard <b>8787</b>, proxy <b>8788</b>, preview <b>8789</b>. Env variable set karke badlo, phir <span class="k">ccs restart</span>.</p>
-  <div class="cmds" data-g="adv_ports"></div>
- </div>
-
- <div class="card c3"><h3>Claude Code ka version / apna GitHub repo</h3>
-  <div class="mu">Termux par Claude Code <b>2.1.112</b> par pin hota hai (naye versions Termux par nahi chalte).</div>
-  <div class="cmds" data-g="adv_ver"></div>
- </div>
-
- <div class="card c4"><h3>Smart proxy kya karta hai</h3>
-  <p class="mu">Claude Code ek chhote proxy (<span class="k">127.0.0.1:8788</span>) se baat karta hai. Model fail ho to proxy <b>2 baar khud retry</b> karta hai, phir request roke rakhta hai (Claude ko error nahi dikhta). Dashboard par laal box aata hai, naya model chuno to kaam wahin se aage badhta hai. Home me <b>"apne aap agla model lagao"</b> on karo to ye bhi khud ho jata hai.</p></div>
-
- <div class="card c5"><h3>Claude ko APK skill dena</h3>
-  <p class="mu">Plugins tab me APK Builder install karo, ya terminal me ye chalao. Phir Task tab me "is app ka APK banao" bolo.</p>
-  <div class="cmds" data-g="adv_skill"></div></div>
-
- <div class="card c6"><h3>Files kahan hain</h3>
-  <div class="tw"><table>
-   <tr><th>File</th><th>Kaam</th></tr>
-   <tr><td><span class="k">cc.js</span></td><td>Main tool (ccs command)</td></tr>
-   <tr><td><span class="k">proxy.js</span></td><td>Smart proxy (retry aur model switch)</td></tr>
-   <tr><td><span class="k">preview.js</span></td><td>Live preview server</td></tr>
-   <tr><td><span class="k">apk.js</span></td><td>APK builder</td></tr>
-   <tr><td><span class="k">dash.html</span></td><td>Dashboard</td></tr>
-   <tr><td><span class="k">providers.json</span> / <span class="k">plugins.json</span></td><td>Providers aur plugins ki list (badal sakte ho)</td></tr>
-   <tr><td><span class="k">install.sh</span> / <span class="k">install.bat</span></td><td>Installer (Termux, Linux / Windows)</td></tr>
-  </table></div>
-  <p class="mu" style="margin-top:8px">Config aur logs <span class="k">~/.cc-setup</span> folder me rehte hain (Windows: <span class="k">C:\Users\TUMHARA_NAAM\.cc-setup</span>).</p>
-  <div class="cmds" data-g="adv_files"></div>
- </div>
-</section>
-
-<!-- ===================== FIX ===================== -->
-<section id="fix">
- <h2>🛠️ Dikkat aaye to</h2>
- <p class="lead">Sabse pehle ye chalao. Wo khud batata hai kya galat hai aur fix kya hai.</p>
- <div class="cmds" data-g="fix1"></div>
- <div class="tw card"><table>
-  <tr><th>Problem</th><th>Kya karo</th></tr>
-  <tr><td><b>ccs: command not found</b></td><td>Terminal band karke dobara kholo. Linux par PATH wala command (Install section) chalao.</td></tr>
-  <tr><td><b>Dashboard nahi khula</b></td><td>Terminal me diya link copy karke browser me paste karo, ya <span class="k">ccs restart</span>.</td></tr>
-  <tr><td><b>"Token galat"</b></td><td>Terminal me <span class="k">ccs</span> likho, naya link khulega.</td></tr>
-  <tr><td><b>Port busy</b></td><td>Advance &gt; Port badalna.</td></tr>
-  <tr><td><b>Model fail / error</b></td><td>Dashboard ke laal box se naya model chuno. Hub me dobara <b>Test</b> karo (free models roz badalte hain).</td></tr>
-  <tr><td><b>Preview khali / nahi dikh raha</b></td><td>Preview tab me sahi folder lagao. Folder me <span class="k">index.html</span> hona chahiye. Dev server ho to port aur command check karo.</td></tr>
-  <tr><td><b>Preview me error (laal)</b></td><td>Neeche 🐞 Console me dekho, wahi error Claude ko bata do.</td></tr>
-  <tr><td><b>Android me kaam beech me ruk jata hai</b></td><td>Battery section pura karo, phir <span class="k">ccs battery app</span>.</td></tr>
-  <tr><td><b>OmniRoute install fail</b></td><td>Node version check karo (22 ya 24+). Logs tab me <span class="k">job-omniroute</span> dekho.</td></tr>
-  <tr><td><b>Cloud APK build fail</b></td><td><span class="k">gh auth login</span> dobara karo, build log me error padho.</td></tr>
- </table></div>
- <div class="cmds" data-g="fix2"></div>
-</section>
-
-<!-- ===================== CHEAT ===================== -->
-<section id="cheat">
- <h2>📋 Sab commands ek jagah</h2>
- <p class="lead">Upar ki search box se filter karo. Level: 🟢 Shuru, 🟡 Medium, 🔴 Advance.</p>
- <input class="srch m-only" id="srch2" type="search" placeholder="🔍 Command dhundo">
- <div class="cmds" data-g="all"></div>
- <div class="empty" id="empty">Koi command nahi mili. Dusra shabd try karo.</div>
-</section>
-
-</main>
+<h2>🟦 Termux (Android)</h2>
+<div class="card tm">
+  <div class="step"><div class="num">1</div><div class="body"><b>Termux F-Droid se install karo</b><p>Play Store wala purana hai.</p></div></div>
+  <div class="step"><div class="num">2</div><div class="body"><b>Packages update</b><div class="box">pkg update -y<button class="cp">Copy</button></div></div></div>
+  <div class="step"><div class="num">3</div><div class="body"><b>git aur curl</b><div class="box">pkg install -y git curl<button class="cp">Copy</button></div></div></div>
+  <div class="step"><div class="num">4</div><div class="body"><b>Repo download</b><div class="box">git clone https://github.com/mrshadowsir/cc-setup ~/cc-setup<button class="cp">Copy</button></div></div></div>
+  <div class="step"><div class="num">5</div><div class="body"><b>Installer chalao</b><div class="box">bash ~/cc-setup/install.sh<button class="cp">Copy</button></div></div></div>
+  <div class="step"><div class="num">6</div><div class="body"><b>Agli baar sirf</b><div class="box">ccs<button class="cp">Copy</button></div></div></div>
+  <div class="note w">⚠️ <code>pkg update</code> fail ho to <code>termux-change-repo</code> chalao, mirror badlo, phir step 2.</div>
 </div>
 
-<footer>ccs v4.2 · Mobile, Windows aur Linux ke liye · Koi dikkat ho to pehle <b class="k">ccs doctor</b> chalao</footer>
-<div id="toast">Copy ho gaya ✅</div>
+<h2>🟦 Windows (VS Code)</h2>
+<div class="card win">
+  <div class="step"><div class="num">1</div><div class="body"><b>Node.js</b><div class="box">winget install OpenJS.NodeJS.LTS<button class="cp">Copy</button></div></div></div>
+  <div class="step"><div class="num">2</div><div class="body"><b>Git</b><div class="box">winget install Git.Git<button class="cp">Copy</button></div></div></div>
+  <div class="step"><div class="num">3</div><div class="body"><b>VS Code band karke dobara kholo</b><p>Naye PATH load hone ke liye.</p></div></div>
+  <div class="step"><div class="num">4</div><div class="body"><b>Repo download</b><div class="box">git clone https://github.com/mrshadowsir/cc-setup<button class="cp">Copy</button></div></div></div>
+  <div class="step"><div class="num">5</div><div class="body"><b>Folder me jao</b><div class="box">cd cc-setup<button class="cp">Copy</button></div></div></div>
+  <div class="step"><div class="num">6</div><div class="body"><b>Installer</b><div class="box">install.bat<button class="cp">Copy</button></div></div></div>
+  <div class="step"><div class="num">7</div><div class="body"><b>Agli baar sirf</b><div class="box">ccs<button class="cp">Copy</button></div></div></div>
+</div>
+
+<h2>🟩 Dashboard pehli setup</h2>
+<div class="grid">
+  <div class="card ac2"><span class="tag t-ac">STEP 1</span><p>Home tab > <b>Claude Install</b></p></div>
+  <div class="card ac2"><span class="tag t-ac">STEP 2</span><p><b>URL + API key > Save</b></p></div>
+  <div class="card ac2"><span class="tag t-ac">STEP 3</span><p><b>Models > Models laao > Test > Lagao</b></p></div>
+  <div class="card ac2"><span class="tag t-ac">STEP 4</span><p>Claude chalao:<div class="box">ccs claude<button class="cp">Copy</button></div></p></div>
+</div>
+
+<h2>🟨 Plugin Center</h2>
+<div class="card wa">
+  <p>Dashboard me <b>🧩 Plugins</b> tab kholo. Upar 5 sections hain:</p>
+  <table>
+    <tr><th>Section</th><th>Kya milega</th></tr>
+    <tr><td>🛒 <b>Marketplace</b></td><td>Saare plugins. Search. <span class="tag t-ok">Install</span> ek click, <span class="tag t-bad">🗑 Delete</span> ek click me permanent.</td></tr>
+    <tr><td>✅ <b>Installed</b></td><td>Active / OFF / Files gayab. ON/OFF toggle, Sab ON/OFF, Health check.</td></tr>
+    <tr><td>🔧 <b>Custom</b></td><td>Official ke bahar ke plugins. Marketplace jodo, <code>plugin@marketplace</code> se install.</td></tr>
+    <tr><td>🧪 <b>Advanced</b></td><td>Backup / restore, marketplace update, skills ki list.</td></tr>
+    <tr><td>📦 <b>Recommended</b></td><td>plugins.json ki recommended list.</td></tr>
+  </table>
+  <div class="note i">Pehli baar Marketplace me neeche <b>Official marketplace jodo</b> dabao.</div>
+  <div class="note d">🚨 <b>Permanent delete</b> me plugin ki files, cache aur settings entry sab hat jati hai. Wapas nahi aata, isliye confirm popup aata hai.</div>
+  <h3 style="margin-top:14px">Status ka matlab</h3>
+  <p><span class="tag t-ok">● Active</span> installed + ON + files maujood. Kaam kar raha hai.</p>
+  <p><span class="tag t-off">⏸ OFF</span> installed hai, par band hai.</p>
+  <p><span class="tag t-bad">⚠ Files gayab</span> settings me hai, folder nahi. Reinstall ya Delete karo.</p>
+</div>
+
+<h2>💾 Backup & restore</h2>
+<div class="grid">
+  <div class="card pk"><b>Backup lo</b><p>Plugins > 🧪 Advanced > <b>⬇ Backup file lo</b></p></div>
+  <div class="card pk"><b>Naye device par</b><p>Plugins > 🧪 Advanced > <b>⬆ Backup file se restore</b></p></div>
+</div>
+
+<h2>📐 Layout</h2>
+<table>
+  <tr><th>Device</th><th>Layout</th><th>Navigation</th></tr>
+  <tr><td>📱 Phone</td><td>Ek column</td><td>Neeche bar</td></tr>
+  <tr><td>📲 Tablet (700px+)</td><td>Chaudi layout</td><td>Neeche bar</td></tr>
+  <tr><td>💻 Computer (1024px+)</td><td>Plugin Center 2 columns</td><td>Bayein sidebar</td></tr>
+</table>
+
+<h2>🔄 Update</h2>
+<div class="card pk">
+  <div class="step"><div class="num">1</div><div class="body"><b>Dashboard se:</b> Home tab > <b>Update karo</b></div></div>
+  <div class="step"><div class="num">2</div><div class="body"><b>Ya terminal se</b><div class="box">ccs update<button class="cp">Copy</button></div></div></div>
+  <div class="step"><div class="num">3</div><div class="body"><b>5 second ruko</b>, phir page reload karo.</div></div>
+</div>
+
+<h2>🧪 Check karo</h2>
+<div class="card ok"><div class="box">ccs doctor<button class="cp">Copy</button></div><p>Kuch laal aaye to uska <code>fix</code> line padho.</p></div>
+
+<h2>📜 Saare commands</h2>
+<div class="card ac2">
+<table>
+  <tr><th>Command</th><th>Kaam</th></tr>
+  <tr><td><code>ccs</code></td><td>Dashboard + menu (background me)</td></tr>
+  <tr><td><code>ccs claude</code></td><td>Claude Code chalao</td></tr>
+  <tr><td><code>ccs menu</code></td><td>Terminal menu (bina browser ke)</td></tr>
+  <tr><td><code>ccs update</code></td><td>Naya version GitHub se</td></tr>
+  <tr><td><code>ccs battery</code></td><td>Battery restriction hatao (Termux)</td></tr>
+  <tr><td><code>ccs apk help</code></td><td>APK banana ki help</td></tr>
+  <tr><td><code>ccs doctor</code></td><td>Sab check</td></tr>
+  <tr><td><code>ccs stop</code></td><td>Sab band</td></tr>
+</table>
+<details><summary>🔌 Plugin commands (terminal se)</summary>
+  <div class="box">claude plugin marketplace add anthropics/claude-plugins-official<button class="cp">Copy</button></div>
+  <div class="box">claude plugin install code-review@claude-plugins-official<button class="cp">Copy</button></div>
+  <div class="box">claude plugin uninstall code-review@claude-plugins-official<button class="cp">Copy</button></div>
+  <div class="box">claude plugin marketplace update<button class="cp">Copy</button></div>
+</details>
+</div>
+
+<h2>🔋 Battery (Android, ek baar)</h2>
+<div class="card wa"><div class="box">ccs battery<button class="cp">Copy</button></div>
+<p>Termux ke liye <b>No restrictions</b> chuno. Redmi/Xiaomi par <b>Autostart</b> ON karo, aur Recent apps me Termux ko <b>Lock</b> karo.</p></div>
+
+<h2>🤖 Model aur API</h2>
+<div class="grid">
+  <details><summary>Model beech me band ho jaye to</summary><p>Proxy 2 baar khud retry karta hai, phir request roke rakhta hai. Naya model chuno, kaam wahin se aage badhta hai.</p></details>
+  <details><summary>Direct API (Gemini, Groq)</summary><p>Home > Provider me chuno, key daalo, <b>Save</b>. Hamesha <code>ccs claude</code> se chalao.</p></details>
+</div>
+
+<h2>📦 APK banana</h2>
+<div class="card ac2">
+  <div class="box">ccs apk new MeraApp<button class="cp">Copy</button></div>
+  <div class="box">ccs apk cloud ~/apk-projects/MeraApp<button class="cp">Copy</button></div>
+  <p>Cloud build ke liye Plugins > Recommended me <b>APK Builder</b> install karo, phir:</p>
+  <div class="box">gh auth login<button class="cp">Copy</button></div>
+</div>
+
+<h2>⚠️ Known limits</h2>
+<div class="note d">
+  • Termux par Claude Code <code>2.1.112</code> pin hota hai. Badalna ho to <code>CC_CLAUDE_VER</code> set karo.<br>
+  • Android battery system phone ke hisaab se alag hai. <code>ccs battery</code> dobara chalao.<br>
+  • Free providers ke models roz badalte hain. Hub > Models me dobara test karo.<br>
+  • Kuch free providers prompts training me use kar sakte hain. <b>Private code/data mat bhejo.</b><br>
+  • Plugin status naye Claude session me lagta hai.
+</div>
+
+<div class="foot">MIT License · Made for Termux & Windows 💜</div>
+</main>
 
 <script>
-const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
-/* c(os, level, command, title, description). os: 'all' ya 'termux,win,linux' ka hissa */
-const c=(os,l,cmd,t,d)=>({os,l,cmd,t,d});
-const A='all';
-const G={
- t_install:[c('termux',1,'pkg update -y && pkg install -y git curl && curl -fsSL https://raw.githubusercontent.com/mrshadowsir/cc-setup/main/install.sh | bash','ccs install karo (ek hi command)','Ye sab kuch khud kar deta hai: git/curl lagata hai, ccs download karta hai, <b>ccs</b> command banata hai aur dashboard kholta hai.')],
- t_mirror:[c('termux',1,'termux-change-repo','Mirror badlo','Screen par ek mirror chuno (OK/Enter dabao). Phir install command dobara chalao.')],
- w_node:[c('win',1,'winget install OpenJS.NodeJS.LTS','Node.js install','Claude Code aur ccs ko Node chahiye.')],
- w_git:[c('win',1,'winget install Git.Git','Git install','Code download karne ke kaam aata hai.')],
- w_clone:[c('win',1,'git clone https://github.com/mrshadowsir/cc-setup','ccs ka code download','Ek <b>cc-setup</b> folder ban jayega.'),c('win',1,'cd cc-setup','Folder ke andar jao','')],
- w_inst:[c('win',1,'install.bat','Installer chalao','Aage se sirf <b>ccs</b> likhna hai.')],
- l_check:[c('linux',1,'node -v','Node ka version dekho','<b>v18</b> ya usse bada aana chahiye.')],
- l_apt:[c('linux',1,'sudo apt update && sudo apt install -y nodejs npm git curl','Node + git (Ubuntu/Debian)','Agar version 18 se kam aaye to nvm wala tareeka lo.')],
- l_dnf:[c('linux',1,'sudo dnf install -y nodejs npm git curl','Node + git (Fedora)','')],
- l_pac:[c('linux',1,'sudo pacman -S --needed nodejs npm git curl','Node + git (Arch)','')],
- l_nvm:[c('linux',2,'curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash','nvm install karo','Phir terminal band karke dobara kholo.'),c('linux',2,'nvm install 22','Node 22 lagao','OmniRoute ke liye bhi Node 22 sahi hai.')],
- l_inst:[c('linux',1,'curl -fsSL https://raw.githubusercontent.com/mrshadowsir/cc-setup/main/install.sh | bash','ccs install karo','<b>ccs</b> command <span class="k">~/.local/bin</span> me banta hai aur dashboard khulta hai.')],
- l_path:[c('linux',1,"echo 'export PATH=\"$HOME/.local/bin:$PATH\"' >> ~/.bashrc && source ~/.bashrc",'PATH me jodo (bash)','Zsh ho to <span class="k">~/.bashrc</span> ki jagah <span class="k">~/.zshrc</span> likho.')],
- open:[c(A,1,'ccs','Dashboard kholo / chalu karo','Background me chalta hai. Terminal band karo tab bhi chalta rahega. Link ban kar copy bhi ho jata hai.')],
- cc_inst:[c(A,1,'ccs install','Claude Code install (terminal se)','Dashboard ka Install button yahi karta hai.')],
- run:[c(A,1,'ccs claude','Claude Code chalao','Ye hamesha sahi settings ke saath Claude kholta hai. Seedha <b>claude</b> mat likho.')],
- daily:[
-  c(A,1,'ccs','Dashboard chalu karo','Pehle se chalu ho to wahi link dikha deta hai.'),
-  c(A,1,'ccs claude','Claude Code chalao','Chat shuru. Model fail ho to dashboard me laal box aata hai.'),
-  c(A,1,'ccs doctor','Sab check karo','Node, Git, Claude, key, model, proxy, sab ek baar me. Galat ho to fix bhi batata hai.'),
-  c(A,1,'ccs menu','Terminal menu','Bina browser ke number wala menu. Termux par bahut kaam aata hai.'),
-  c(A,1,'ccs update','Naya version laao','GitHub se naya code laata hai aur dashboard khud dobara chalu karta hai.'),
-  c(A,1,'ccs stop','Sab band karo','Dashboard, proxy aur sab chal rahi cheezein band.')],
- devsrv:[
-  c(A,2,'npm install','Pehli baar packages lagao','Project folder ke andar chalana hai.'),
-  c(A,2,'npm run dev','React / Vite / Next ka dev server','Port aam taur par 3000 (Next) ya 5173 (Vite) hota hai.'),
-  c(A,3,'npm run dev -- --host 127.0.0.1','Vite ko 127.0.0.1 par chalao','Preview ke liye sahi address.'),
-  c(A,2,'python3 -m http.server 3000','Sirf python se simple server','Bina npm ke koi bhi folder dikhane ke liye.')],
- omni:[
-  c(A,2,'npm install -g omniroute','OmniRoute install','Node 22 ya 24+ chahiye.'),
-  c(A,2,'omniroute','OmniRoute start','Endpoint: <span class="k">http://localhost:20128/v1</span>'),
-  c(A,2,'npx -y omniroute','Bina install kiye chalao','Ek baar ke liye.')],
- battery:[
-  c('termux',1,'ccs battery','Battery guide (step by step)','Wake-lock lagata hai aur settings kholne me madad karta hai.'),
-  c('termux',2,'ccs battery optim','Battery optimization list kholo',''),
-  c('termux',2,'ccs battery app','Termux app info kholo','Yahan se Battery &gt; No restrictions chuno.'),
-  c('termux',2,'ccs battery autostart','Autostart kholo (Redmi/Xiaomi)',''),
-  c('termux',1,'ccs battery done','"Maine kar liya" yaad rakho','Reminder band ho jata hai.'),
-  c('termux',1,'termux-wake-lock','Wake-lock haath se lagao','Termux ko sone se rokta hai.')],
- phantom:[c('termux',3,'adb shell "settings put global settings_enable_monitor_phantom_procs false"','Phantom process killer band karo','Ye command PC se adb ke saath chalti hai, phone ke Termux me nahi.')],
- apk_setup:[
-  c('termux',1,'ccs apk-setup','Claude ko APK skill do + gh lagao','Termux par gh aur git bhi install karta hai.'),
-  c('win',1,'winget install GitHub.cli','GitHub CLI install (Windows)',''),
-  c('linux',1,'sudo apt install -y gh','GitHub CLI install (Ubuntu/Debian)','Dusre distro ho to unka package manager use karo.'),
-  c(A,1,'gh auth login','GitHub login (ek baar)','Screen ke sawaalon ka jawab do. Cloud APK build ke liye zaruri.'),
-  c('termux',1,'termux-setup-storage','Downloads folder ka access','APK Downloads me copy hone ke liye.')],
- apk_new:[
-  c(A,1,'ccs apk new MeraApp','Starter app banao','Ek chhota WebView app ~/apk-projects/MeraApp me banta hai.'),
-  c(A,2,'ccs apk new MeraApp --web ~/meri-site','Apni website ka app banao','Folder me <b>index.html</b> hona chahiye.'),
-  c(A,3,'ccs apk new MeraApp --web ~/meri-site --out ~/projects','Apne folder me banao','--out se batao project kahan banana hai.'),
-  c(A,1,'ccs apk help','APK help','Saare APK options.')],
- apk_build:[
-  c(A,1,'ccs apk cloud ~/apk-projects/MeraApp','Cloud build (GitHub Actions)','Termux ke liye best. 2 se 5 minute lagte hain.'),
-  c('win,linux',3,'ccs apk local ~/apk-projects/MeraApp','Local build','Sirf jab JDK 17, Gradle aur ANDROID_HOME maujood ho.'),
-  c('win',3,'winget install EclipseAdoptium.Temurin.17.JDK','JDK 17 install (Windows)','Local build ke liye.')],
- adv_ctl:[
-  c(A,1,'ccs status','Dashboard chal raha hai?','Version, model aur wake-lock dikhata hai.'),
-  c(A,2,'ccs restart','Dashboard dobara chalu','Band karke phir chalu karta hai. Kuch atak jaye to pehle ye.'),
-  c(A,1,'ccs stop','Sab band',''),
-  c(A,2,'ccs help','Saare commands ki list','Koi galat command likho to bhi yahi list aati hai.')],
- adv_ports:[
-  c('termux,linux',3,'export CC_PORT=9000 CC_PROXY_PORT=9001 CC_PREVIEW_PORT=9002','Teeno ports badlo','Dashboard, proxy aur preview ke naye port. Isi terminal me phir <b>ccs restart</b>.'),
-  c('win',3,'$env:CC_PORT=9000; $env:CC_PROXY_PORT=9001; $env:CC_PREVIEW_PORT=9002','Ports badlo (PowerShell / VS Code)','Phir <b>ccs restart</b>.'),
-  c('win',3,'set CC_PORT=9000 && set CC_PROXY_PORT=9001 && set CC_PREVIEW_PORT=9002','Ports badlo (CMD)','Phir <b>ccs restart</b>.')],
- adv_ver:[
-  c('termux,linux',3,'export CC_CLAUDE_VER=2.1.112','Claude Code ka version chuno','Install se pehle set karo. Termux par 2.1.112 hi chalta hai.'),
-  c('win',3,'$env:CC_CLAUDE_VER="2.1.112"','Claude Code ka version (PowerShell)',''),
-  c('termux,linux',3,'export CC_REPO=apna-naam/cc-setup CC_BRANCH=main','Update apne repo se lo','<b>ccs update</b> ab tumhare GitHub repo se code laayega.')],
- adv_skill:[c(A,2,'ccs apk-setup','APK skill lagao','Claude ko APK banana aata hai ye skill file mil jati hai.')],
- adv_files:[
-  c('termux,linux',2,'ls ~/.cc-setup ~/.cc-setup/logs','Config aur logs dekho',''),
-  c('termux,linux',2,'tail -n 50 ~/.cc-setup/logs/daemon.log','Daemon ka log padho','Dashboard start na ho to yahan error milta hai.'),
-  c('win',2,'dir $HOME\\.cc-setup\\logs','Logs dekho (PowerShell)',''),
-  c('win',2,'Get-Content $HOME\\.cc-setup\\logs\\daemon.log -Tail 50','Daemon ka log padho (PowerShell)','')],
- fix1:[c(A,1,'ccs doctor','Sab check (sabse pehle ye)','Har cheez ke saamne [ok] ya [!!] aur fix likha aata hai.')],
- fix2:[
-  c(A,1,'ccs restart','Dashboard dobara chalu karo',''),
-  c(A,2,'ccs stop && ccs','Poora reset','Sab band karke naye sire se chalu.'),
-  c('termux',1,'termux-change-repo','Termux mirror badlo','pkg update fail ho to.'),
-  c(A,1,'node -v','Node version dekho','18+ chahiye.')]
-};
-/* "Sab commands" = upar ke saare, duplicate hata kar */
-G.all=(()=>{const seen=new Set(),o=[];for(const k of Object.keys(G)){if(k==='all')continue;for(const x of G[k]){const key=x.cmd+'|'+x.os;if(!seen.has(key)){seen.add(key);o.push(x)}}}return o})();
-
-const LV={1:['l1','🟢 Shuru'],2:['l2','🟡 Medium'],3:['l3','🔴 Advance']};
-const ON={termux:'📱 Mobile',win:'🪟 Windows',linux:'🐧 Linux'};
-const esc=s=>String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
-function card(x){
- const d=document.createElement('div');d.className='cmd';d.dataset.os=x.os;d.dataset.q=(x.cmd+' '+x.t+' '+x.d).toLowerCase();
- const os=x.os==='all'?'<span class="tag o">Sab</span>':x.os.split(',').map(o=>`<span class="tag o">${ON[o]}</span>`).join('');
- d.innerHTML=`<div class="top"><span class="t">${esc(x.t)}</span><span class="tag ${LV[x.l][0]}">${LV[x.l][1]}</span>${os}</div>
- <div class="row"><code></code><button class="copy" type="button">📋 Copy</button></div>${x.d?`<div class="d">${x.d}</div>`:''}`;
- $('code',d).textContent=x.cmd;
- return d}
-$$('.cmds').forEach(el=>{(G[el.dataset.g]||[]).forEach(x=>el.appendChild(card(x)))});
-
-async function copy(t){try{await navigator.clipboard.writeText(t);return true}catch{const a=document.createElement('textarea');a.value=t;a.style.cssText='position:fixed;opacity:0';document.body.appendChild(a);a.select();let ok=false;try{ok=document.execCommand('copy')}catch{}a.remove();return ok}}
-let tt;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),1600)}
-document.addEventListener('click',async e=>{
- const b=e.target.closest('.copy');if(!b)return;
- const cmd=$('code',b.closest('.cmd')).textContent,ok=await copy(cmd);
- b.textContent=ok?'✅ Copied':'❌ Haath se copy karo';b.classList.toggle('done',ok);toast(ok?'Copy ho gaya ✅':'Copy nahi hua, code ko dabake pakdo');
- setTimeout(()=>{b.textContent='📋 Copy';b.classList.remove('done')},1600)});
-
-/* OS chuno */
-let OS='linux';
-try{const ua=navigator.userAgent;OS=/Android/i.test(ua)?'termux':/Windows/i.test(ua)?'win':'linux';OS=localStorage.ccsos||OS}catch{}
-function applyOS(){
- try{localStorage.ccsos=OS}catch{}
- $$('#os button').forEach(b=>b.classList.toggle('on',b.dataset.os===OS));
- $$('[data-os-only]').forEach(e=>e.classList.toggle('hide',!e.dataset.osOnly.split(' ').includes(OS)));
- filter()}
-function filter(){
- const q=$('#srch').value.trim().toLowerCase();let shown=0;
- $$('.cmd').forEach(e=>{const o=e.dataset.os,okOS=o==='all'||o.split(',').includes(OS),okQ=!q||e.dataset.q.includes(q);const v=okOS&&okQ;e.classList.toggle('hide',!v);if(v&&e.closest('#cheat'))shown++});
- $('#empty').style.display=shown?'none':'block'}
-$('#os').addEventListener('click',e=>{const b=e.target.closest('button');if(b){OS=b.dataset.os;applyOS()}});
-$('#srch').addEventListener('input',()=>{filter();if($('#srch').value.trim())$('#cheat').scrollIntoView()});
-$('#srch2').addEventListener('input',()=>{$('#srch').value=$('#srch2').value;filter()});
-applyOS();
-
-/* menu */
-$('#burger').addEventListener('click',()=>$('#menu').classList.toggle('open'));
-$('#menu').addEventListener('click',e=>{if(e.target.closest('a'))$('#menu').classList.remove('open')});
-const links=$$('#menu a'),secs=links.map(a=>$(a.getAttribute('href')));
-const io=new IntersectionObserver(es=>{es.forEach(en=>{if(en.isIntersecting){links.forEach(l=>l.classList.toggle('on',l.getAttribute('href')==='#'+en.target.id))}})},{rootMargin:'-30% 0px -60% 0px'});
-secs.forEach(s=>s&&io.observe(s));
+document.querySelectorAll('.cp').forEach(function(b){
+  b.addEventListener('click',function(){
+    var box=b.parentElement;
+    var t=box.childNodes[0].textContent.trim();
+    var done=function(ok){b.textContent=ok?'✅ Copied':'Haath se copy karo';setTimeout(function(){b.textContent='Copy'},1500)};
+    if(navigator.clipboard){navigator.clipboard.writeText(t).then(function(){done(true)},function(){done(false)})}
+    else{done(false)}
+  });
+});
 </script>
 </body>
 </html>

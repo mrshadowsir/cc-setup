@@ -109,6 +109,38 @@ pre.mini{max-height:240px;font-size:12px;margin-top:10px}
 .pvfs:fullscreen{background:#0b1020;display:grid;place-items:start center;overflow:auto}
 @media (min-width:980px){#t-preview.on{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(320px,1fr);column-gap:16px;align-items:start}
  #t-preview.on>#pv-card{grid-column:1;grid-row:1/span 6;position:sticky;top:104px}#t-preview.on>.card:not(#pv-card){grid-column:2}}
+
+/* ---- Plugin Center ---- */
+.psub{display:none}.psub.on{display:block}
+.pseg{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 2px}
+.pseg button{flex:1 1 auto;min-width:0;min-height:44px;padding:8px 10px;font-size:13.5px;color:var(--mu)}
+.pseg button.on{background:linear-gradient(135deg,var(--ac),var(--ac2));border:0;color:#fff}
+.bad-btn,.row button.bad-btn{color:var(--bad)}
+.row .macts{display:flex;gap:6px;flex:none}.row .macts button{min-width:0}
+.gh{margin:14px 2px 6px;font-size:15px;color:var(--ac2)}
+.ok{color:var(--ok)}
+/* ---- Responsive: phone (default), tablet (700px+), computer (1024px+) ---- */
+html,body{min-height:100%}
+@media (min-width:700px){
+ body{max-width:900px;padding-left:24px;padding-right:24px}
+ .hero{margin:0 -24px;padding-left:24px;padding-right:24px}
+ .card{padding:20px}
+ .pseg button{font-size:14px}
+}
+@media (min-width:1024px){
+ body{max-width:none;margin:0;padding:0 32px 40px 268px}
+ body.pvwide{max-width:none}
+ .hero{margin:0 -32px 18px -268px;padding-left:calc(268px + 32px);border-radius:0 0 26px 26px}
+ nav{top:0;bottom:0;right:auto;width:236px;flex-direction:column;border-top:0;border-right:1px solid var(--line);padding:18px 10px calc(18px + env(safe-area-inset-bottom));gap:4px;overflow-y:auto;z-index:8}
+ nav button{flex:none;flex-direction:row;justify-content:flex-start;gap:12px;min-height:52px;padding:10px 14px;font-size:15px;border-radius:14px}
+ nav button span{font-size:20px}
+ nav button.on{box-shadow:inset 3px 0 0 var(--ac2)}
+ #toast{left:auto;right:24px;max-width:420px}
+ #t-plugins.on{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:start}
+ #t-plugins.on .card{margin:0}
+ #t-plugins .card.wide{grid-column:1/-1}
+ .psub.on{display:contents}
+}
 </style>
 </head>
 <body>
@@ -322,12 +354,78 @@ pre.mini{max-height:240px;font-size:12px;margin-top:10px}
 
 <!-- ============ PLUGINS ============ -->
 <div class="tab" id="t-plugins">
- <div class="card c5"><h2>🧩 Plugins</h2><div id="plist"></div></div>
- <div class="card c2"><h2>➕ Apna plugin command</h2>
-  <p class="mu">Koi bhi plugin ka command yahan daalo (claude / npx / npm / pip / pkg se shuru).</p>
-  <input id="pcmd" autocapitalize="off" autocomplete="off" placeholder="claude plugin marketplace add owner/repo">
-  <div class="btns"><button class="p" data-a="pcustom">Chalao</button></div>
-  <p class="mu">Result Logs tab me dikhega (job-custom).</p>
+ <div class="card c5 wide"><h2>🧩 Plugin Center</h2>
+  <p class="mu">Marketplace se plugin laao. Ek click me install, ek click me permanent delete. Yahan dekho kaun sa plugin active hai aur kaam kar raha hai.</p>
+  <div class="pseg" id="pseg">
+   <button class="on" data-a="psec" data-s="mkt">🛒 Marketplace</button>
+   <button data-a="psec" data-s="inst">✅ Installed</button>
+   <button data-a="psec" data-s="cust">🔧 Custom</button>
+   <button data-a="psec" data-s="adv">🧪 Advanced</button>
+   <button data-a="psec" data-s="rec">📦 Recommended</button>
+  </div>
+  <div id="mp-sum" class="mu" style="margin-top:12px"></div>
+ </div>
+
+ <div class="psub on" id="ps-mkt">
+  <div class="card c1"><h2>🛒 Marketplace</h2>
+   <p class="mu">Saare marketplace plugins yahan. Install ke baad ye Installed me dikhega.</p>
+   <input id="mp-q" type="search" autocomplete="off" placeholder="Plugin dhundo (naam, category, desc)…">
+   <div class="btns"><button data-a="mpRefresh">🔄 Refresh (marketplace update)</button></div>
+   <div id="mp-cat"></div>
+   <div class="btns"><button class="p" data-a="mpOfficial">Official marketplace jodo</button></div>
+  </div>
+ </div>
+
+ <div class="psub" id="ps-inst">
+  <div class="card c3"><h2>✅ Installed plugins</h2>
+   <p class="mu"><span class="tag fr">● Active</span> installed + ON + files maujood. <span class="tag">⏸ OFF</span> band hai. <span class="tag bd">⚠ Files gayab</span> reinstall ya delete karo.</p>
+   <div class="btns"><button data-a="mpBulk" data-on="1">Sab ON</button><button data-a="mpBulk" data-on="0">Sab OFF</button><button data-a="mpHealth">🩺 Health check</button></div>
+   <div id="mp-inst"></div>
+   <div id="mp-health"></div>
+  </div>
+ </div>
+
+ <div class="psub" id="ps-cust">
+  <div class="card c2"><h2>🔧 Custom plugins</h2>
+   <p class="mu">Official marketplace ke bahar ke plugins (3rd party ya tumhare apne).</p>
+   <div id="mp-cust"></div>
+  </div>
+  <div class="card c2"><h2>🗂 Marketplaces</h2>
+   <input id="mp-repo" autocapitalize="off" autocomplete="off" placeholder="owner/repo  (jaise anthropics/claude-plugins-official)">
+   <div class="btns"><button class="p" data-a="mpAddMkt">Marketplace jodo</button></div>
+   <div id="mp-mkts"></div>
+  </div>
+  <div class="card c2"><h2>⚙️ Plugin ID se install</h2>
+   <p class="mu">Plugin ka naam@marketplace likho, jaise <span class="mono">code-review@claude-plugins-official</span>.</p>
+   <input id="mp-id" autocapitalize="off" autocomplete="off" placeholder="plugin-naam@marketplace">
+   <div class="btns"><button class="p" data-a="mpInstallId">Install</button></div>
+  </div>
+  <div class="card c2"><h2>➕ Apna plugin command</h2>
+   <p class="mu">Koi bhi plugin ka command yahan daalo (claude / npx / npm / pip / pkg se shuru).</p>
+   <input id="pcmd" autocapitalize="off" autocomplete="off" placeholder="claude plugin marketplace add owner/repo">
+   <div class="btns"><button class="p" data-a="pcustom">Chalao</button></div>
+   <p class="mu">Result Logs tab me dikhega (job-custom).</p>
+  </div>
+ </div>
+
+ <div class="psub" id="ps-adv">
+  <div class="card c4"><h2>🧪 Backup & restore</h2>
+   <p class="mu">Installed plugin list ek JSON file me save karo. Naye phone/PC par wahi file daalo, sab plugins wapas install ho jayenge.</p>
+   <div class="btns"><button class="p" data-a="mpExport">⬇ Backup file lo</button><button data-a="mpPick">⬆ Backup file se restore</button></div>
+   <input type="file" id="mp-file" accept="application/json,.json" hidden>
+  </div>
+  <div class="card c4"><h2>🔁 Marketplace update</h2>
+   <p class="mu">Sab marketplaces ka naya catalog laao.</p>
+   <div class="btns"><button data-a="mpRefresh">🔄 Sab update karo</button></div>
+  </div>
+  <div class="card c4"><h2>🧠 Skills</h2>
+   <p class="mu">~/.claude/skills me jo skills hain.</p>
+   <div id="mp-skills"><p class="mu">Load ho raha hai…</p></div>
+  </div>
+ </div>
+
+ <div class="psub" id="ps-rec">
+  <div class="card c5"><h2>📦 Recommended</h2><p class="mu">Ye list plugins.json se aati hai. Install se Logs me progress dikhega.</p><div id="plist"></div></div>
  </div>
 </div>
 
@@ -407,7 +505,7 @@ function paint(){
 }
 async function useModel(m){const r=await api('config',{model:m});if(!r.error){toast(r.applied?'Model lag gaya: '+m:'Model save hua. Gateway URL aur key bhi daalo');refresh()}}
 const A={
- tab(e){tab=e.dataset.t;document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x.id==='t-'+tab));document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x.dataset.t===tab));scrollTo(0,0);document.body.classList.toggle('pvwide',tab==='preview');if(tab==='preview')setTimeout(pvOpen,30);if(tab==='models'){paintHub();if(seg==='m'&&!H.loaded&&!H.loading)loadHub()}tick(true)},
+ tab(e){tab=e.dataset.t;document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x.id==='t-'+tab));document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x.dataset.t===tab));scrollTo(0,0);document.body.classList.toggle('pvwide',tab==='preview');if(tab==='preview')setTimeout(pvOpen,30);if(tab==='plugins')mpLoad();if(tab==='models'){paintHub();if(seg==='m'&&!H.loaded&&!H.loading)loadHub()}tick(true)},
  goto(e){$('#c-'+e.dataset.g).scrollIntoView({behavior:'smooth',block:'start'})},
  async save(){const r=await api('config',{provider:$('#prov').value,base_url:$('#url').value,api_key:$('#key').value,preset:$('#preset').value});if(!r.error){$('#key').value='';toast(r.applied?'Save aur Claude me lag gaya ✅':'Save ho gaya. Ab model chuno');refresh()}},
  async gw(){const was=S.gateway.running;await api('svc',{op:was?'stop':'start'});toast(was?'Band ho raha hai':'Start ho raha hai. Pehli baar time lagta hai');setTimeout(refresh,1500)},
@@ -639,6 +737,47 @@ setInterval(pvPoll,1200);
 $('#q').addEventListener('input',()=>{hq=$('#q').value;hshow=40;paintModels()});
 $('#fq').addEventListener('input',()=>{fq=$('#fq').value;paintFree()});
 document.addEventListener('toggle',e=>{const d=e.target;if(d&&d.classList&&d.classList.contains('pv')){d.open?openP.add(d.dataset.id):openP.delete(d.dataset.id)}},true);
+
+/* ---- Plugin Center ---- */
+let MP=null,psec='mkt',mpQ='',mpT=null;
+const sidc=x=>String(x).replace(/\W/g,'_');
+const stTag=x=>x==='active'?'<span class="tag fr">● Active</span>':x==='off'?'<span class="tag">⏸ OFF</span>':'<span class="tag bd">⚠ Files gayab</span>';
+async function mpLoad(){const r=await api('mp/state');if(r.error||!r.counts)return;MP=r;mpPaint();clearTimeout(mpT);if(MP.running.length&&tab==='plugins')mpT=setTimeout(mpLoad,3000)}
+function mpPaint(){
+ if(!MP)return;
+ const c=MP.counts;
+ htm($('#mp-sum'),`<span class="tag">🛒 ${c.available} available</span> <span class="tag fr">✅ ${c.active} active</span> <span class="tag">⏸ ${c.off} off</span> <span class="tag bd">⚠ ${c.missing} missing</span> <span class="tag ac">🔧 ${c.custom} custom</span>`);
+ const q=mpQ.trim().toLowerCase();
+ const cat=MP.catalog.filter(p=>!q||(p.name+' '+p.desc+' '+p.category+' '+p.mkt).toLowerCase().includes(q));
+ const row=p=>{const busy=MP.running.includes(sidc(p.id));return `<div class="row"><div class="nm"><b>${esc(p.name)}</b> <span class="tag">${esc(p.mkt)}</span>${p.installed?' <span class="ok">✔ Installed</span>':''}${busy?' <span class="wa">Ho raha hai…</span>':''}<div class="mu">${esc(p.desc)}</div></div>${p.installed?`<button class="sm bad-btn" data-a="mpUninstall" data-id="${esc(p.id)}">🗑 Delete</button>`:`<button class="p sm" data-a="mpInstall" data-id="${esc(p.id)}" ${busy?'disabled':''}>Install</button>`}</div>`};
+ htm($('#mp-cat'),cat.length?cat.slice(0,150).map(row).join('')+(cat.length>150?`<p class="mu">${cat.length-150} aur. Search karke dhundo.</p>`:''):(MP.catalog.length?'<p class="mu">Ye search me koi plugin nahi mila.</p>':'<p class="mu">Abhi koi plugin list me nahi. Neeche "Official marketplace jodo" dabao.</p>'));
+ const inst=MP.installed;
+ htm($('#mp-inst'),inst.length?inst.map(p=>`<div class="row"><div class="nm"><b>${esc(p.name)}</b> <span class="mu">@${esc(p.mkt)}${p.version?' · v'+esc(p.version):''}</span><div>${stTag(p.state)}</div><div class="mu mono" style="font-size:12px;overflow-wrap:anywhere">${esc(p.path)}</div></div><div class="macts"><button class="sm" data-a="mpToggle" data-id="${esc(p.id)}" data-on="${p.enabled?0:1}">${p.enabled?'OFF karo':'ON karo'}</button><button class="sm bad-btn" data-a="mpUninstall" data-id="${esc(p.id)}">🗑</button></div></div>`).join(''):'<p class="mu">Abhi koi plugin installed nahi hai. Marketplace tab se install karo.</p>');
+ const cust=inst.filter(p=>p.custom);
+ htm($('#mp-cust'),cust.length?cust.map(p=>`<div class="row"><div class="nm"><b>${esc(p.name)}</b> <span class="tag ac">${esc(p.mkt)}</span><div>${stTag(p.state)}</div></div><button class="sm bad-btn" data-a="mpUninstall" data-id="${esc(p.id)}">🗑 Delete</button></div>`).join(''):'<p class="mu">Koi custom plugin nahi. Official marketplace ke bahar wale plugins yahan dikhenge.</p>');
+ htm($('#mp-mkts'),MP.marketplaces.length?MP.marketplaces.map(m=>`<div class="row"><div class="nm"><b>${esc(m.name)}</b>${m.official?' <span class="ok">★ official</span>':''}<div class="mu">${esc(m.source)} · ${m.count} plugins</div></div>${m.official?'':`<button class="sm bad-btn" data-a="mpRmMkt" data-name="${esc(m.name)}">Hatao</button>`}</div>`).join(''):'<p class="mu">Koi marketplace nahi.</p>');
+}
+async function mpSkills(){const r=await api('mp/skills');if(r.error)return;htm($('#mp-skills'),r.skills.length?r.skills.map(x=>`<div class="row"><div class="nm"><b>${esc(x.name)}</b>${x.ok?'':' <span class="bad">(SKILL.md nahi)</span>'}<div class="mu">${esc(x.desc)}</div></div></div>`).join(''):'<p class="mu">Koi skill nahi mili.</p>')}
+document.addEventListener('input',e=>{if(e.target.id==='mp-q'){mpQ=e.target.value;if(MP)mpPaint()}});
+document.addEventListener('change',async e=>{if(e.target.id!=='mp-file')return;const f=e.target.files[0];e.target.value='';if(!f)return;
+ try{const j=JSON.parse(await f.text());const ids=Array.isArray(j.plugins)?j.plugins:[];const mk=Array.isArray(j.marketplaces)?j.marketplaces:[];
+  const r=await api('mp/restore',{ids,markets:mk});if(!r.error){toast(`Restore shuru (${r.count} plugins). Logs tab me job-mp-restore dekho`);setTimeout(mpLoad,5000)}}
+ catch{toast('Ye backup file sahi nahi hai',1)}});
+Object.assign(A,{
+ psec(e){psec=e.dataset.s;document.querySelectorAll('.psub').forEach(x=>x.classList.toggle('on',x.id==='ps-'+psec));document.querySelectorAll('#pseg button').forEach(x=>x.classList.toggle('on',x.dataset.s===psec));if(psec==='adv')mpSkills()},
+ mpRefresh(){api('mp/mkt/update',{}).then(r=>{if(!r.error){toast('Marketplace update shuru. Kuch second baad list refresh hogi');setTimeout(mpLoad,8000)}})},
+ mpOfficial(){api('mp/mkt/add',{repo:'anthropics/claude-plugins-official'}).then(r=>{if(!r.error){toast('Official marketplace jud raha hai. Logs dekho');setTimeout(mpLoad,8000)}})},
+ mpAddMkt(){api('mp/mkt/add',{repo:$('#mp-repo').value.trim()}).then(r=>{if(!r.error){toast('Marketplace jud raha hai. Logs dekho');setTimeout(mpLoad,8000)}})},
+ mpRmMkt(e){const name=e.dataset.name;if(!confirm(`Marketplace "${name}" hatana hai? Iske plugins bhi hat sakte hain.`))return;api('mp/mkt/remove',{name}).then(r=>{if(!r.error){toast(r.msg,!r.ok);mpLoad()}})},
+ mpInstall(e){api('mp/install',{id:e.dataset.id}).then(r=>{if(!r.error){toast('Install shuru. Ho jaane par list update hogi');mpLoad()}})},
+ mpInstallId(){api('mp/install',{id:$('#mp-id').value.trim()}).then(r=>{if(!r.error){toast('Install shuru. Logs dekho');mpLoad()}})},
+ mpUninstall(e){const id=e.dataset.id;if(!confirm(`"${id}" PERMANENT delete ho jayega (files, cache, settings sab). Pakka?`))return;api('mp/uninstall',{id}).then(r=>{if(!r.error){toast(r.msg,!r.ok);mpLoad()}})},
+ mpToggle(e){const on=e.dataset.on==='1';api('mp/toggle',{id:e.dataset.id,on}).then(r=>{if(!r.error){toast(on?'ON ho gaya':'OFF ho gaya. Naye Claude session me lagega');mpLoad()}})},
+ mpBulk(e){const on=e.dataset.on==='1';if(!confirm(on?'Sab plugins ON karein?':'Sab plugins OFF karein?'))return;api('mp/bulk',{on}).then(r=>{if(!r.error){toast(r.msg);mpLoad()}})},
+ async mpHealth(){const r=await api('mp/health');if(r.error)return;htm($('#mp-health'),'<div class="gh">🩺 Health</div>'+(r.rows.length?r.rows.map(x=>`<div class="row"><span class="dot ${x.ok?'ok':'bad'}"></span><div class="nm"><b>${esc(x.id)}</b><div class="mu">${esc(x.msg)} · ${x.files} files</div></div></div>`).join(''):'<p class="mu">Koi plugin nahi.</p>'))},
+ mpExport(){api('mp/export').then(r=>{if(r.error)return;const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(r,null,2)],{type:'application/json'}));a.download='cc-plugins-backup.json';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000)})},
+ mpPick(){$('#mp-file').click()}
+});
 document.addEventListener('click',e=>{const el=e.target.closest('[data-a]');if(el&&A[el.dataset.a])A[el.dataset.a](el)});
 $('#prov').addEventListener('change',async()=>{const r=await api('config',{provider:$('#prov').value});if(!r.error){init=false;await refresh();toast('Provider badal gaya'+(r.applied?' aur Claude me lag gaya':'. URL, key aur model daalo'))}});
 $('#ck-auto2').addEventListener('change',()=>api('config',{auto:$('#ck-auto2').checked}));
